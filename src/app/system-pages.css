@@ -1,0 +1,118 @@
+.system-page {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  background: var(--cream);
+}
+
+.system-page-inner {
+  max-width: 520px;
+  text-align: center;
+  background: var(--warm-white);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 48px 32px;
+}
+
+.system-page-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 16px;
+  color: var(--teal-stamp);
+}
+
+.system-page-eyebrow {
+  font-family: var(--font-family-caveat);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.system-page-title {
+  font-family: var(--font-playfair);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.system-page-text {
+  font-family: var(--font-baskerville);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-mid);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.system-page-btn {
+  font-family: var(--font-family-caveat);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 14px 32px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  background: var(--teal-stamp);
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.system-page-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.system-page-btn.outline {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.loading-page {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+}
+
+.loading-text {
+  font-family: var(--font-family-caveat);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  letter-spacing: 0.08em;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .system-page {
+    padding: 100px 20px 60px;
+  }
+
+  .system-page-inner {
+    padding: 32px 24px;
+  }
+}

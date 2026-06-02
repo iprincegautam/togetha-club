@@ -1,0 +1,110 @@
+import type { QuizQuestion } from '@/types/quiz'
+
+export const QUIZ_QUESTIONS: QuizQuestion[] = [
+  {
+    id: 1,
+    type: 'opts',
+    q: "It's Friday night. Your ideal version of this evening is...",
+    sub: "Be honest. Nobody's watching.",
+    opts: [
+      'Rooftop with loud music, 12 people, and chaos',
+      'Cosy dinner with 3 people where the conversation hits 3am',
+      "Solo walk with headphones and a playlist you'd die before sharing",
+      'A bonfire. Wherever. With whoever. Just a bonfire.',
+    ],
+  },
+  {
+    id: 2,
+    type: 'opts',
+    q: 'You meet someone interesting at a party. You most likely...',
+    sub: 'Your actual instinct, not your aspirational self.',
+    opts: [
+      'Make a joke to see if they laugh at the right things',
+      'Ask one very specific weird question and see how they handle it',
+      'Subtly find them on Instagram before talking to them',
+      "Just talk. You're genuinely good at this.",
+    ],
+  },
+  {
+    id: 3,
+    type: 'opts',
+    q: 'Your most controversial opinion about relationships...',
+    sub: "Pick the closest to something you'd actually say at 1am.",
+    opts: [
+      'Love is a choice, not a feeling — every single day',
+      'Compatibility is overrated. Chemistry decides everything.',
+      "Most people settle because they're afraid. Including themselves.",
+      'The best relationships start as really good friendships.',
+    ],
+  },
+  {
+    id: 4,
+    type: 'opts',
+    q: 'Pick your travel personality. Zero judgement.',
+    sub: '',
+    opts: [
+      'I plan everything. Itinerary. Backup itinerary. Emergency snacks.',
+      'I book the flight and figure it out. This has gone wrong exactly once.',
+      "I go wherever the vibe takes me. Sometimes I don't know where I am.",
+      "I travel to understand, not just to see. There's a difference.",
+    ],
+  },
+  {
+    id: 5,
+    type: 'range',
+    q: 'On a scale of 1–10, how emotionally available are you right now?',
+    sub: '1 = need 6 months and a therapist · 10 = genuinely ready for something real',
+    min: '1 = not ready',
+    max: '10 = fully open',
+  },
+  {
+    id: 6,
+    type: 'opts',
+    q: "The thing you want most from the next person you're with...",
+    sub: 'One answer. Your gut answer.',
+    opts: [
+      'Someone who makes ordinary days feel like something',
+      "Someone who challenges me and isn't afraid of disagreement",
+      'Someone who feels like home — safe, warm, easy',
+      'Someone who is as weird as I am, in exactly the right ways',
+    ],
+  },
+  {
+    id: 7,
+    type: 'text',
+    q: 'Describe yourself using only a metaphor. No adjectives.',
+    sub: '"I\'m like a ___" — make it actually mean something. We read every answer.',
+    ph: 'e.g. "a really good book with a slow start" or "a train that runs on time but takes scenic routes"',
+  },
+  {
+    id: 8,
+    type: 'opts',
+    q: '2am on night three. Bonfire is dying. What are you doing?',
+    sub: 'The real you. Not the performed version.',
+    opts: [
+      'Keeping the fire alive and making sure nobody sleeps yet',
+      'In a deep one-on-one conversation that started two hours ago',
+      'Walking alone by the river because you need to process everything',
+      'Making everyone laugh one more time before the night ends',
+    ],
+  },
+  {
+    id: 9,
+    type: 'opts',
+    q: 'Your ideal Sunday morning looks like...',
+    sub: 'The kind of Sunday that actually restores you.',
+    opts: [
+      'Farmers market, good coffee, and 3 hours of nothing',
+      'Still in bed at 11am talking about everything and nothing',
+      'Long run or hike. Physical reset before the week.',
+      'Slow breakfast cooked at home. Music. Maybe someone else there.',
+    ],
+  },
+  {
+    id: 10,
+    type: 'text',
+    q: "If the mountains could tell us one thing about you that you wouldn't say yourself — what would it be?",
+    sub: 'This is the question our AI weights most. Take your time.',
+    ph: 'Write whatever comes. There is no wrong answer here.',
+  },
+]

@@ -1,0 +1,227 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/constants/routes'
+import { formatPrice } from '@/lib/utils'
+import type { BatchStatus } from '@/types/batch'
+import BatchTabs from '@/components/batches/BatchTabs'
+import DatePicker from '@/components/batches/DatePicker'
+import GenderSelector from '@/components/batches/GenderSelector'
+import { BatchAFullVisual, BatchBFullVisual } from '@/components/batches/BatchVisuals'
+
+interface BatchCardProps {
+  slug: string
+  name: string
+  price: number | null
+  status: BatchStatus
+  accentColor: string
+  dateOptions: { label: string; sublabel: string; soldOut?: boolean }[]
+  faqItems: { question: string; answer: string }[]
+  tabs: { id: string; label: string; content: React.ReactNode }[]
+}
+
+const BATCH_CONFIG: Record<
+  string,
+  {
+    genBadge: string
+    tagline: string
+    ratingText: string
+    installment: string
+    includes: string
+    maleLabel: string
+    femaleLabel: string
+    roseAccent: boolean
+    infoClass?: string
+    priceSectionClass?: string
+    installmentColor?: string
+    trustCheckColor?: string
+    bookClass?: string
+    trustItems: string[]
+  }
+> = {
+  'batch-a': {
+    genBadge: 'GenZ · Ages 20–27',
+    tagline: '"Manali. Kasol. Sissu. Five nights of chaos, connection, and maybe something more."',
+    ratingText: "India's first matchmaking travel experience",
+    installment: '✦ Pay ₹9,499 now · rest 14 days before departure',
+    includes: 'Includes accommodation, all meals, transport Delhi↔Manali, activities & experiences',
+    maleLabel: '🧑 A boy',
+    femaleLabel: '👧 A girl',
+    roseAccent: false,
+    trustItems: [
+      'Verified profiles only',
+      'Secure Razorpay payment',
+      'Full refund if rejected',
+      '12 boys · 12 girls balance guaranteed',
+    ],
+  },
+  'batch-b': {
+    genBadge: 'Millennial · Ages 28–38',
+    tagline: '"For the ones who\'ve done the apps and know what they actually want. No games. Just mountains and real people."',
+    ratingText: "India's most intentional travel experience",
+    installment: '✦ Pay ₹11,499 now · rest 14 days before departure',
+    includes: 'Premium accommodation, all meals, private transport, guided activities, curated experiences',
+    maleLabel: '🧑 A man',
+    femaleLabel: '👩 A woman',
+    roseAccent: true,
+    infoClass: 'rose-bg',
+    priceSectionClass: 'rose-bg',
+    installmentColor: 'var(--rose)',
+    trustCheckColor: 'var(--rose)',
+    bookClass: 'rose',
+    trustItems: [
+      'Premium accommodation',
+      'Private transport',
+      'Full refund if rejected',
+      '12M · 12F guaranteed',
+    ],
+  },
+}
+
+function ProductTitle({ slug }: { slug: string }) {
+  if (slug === 'batch-a') {
+    return (
+      <>
+        The Himalayan
+        <br />
+        Love Trail — A
+      </>
+    )
+  }
+  if (slug === 'batch-b') {
+    return (
+      <>
+        The Himalayan
+        <br />
+        Love Trail — B
+      </>
+    )
+  }
+  return null
+}
+
+function statusBadge(status: BatchStatus, roseAccent: boolean): { label: string; className: string } {
+  switch (status) {
+    case 'open':
+      return {
+        label: roseAccent ? '♡ Spots Open' : '✦ Spots Open',
+        className: roseAccent ? 'badge-open' : 'badge-open',
+      }
+    case 'sold_out':
+      return { label: 'Sold Out', className: 'badge-sold' }
+    case 'waitlist':
+      return { label: 'Waitlist', className: 'badge-waitlist' }
+    case 'coming_soon':
+      return { label: 'Coming Soon', className: 'badge-waitlist' }
+    default:
+      return { label: '✦ Spots Open', className: 'badge-open' }
+  }
+}
+
+export default function BatchCard({
+  slug,
+  price,
+  status,
+  accentColor,
+  dateOptions,
+  faqItems: _faqItems,
+  tabs,
+}: BatchCardProps) {
+  const router = useRouter()
+  const config = BATCH_CONFIG[slug] ?? BATCH_CONFIG['batch-a']
+  const badge = statusBadge(status, config.roseAccent)
+
+  const [selectedDate, setSelectedDate] = useState<number | null>(0)
+  const [selectedGender, setSelectedGender] = useState<'m' | 'f' | null>(null)
+
+  const Visual = slug === 'batch-b' ? BatchBFullVisual : BatchAFullVisual
+
+  return (
+    <div className="product-card">
+      <div className="product-hero">
+        <div className="product-visual">
+          <Visual />
+        </div>
+        <div className={`product-info${config.infoClass ? ` ${config.infoClass}` : ''}`}>
+          <div className="product-badges">
+            <span className="badge badge-gen">{config.genBadge}</span>
+            <span className={`badge ${badge.className}`} style={config.roseAccent && status === 'open' ? { background: 'var(--rose)' } : undefined}>
+              {badge.label}
+            </span>
+            <span className="badge badge-limited">Only 12+12</span>
+          </div>
+
+          <h1 className="product-title">
+            <ProductTitle slug={slug} />
+          </h1>
+          <p className="product-tagline">
+            <em>{config.tagline}</em>
+          </p>
+
+          <div className="product-rating">
+            <span className="stars">★★★★★</span>
+            <span className="rating-text">{config.ratingText}</span>
+          </div>
+
+          {price !== null && (
+            <div className={`price-section${config.priceSectionClass ? ` ${config.priceSectionClass}` : ''}`}>
+              <div className="price-label">Trip investment</div>
+              <div>
+                <span className="price-main">{formatPrice(price)}</span>
+                <span className="price-per">/ per person</span>
+              </div>
+              <div className="price-installment" style={config.installmentColor ? { color: config.installmentColor } : undefined}>
+                {config.installment}
+              </div>
+              <div className="price-includes">{config.includes}</div>
+            </div>
+          )}
+
+          <DatePicker
+            options={dateOptions}
+            value={selectedDate}
+            onChange={setSelectedDate}
+            accentColor={accentColor}
+          />
+
+          <GenderSelector
+            value={selectedGender}
+            onChange={setSelectedGender}
+            maleLabel={config.maleLabel}
+            femaleLabel={config.femaleLabel}
+          />
+
+          <div className="cta-stack">
+            <button
+              type="button"
+              className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
+              onClick={() => router.push(ROUTES.apply(slug))}
+            >
+              ✦ Apply & Reserve My Spot →
+            </button>
+            <a href={`${ROUTES.batches}#batch-c`} className="btn-waitlist">
+              ♡ Join the Waitlist Instead
+            </a>
+          </div>
+
+          <div className="trust-row">
+            {config.trustItems.map((item) => (
+              <span className="trust-item" key={item}>
+                <span
+                  className="trust-check"
+                  style={config.trustCheckColor ? { color: config.trustCheckColor } : undefined}
+                >
+                  ✓
+                </span>
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <BatchTabs batchId={slug.replace('batch-', '')} tabs={tabs} roseAccent={config.roseAccent} />
+    </div>
+  )
+}
