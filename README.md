@@ -2,7 +2,7 @@
 
 India's first matchmaking travel club — AI-matched singles, Himalayan batches, and a full apply-to-pay flow.
 
-**Live:** [togetha.club](https://togetha.club) · **Preview:** [togetha-club.vercel.app](https://togetha-club.vercel.app)
+**Live:** [togetha.club](https://togetha.club) · **Preview:** [togetha-club.vercel.app](https://togetha-club.vercel.app) · **Repo:** [github.com/iprincegautam/togetha-club](https://github.com/iprincegautam/togetha-club)
 
 ---
 
@@ -135,6 +135,19 @@ Add all env vars in [Vercel → Project Settings → Environment Variables](http
 Push to `main` on GitHub — Vercel rebuilds automatically when the repo is connected.
 
 See **[DEPLOY.md](./DEPLOY.md)** for the full production checklist (Razorpay live keys, Resend domain, smoke tests).
+
+### Custom domain (togetha.club)
+
+Domains are added on Vercel. **You must update DNS** at your domain registrar:
+
+| Type | Name | Value |
+|------|------|-------|
+| A | `@` | `76.76.21.21` |
+| A | `www` | `76.76.21.21` |
+
+**Or** point nameservers to Vercel: `ns1.vercel-dns.com`, `ns2.vercel-dns.com`.
+
+DNS can take up to 48 hours. Check status in [Vercel → Domains](https://vercel.com/princes-projects-a8114053/togetha-club/settings/domains).
 
 ---
 
