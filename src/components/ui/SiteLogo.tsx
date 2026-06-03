@@ -21,8 +21,8 @@ export default function SiteLogo({
       src="/logo.png?v=2"
       alt=""
       className={cn('site-logo-img', imageClassName)}
-      width={320}
-      height={459}
+      width={34}
+      height={49}
       decoding="async"
     />
   )

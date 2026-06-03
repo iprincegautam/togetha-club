@@ -7,7 +7,6 @@ import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
 import BatchTabs from '@/components/batches/BatchTabs'
 import DatePicker from '@/components/batches/DatePicker'
-import GenderSelector from '@/components/batches/GenderSelector'
 import { BatchAFullVisual, BatchBFullVisual } from '@/components/batches/BatchVisuals'
 
 interface BatchCardProps {
@@ -29,8 +28,6 @@ const BATCH_CONFIG: Record<
     ratingText: string
     installment: string
     includes: string
-    maleLabel: string
-    femaleLabel: string
     roseAccent: boolean
     infoClass?: string
     priceSectionClass?: string
@@ -46,8 +43,6 @@ const BATCH_CONFIG: Record<
     ratingText: "India's first matchmaking travel experience",
     installment: '✦ Pay ₹9,499 now · rest 14 days before departure',
     includes: 'Includes accommodation, all meals, transport Delhi↔Manali, activities & experiences',
-    maleLabel: 'A boy',
-    femaleLabel: 'A girl',
     roseAccent: false,
     trustItems: [
       'Verified profiles only',
@@ -62,8 +57,6 @@ const BATCH_CONFIG: Record<
     ratingText: "India's most intentional travel experience",
     installment: '✦ Pay ₹11,499 now · rest 14 days before departure',
     includes: 'Premium accommodation, all meals, private transport, guided activities, curated experiences',
-    maleLabel: 'A man',
-    femaleLabel: 'A woman',
     roseAccent: true,
     infoClass: 'rose-bg',
     priceSectionClass: 'rose-bg',
@@ -133,7 +126,6 @@ export default function BatchCard({
   const badge = statusBadge(status, config.roseAccent)
 
   const [selectedDate, setSelectedDate] = useState<number | null>(0)
-  const [selectedGender, setSelectedGender] = useState<'m' | 'f' | null>(null)
 
   const Visual = slug === 'batch-b' ? BatchBFullVisual : BatchAFullVisual
 
@@ -183,13 +175,6 @@ export default function BatchCard({
             value={selectedDate}
             onChange={setSelectedDate}
             accentColor={accentColor}
-          />
-
-          <GenderSelector
-            value={selectedGender}
-            onChange={setSelectedGender}
-            maleLabel={config.maleLabel}
-            femaleLabel={config.femaleLabel}
           />
 
           <div className="cta-stack">
