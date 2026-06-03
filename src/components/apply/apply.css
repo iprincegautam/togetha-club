@@ -286,6 +286,64 @@
   font-size: 1.2rem;
 }
 
+.apply-review-discount strong {
+  color: var(--rose);
+}
+
+.apply-promo-field {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1.5px dashed rgba(44, 24, 16, 0.15);
+}
+
+.apply-promo-row {
+  display: flex;
+  gap: 8px;
+}
+
+.apply-promo-input {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.apply-promo-btn {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  background: var(--ink);
+  color: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  font-family: var(--font-family-caveat);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 rgba(44, 24, 16, 0.3);
+}
+
+.apply-promo-btn.rose {
+  background: var(--rose);
+  border-color: var(--rose);
+}
+
+.apply-promo-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.apply-promo-success {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--teal-stamp);
+  font-weight: 500;
+}
+
+.apply-promo-error {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--rose);
+}
+
 .confirm-icon {
   font-size: 3rem;
   text-align: center;

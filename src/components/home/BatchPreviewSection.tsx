@@ -1,3 +1,4 @@
+import Reveal from '@/components/ui/Reveal'
 import Link from 'next/link'
 import SectionLabel from '@/components/ui/SectionLabel'
 import { ROUTES } from '@/constants/routes'
@@ -163,6 +164,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
     .filter((b): b is BatchPreview => b !== undefined)
 
   return (
+    <Reveal>
     <section className="sec" id="batches" style={{ background: 'var(--paper)' }}>
       <div className="sec-inner">
         <SectionLabel>The Batches</SectionLabel>
@@ -217,5 +219,6 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
         </div>
       </div>
     </section>
+    </Reveal>
   )
 }

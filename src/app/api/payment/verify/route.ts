@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
@@ -48,6 +49,8 @@ export async function POST(req: NextRequest) {
       .eq('id', applicantId)
 
     if (updateError) throw updateError
+
+    await recordPromoRedemption(supabase, applicantId)
 
     const { data: applicant, error: fetchError } = await supabase
       .from('applicants')

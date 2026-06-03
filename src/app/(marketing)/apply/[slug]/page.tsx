@@ -54,7 +54,7 @@ export default async function ApplyPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ name?: string; email?: string; applicantId?: string }>
+  searchParams: Promise<{ name?: string; email?: string; applicantId?: string; promo?: string; step?: string }>
 }) {
   const { slug } = await params
   const query = await searchParams
@@ -76,6 +76,10 @@ export default async function ApplyPage({
 
   const meta = BATCH_META[batchSlug]
   const dateOptions = BATCH_DATE_OPTIONS[batchSlug] ?? []
+  const previewStep =
+    process.env.NODE_ENV === 'development' && (query.step === '2' || query.step === '3')
+      ? (Number(query.step) as 2 | 3)
+      : undefined
 
   return (
     <div className="apply-page">
@@ -111,6 +115,8 @@ export default async function ApplyPage({
           initialName={query.name}
           initialEmail={query.email}
           applicantId={query.applicantId}
+          initialPromoCode={query.promo}
+          previewStep={previewStep}
         />
       </div>
     </div>

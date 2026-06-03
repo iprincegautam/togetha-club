@@ -1,7 +1,9 @@
+import Reveal from '@/components/ui/Reveal'
 import QuizWidget from '@/components/quiz/QuizWidget'
 
 export default function QuizSection() {
   return (
+    <Reveal>
     <section className="quiz-sec" id="quiz">
       <div className="quiz-wrap">
         <div className="quiz-header">
@@ -16,5 +18,6 @@ export default function QuizSection() {
         <QuizWidget />
       </div>
     </section>
+    </Reveal>
   )
 }

@@ -10,64 +10,119 @@ export default function HeroSection() {
 
   return (
     <section className="hero" id="top">
-      <StampCircle
-        text={<>India&apos;s<br />First ♡<br />Love Trip</>}
-        color="var(--rose)"
-        size={125}
-        rotation={-15}
-        top={100}
-        left={60}
-        opacity={0.6}
-      />
-      <StampCircle
-        text={<>Togetha<br />Club<br />✦ 2026 ✦</>}
-        color="var(--teal)"
-        size={108}
-        rotation={12}
-        top={108}
-        right={80}
-        opacity={0.6}
-      />
-      <StampCircle
-        text={<>Manali<br />Kasol<br />Sissu</>}
-        color="var(--gold)"
-        size={88}
-        rotation={-8}
-        bottom={130}
-        left={120}
-        opacity={0.5}
-      />
-      <StampCircle
-        text={<>12+12<br />Singles<br />✦</>}
-        color="var(--ink-mid)"
-        size={96}
-        rotation={10}
-        bottom={110}
-        right={100}
-        opacity={0.4}
-      />
-
-      <p className="hero-eyebrow">✦ India&apos;s First Matchmaking Travel Club ✦</p>
-      <h1 className="hero-title">
-        <span className="ht-teal">Like Hinge,</span>
-        <br />
-        but <span className="ht-rose">for</span>
-        <br />
-        <span className="ht-gold">travelers.</span>
-      </h1>
-      <p className="hero-sub">
-        24 screened, AI-matched singles. 6 days in the Himalayas. Unlimited ice breakers,
-        one unforgettable bonfire night, and a 60% chance your relationship status changes.
-      </p>
-      <div className="hero-btns">
-        <button type="button" className="btn-p" onClick={() => scrollTo('quiz')}>
-          ✦ Take the Compatibility Quiz →
-        </button>
-        <Link href={ROUTES.batches} className="btn-o">
-          See All Batches ♡
-        </Link>
+      <div className="hero-stamps hero-stamps--desktop" aria-hidden="true">
+        <div className="hero-stamp-wrap anim-stamp-drift" style={{ top: 100, left: 60 }}>
+          <StampCircle
+            text={<>India&apos;s<br />First ♡<br />Love Trip</>}
+            color="var(--rose)"
+            size={125}
+            rotation={-15}
+            opacity={0.6}
+            className="hero-stamp hero-stamp-love"
+          />
+        </div>
+        <div
+          className="hero-stamp-wrap anim-stamp-drift-alt"
+          style={{ top: 108, right: 80 }}
+        >
+          <StampCircle
+            text={<>Togetha<br />Club<br />✦ 2026 ✦</>}
+            color="var(--teal)"
+            size={108}
+            rotation={12}
+            opacity={0.6}
+            className="hero-stamp hero-stamp-club"
+          />
+        </div>
+        <div
+          className="hero-stamp-wrap anim-float-delay-1"
+          style={{ bottom: 130, left: 120 }}
+        >
+          <StampCircle
+            text={<>Manali<br />Kasol<br />Sissu</>}
+            color="var(--gold)"
+            size={88}
+            rotation={-8}
+            opacity={0.5}
+            className="hero-stamp hero-stamp-routes"
+          />
+        </div>
+        <div
+          className="hero-stamp-wrap anim-float-delay-2"
+          style={{ bottom: 110, right: 100 }}
+        >
+          <StampCircle
+            text={<>12+12<br />Singles<br />✦</>}
+            color="var(--ink-mid)"
+            size={96}
+            rotation={10}
+            opacity={0.4}
+            className="hero-stamp hero-stamp-singles"
+          />
+        </div>
       </div>
-      <div className="hero-scene">
+
+      <span className="hero-floatie hero-floatie-1 anim-hero-sparkle" aria-hidden="true">
+        ✦
+      </span>
+      <span className="hero-floatie hero-floatie-2 anim-hero-sparkle-delay" aria-hidden="true">
+        ♡
+      </span>
+      <span className="hero-floatie hero-floatie-3 anim-float" aria-hidden="true">
+        ✦
+      </span>
+
+      <div className="hero-content">
+        <p className="hero-eyebrow anim-float">✦ India&apos;s First Matchmaking Travel Club ✦</p>
+
+        <div className="hero-stamps hero-stamps--mobile" aria-hidden="true">
+          <StampCircle
+            text={<>India&apos;s<br />First ♡<br />Love Trip</>}
+            color="var(--rose)"
+            size={88}
+            rotation={-12}
+            opacity={0.85}
+            className="hero-stamp-inline"
+          />
+          <StampCircle
+            text={<>Togetha<br />Club<br />✦ 2026 ✦</>}
+            color="var(--teal)"
+            size={80}
+            rotation={10}
+            opacity={0.85}
+            className="hero-stamp-inline"
+          />
+        </div>
+
+        <h1 className="hero-title anim-title-pop">
+          <span className="ht-teal">Like Hinge,</span>
+          <br />
+          but <span className="ht-rose">for</span>
+          <br />
+          <span className="ht-gold">travelers.</span>
+        </h1>
+        <p className="hero-sub">
+          <span className="hero-sub-line">
+            24 screened, AI-matched singles. 6 days in the Himalayas.
+          </span>
+          <span className="hero-sub-line">
+            Unlimited ice breakers, one unforgettable bonfire night,
+          </span>
+          <span className="hero-sub-line">
+            and a 60% chance your relationship status changes.
+          </span>
+        </p>
+        <div className="hero-btns">
+          <button type="button" className="btn-p" onClick={() => scrollTo('quiz')}>
+            ✦ Take the Compatibility Quiz →
+          </button>
+          <Link href={ROUTES.batches} className="btn-o">
+            See All Batches ♡
+          </Link>
+        </div>
+      </div>
+
+      <div className="hero-scene anim-float-delay-1">
         <svg viewBox="0 0 680 272" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="skyH" x1="0" y1="0" x2="0" y2="1">

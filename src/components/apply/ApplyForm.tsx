@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import DatePicker from '@/components/batches/DatePicker'
 import GenderSelector from '@/components/batches/GenderSelector'
@@ -8,6 +8,15 @@ import RazorpayButton from '@/components/apply/RazorpayButton'
 import { ROUTES } from '@/constants/routes'
 import { formatPrice } from '@/lib/utils'
 import '@/components/batches/batches.css'
+
+interface PromoPreview {
+  code: string
+  discountAmount: number
+  finalAmount: number
+  originalAmount: number
+  grantsPriority: boolean
+  message: string
+}
 
 interface ApplyFormProps {
   batchSlug: string
@@ -19,6 +28,8 @@ interface ApplyFormProps {
   initialName?: string
   initialEmail?: string
   applicantId?: string
+  initialPromoCode?: string
+  previewStep?: 2 | 3
 }
 
 export default function ApplyForm({
@@ -31,20 +42,95 @@ export default function ApplyForm({
   initialName = '',
   initialEmail = '',
   applicantId: initialApplicantId = '',
+  initialPromoCode = '',
+  previewStep,
 }: ApplyFormProps) {
   const router = useRouter()
-  const [step, setStep] = useState<1 | 2 | 3>(1)
-  const [name, setName] = useState(initialName)
-  const [email, setEmail] = useState(initialEmail)
-  const [phone, setPhone] = useState('')
-  const [gender, setGender] = useState<'m' | 'f' | null>(null)
+  const isPreview = Boolean(previewStep)
+  const previewOriginal = batchPrice * 100
+  const previewDiscount = 200000
+  const previewPromoDefault: PromoPreview | null = previewStep
+    ? {
+        code: initialPromoCode || 'SARAH200',
+        discountAmount: previewDiscount,
+        finalAmount: previewOriginal - previewDiscount,
+        originalAmount: previewOriginal,
+        grantsPriority: true,
+        message: 'You save ₹2,000!',
+      }
+    : null
+
+  const [step, setStep] = useState<1 | 2 | 3>(previewStep ?? 1)
+  const [name, setName] = useState(initialName || (isPreview ? 'Preview User' : ''))
+  const [email, setEmail] = useState(initialEmail || (isPreview ? 'preview@togetha.club' : ''))
+  const [phone, setPhone] = useState(isPreview ? '9876543210' : '')
+  const [gender, setGender] = useState<'m' | 'f' | null>(isPreview ? 'm' : null)
   const [dateChoice, setDateChoice] = useState<number | null>(0)
-  const [applicantId, setApplicantId] = useState(initialApplicantId)
-  const [orderId, setOrderId] = useState('')
-  const [amount, setAmount] = useState(batchPrice * 100)
+  const [applicantId, setApplicantId] = useState(
+    initialApplicantId || (isPreview ? 'preview-applicant-id' : '')
+  )
+  const [orderId, setOrderId] = useState(isPreview && previewStep === 3 ? 'dev_order_preview' : '')
+  const [amount, setAmount] = useState(
+    isPreview && previewStep === 3 ? previewOriginal - previewDiscount : batchPrice * 100
+  )
+  const [originalAmount, setOriginalAmount] = useState(
+    isPreview && previewStep === 3 ? previewOriginal : batchPrice * 100
+  )
+  const [discountAmount, setDiscountAmount] = useState(
+    isPreview && previewStep === 3 ? previewDiscount : 0
+  )
   const [keyId, setKeyId] = useState('')
+  const [promoInput, setPromoInput] = useState(initialPromoCode || (isPreview ? 'SARAH200' : ''))
+  const [appliedPromo, setAppliedPromo] = useState<PromoPreview | null>(previewPromoDefault)
+  const [promoError, setPromoError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const validatePromo = useCallback(
+    async (code: string): Promise<PromoPreview | null> => {
+      setPromoError('')
+      if (!code.trim()) {
+        setAppliedPromo(null)
+        return null
+      }
+
+      const res = await fetch('/api/promo/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.trim(),
+          batchSlug,
+          originalAmount: batchPrice * 100,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!data.valid) {
+        setAppliedPromo(null)
+        setPromoError(data.error || 'Invalid promo code.')
+        return null
+      }
+
+      const promo: PromoPreview = {
+        code: data.code,
+        discountAmount: data.discountAmount,
+        finalAmount: data.finalAmount,
+        originalAmount: data.originalAmount,
+        grantsPriority: data.grantsPriority,
+        message: data.message,
+      }
+      setAppliedPromo(promo)
+      return promo
+    },
+    [batchSlug, batchPrice]
+  )
+
+  useEffect(() => {
+    if (initialPromoCode && !isPreview) {
+      validatePromo(initialPromoCode)
+    }
+  }, [initialPromoCode, validatePromo, isPreview])
 
   const ensureApplicantId = async (): Promise<string | null> => {
     if (applicantId) return applicantId
@@ -97,8 +183,18 @@ export default function ApplyForm({
     }
   }
 
+  const handleApplyPromo = async () => {
+    setIsLoading(true)
+    try {
+      await validatePromo(promoInput)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleStep2Next = async () => {
     setError('')
+    setPromoError('')
 
     if (!gender) {
       setError('Please select how you are joining.')
@@ -111,6 +207,12 @@ export default function ApplyForm({
 
     setIsLoading(true)
     try {
+      let promo = appliedPromo
+      if (promoInput.trim() && !promo) {
+        promo = await validatePromo(promoInput)
+        if (!promo) return
+      }
+
       const id = await ensureApplicantId()
       if (!id) throw new Error('Application profile not found.')
 
@@ -124,6 +226,7 @@ export default function ApplyForm({
           gender,
           batchSlug,
           dateChoice,
+          promoCode: promo?.code ?? undefined,
         }),
       })
 
@@ -135,6 +238,8 @@ export default function ApplyForm({
 
       setOrderId(data.orderId)
       setAmount(data.amount)
+      setOriginalAmount(data.originalAmount ?? batchPrice * 100)
+      setDiscountAmount(data.discountAmount ?? 0)
       if (data.keyId) setKeyId(data.keyId)
       setStep(3)
     } catch (err) {
@@ -232,6 +337,55 @@ export default function ApplyForm({
             onChange={setDateChoice}
             accentColor={accentColor}
           />
+
+          <div className="apply-field apply-promo-field">
+            <label className="apply-label" htmlFor="apply-promo">
+              Promo code (optional)
+            </label>
+            <div className="apply-promo-row">
+              <input
+                id="apply-promo"
+                type="text"
+                className="apply-input apply-promo-input"
+                value={promoInput}
+                onChange={(e) => {
+                  setPromoInput(e.target.value.toUpperCase())
+                  setAppliedPromo(null)
+                  setPromoError('')
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (promoInput.trim() && !isLoading) {
+                      handleApplyPromo()
+                    }
+                  }
+                }}
+                placeholder="e.g. SARAH200"
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className={`apply-promo-btn${roseAccent ? ' rose' : ''}`}
+                onClick={handleApplyPromo}
+                disabled={isLoading || !promoInput.trim()}
+              >
+                Apply
+              </button>
+            </div>
+            {appliedPromo && (
+              <p className="apply-promo-success">
+                ✓ {appliedPromo.message}
+                {appliedPromo.grantsPriority && ' · Priority review included'}
+              </p>
+            )}
+            {promoError && (
+              <p className="apply-promo-error" role="alert">
+                {promoError}
+              </p>
+            )}
+          </div>
+
           <div className="apply-nav-row">
             <button
               type="button"
@@ -278,8 +432,26 @@ export default function ApplyForm({
                 <strong>{selectedDate.label}</strong>
               </div>
             )}
+            {appliedPromo && (
+              <div className="apply-review-row">
+                <span>Promo</span>
+                <strong>{appliedPromo.code}</strong>
+              </div>
+            )}
+            {discountAmount > 0 && (
+              <>
+                <div className="apply-review-row">
+                  <span>Original price</span>
+                  <strong>{formatPrice(originalAmount / 100)}</strong>
+                </div>
+                <div className="apply-review-row apply-review-discount">
+                  <span>Discount</span>
+                  <strong>−{formatPrice(discountAmount / 100)}</strong>
+                </div>
+              </>
+            )}
             <div className="apply-review-row apply-review-total">
-              <span>Deposit due now</span>
+              <span>Amount due now</span>
               <strong>{formatPrice(amount / 100)}</strong>
             </div>
           </div>

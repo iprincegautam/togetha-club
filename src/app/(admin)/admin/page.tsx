@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import AdminApplicantsTable from '@/components/admin/AdminApplicantsTable'
 import { mapApplicantRow } from '@/lib/applicants'
 import { getAdminSession } from '@/lib/supabase/server'
@@ -27,7 +28,9 @@ async function fetchApplicants() {
       quiz_score,
       status,
       created_at,
-      batches ( name, slug )
+      priority_review,
+      batches ( name, slug ),
+      promo_codes ( code )
     `
     )
     .order('created_at', { ascending: false })
@@ -46,7 +49,10 @@ export default async function AdminPage() {
         <p className="apply-eyebrow">✦ Admin ✦</p>
         <h1 className="admin-title">Applicants</h1>
         <p className="apply-sub" style={{ textAlign: 'left', marginBottom: 0 }}>
-          Review applications, payment status, and batch assignments.
+          Review applications, payment status, and batch assignments.{' '}
+          <Link href="/admin/affiliates" className="admin-inline-link">
+            View affiliates →
+          </Link>
         </p>
 
         <AdminApplicantsTable applicants={applicants} />

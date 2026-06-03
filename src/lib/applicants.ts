@@ -1,11 +1,18 @@
 import type { ApplicantStatus } from '@/types/applicant'
 
 type BatchRelation = { name: string; slug: string } | { name: string; slug: string }[] | null
+type PromoRelation = { code: string } | { code: string }[] | null
 
 export function parseBatchRelation(batches: BatchRelation): { name: string; slug: string } | null {
   if (!batches) return null
   if (Array.isArray(batches)) return batches[0] ?? null
   return batches
+}
+
+function parsePromoRelation(promo: PromoRelation): string | null {
+  if (!promo) return null
+  if (Array.isArray(promo)) return promo[0]?.code ?? null
+  return promo.code
 }
 
 export interface ApplicantDbRow {
@@ -17,7 +24,9 @@ export interface ApplicantDbRow {
   quiz_score: number | null
   status: string
   created_at: string
+  priority_review?: boolean
   batches: BatchRelation
+  promo_codes?: PromoRelation
 }
 
 export function mapApplicantRow(row: ApplicantDbRow) {
@@ -32,5 +41,7 @@ export function mapApplicantRow(row: ApplicantDbRow) {
     quizScore: row.quiz_score,
     status: row.status as ApplicantStatus,
     createdAt: row.created_at,
+    promoCode: parsePromoRelation(row.promo_codes ?? null),
+    priorityReview: row.priority_review ?? false,
   }
 }

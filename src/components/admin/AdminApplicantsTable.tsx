@@ -14,6 +14,8 @@ export interface AdminApplicantRow {
   quizScore: number | null
   status: ApplicantStatus
   createdAt: string
+  promoCode: string | null
+  priorityReview: boolean
 }
 
 interface AdminApplicantsTableProps {
@@ -116,6 +118,8 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
               <th>Email</th>
               <th>Gender</th>
               <th>Batch</th>
+              <th>Promo</th>
+              <th>Priority</th>
               <th>Quiz score</th>
               <th>Status</th>
               <th>Applied</th>
@@ -124,7 +128,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="admin-table-empty">
+                <td colSpan={9} className="admin-table-empty">
                   No applicants found.
                 </td>
               </tr>
@@ -135,6 +139,8 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                   <td>{row.email}</td>
                   <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
                   <td>{row.batchName || row.batchSlug || '—'}</td>
+                  <td>{row.promoCode ? <code className="admin-code">{row.promoCode}</code> : '—'}</td>
+                  <td>{row.priorityReview ? 'Yes' : '—'}</td>
                   <td>{row.quizScore ?? '—'}</td>
                   <td>
                     <Badge color={statusBadgeColor(row.status)}>{row.status}</Badge>

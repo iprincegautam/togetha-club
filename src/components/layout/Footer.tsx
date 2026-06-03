@@ -1,10 +1,16 @@
 import Link from 'next/link'
+import SiteLogo from '@/components/ui/SiteLogo'
 import { ROUTES } from '@/constants/routes'
 
 export default function Footer() {
   return (
     <footer>
-      <div className="flogo">✈ Togetha.Club</div>
+      <SiteLogo
+        className="footer-logo"
+        imageClassName="footer-logo-img"
+        href={ROUTES.home}
+        showWordmark={false}
+      />
       <p className="ftag">
         India&apos;s first matchmaking travel club. Like Hinge, but for travelers.
       </p>

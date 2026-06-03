@@ -1,0 +1,329 @@
+/* Playful motion — disabled when user prefers reduced motion */
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-transition {
+    animation: fadeUp 0.55s ease both;
+  }
+
+  .page-hero-eyebrow,
+  .apply-eyebrow {
+    animation: fadeUp 0.65s ease both;
+  }
+
+  .page-hero-title,
+  .apply-title,
+  .admin-title {
+    animation: fadeUp 0.75s 0.08s ease both;
+  }
+
+  .page-hero-title .teal,
+  .page-hero-title .rose {
+    display: inline-block;
+    animation: titlePop 0.85s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+
+  .page-hero-title .teal {
+    animation-delay: 0.12s;
+  }
+
+  .page-hero-title .rose {
+    animation-delay: 0.28s;
+  }
+
+  .page-hero-sub,
+  .apply-sub {
+    animation: fadeUp 0.75s 0.18s ease both;
+  }
+
+  .apply-page .apply-stamp-left,
+  .confirm-page .apply-stamp-left,
+  .page-hero .pc-1 {
+    animation: stampDrift 6s ease-in-out infinite;
+  }
+
+  .apply-page .apply-stamp-right,
+  .confirm-page .apply-stamp-right,
+  .page-hero .pc-2 {
+    animation: stampDriftAlt 7s ease-in-out 0.8s infinite;
+  }
+
+  .confirm-icon,
+  .confirm-star {
+    animation: sparkle 2.8s ease-in-out infinite;
+  }
+
+  .anim-logo:hover .site-logo-img {
+    animation: logoWiggle 0.55s ease;
+  }
+
+  .anim-float {
+    animation: float 4.5s ease-in-out infinite;
+  }
+
+  .anim-float-delay-1 {
+    animation: float 5s ease-in-out 0.6s infinite;
+  }
+
+  .anim-float-delay-2 {
+    animation: float 5.5s ease-in-out 1.2s infinite;
+  }
+
+  .anim-stamp-drift {
+    animation: stampDrift 6s ease-in-out infinite;
+  }
+
+  .anim-stamp-drift-alt {
+    animation: stampDriftAlt 7s ease-in-out 0.8s infinite;
+  }
+
+  .anim-stamp-spin-slow {
+    animation: stampSpin 18s linear infinite;
+  }
+
+  .anim-hero-sparkle {
+    animation: sparkle 2.8s ease-in-out infinite;
+  }
+
+  .anim-hero-sparkle-delay {
+    animation: sparkle 3.2s ease-in-out 1.1s infinite;
+  }
+
+  .anim-title-pop .ht-teal,
+  .anim-title-pop .ht-gold {
+    display: inline-block;
+    animation: titlePop 0.85s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+
+  .anim-title-pop .ht-teal {
+    animation-delay: 0.15s;
+  }
+
+  .anim-title-pop .ht-rose {
+    display: inline-block;
+    animation: titlePop 0.85s cubic-bezier(0.34, 1.4, 0.64, 1) 0.35s both;
+  }
+
+  .anim-title-pop .ht-gold {
+    animation-delay: 0.55s;
+  }
+
+  .btn-p,
+  .nav-cta,
+  .nav-dropdown-cta,
+  .apply-submit,
+  .batches-cta-btn,
+  .confirm-link.confirm-whatsapp {
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .btn-p:hover:not(:disabled),
+  .nav-cta:hover,
+  .nav-dropdown-cta:hover,
+  .apply-submit:hover:not(:disabled),
+  .batches-cta-btn:hover,
+  .confirm-link.confirm-whatsapp:hover {
+    animation: btnBounce 0.45s ease;
+  }
+
+  .btn-o:hover:not(:disabled),
+  .confirm-link.outline:hover {
+    animation: gentleWiggle 0.5s ease;
+  }
+
+  .sc:hover,
+  .vibe-card:hover,
+  .batch-c-clue-grid .vibe-card:hover {
+    animation: cardNudge 0.4s ease;
+  }
+
+  .tpc:hover,
+  .product-card:hover {
+    animation: cardLift 0.35s ease forwards;
+  }
+
+  .step:hover {
+    animation: cardLift 0.35s ease forwards;
+  }
+
+  .flinks a {
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .flinks a:hover {
+    transform: translateY(-2px);
+  }
+
+  .doodle-divider {
+    animation: gentleWiggle 4s ease-in-out infinite;
+  }
+
+  .mq-i {
+    animation: mqBounce 22s linear infinite;
+  }
+
+  .nav-links a {
+    position: relative;
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 2px;
+    background: var(--teal-stamp);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+
+  .nav-links a:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes logoWiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg) scale(1.05);
+  }
+  75% {
+    transform: rotate(6deg) scale(1.05);
+  }
+}
+
+@keyframes stampDrift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-15deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-11deg);
+  }
+}
+
+@keyframes stampDriftAlt {
+  0%,
+  100% {
+    transform: translateY(0) rotate(12deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(16deg);
+  }
+}
+
+@keyframes stampSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.9) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(12deg);
+  }
+}
+
+@keyframes titlePop {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes btnBounce {
+  0%,
+  100% {
+    transform: translate(-1px, -1px);
+  }
+  40% {
+    transform: translate(-3px, -4px) scale(1.02);
+  }
+  70% {
+    transform: translate(-1px, -2px);
+  }
+}
+
+@keyframes gentleWiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(-1.5deg);
+  }
+  66% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@keyframes cardLift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes cardNudge {
+  0%,
+  100% {
+    transform: translateX(4px);
+  }
+  50% {
+    transform: translateX(8px) translateY(-2px);
+  }
+}
+
+@keyframes mqBounce {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+
+  .page-hero-eyebrow,
+  .page-hero-title,
+  .page-hero-sub,
+  .apply-eyebrow,
+  .apply-title,
+  .apply-sub,
+  .admin-title {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

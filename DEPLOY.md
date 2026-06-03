@@ -30,17 +30,76 @@ From **Project Settings → API**:
 
 ---
 
-## 2. Razorpay (Live)
+## 2. Razorpay
 
-1. [Razorpay Dashboard](https://dashboard.razorpay.com/) → switch to **Live** mode
-2. **Settings → API Keys** → generate live keys
-3. Set on Vercel (and `.env.local` for local testing):
+### Get your API keys
 
+1. Create or sign in at [Razorpay Dashboard](https://dashboard.razorpay.com/)
+2. For local testing, keep the dashboard in **Test Mode** (toggle at top)
+3. Go to **Account & Settings → API Keys** (or [direct link](https://dashboard.razorpay.com/app/keys))
+4. Click **Generate Key** (Test or Live)
+5. Copy **Key ID** (`rzp_test_...` or `rzp_live_...`) and **Key Secret**  
+   — the secret is shown **once**; save it somewhere safe
+
+### Add to `.env.local` (local dev)
+
+Open `togetha-club/.env.local` and set:
+
+```bash
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
+RAZORPAY_KEY_SECRET=your_secret_here
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxx
 ```
-RAZORPAY_KEY_ID=rzp_live_...
-RAZORPAY_KEY_SECRET=...
-NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_...
+
+`NEXT_PUBLIC_RAZORPAY_KEY_ID` must be the **same Key ID** as `RAZORPAY_KEY_ID`.  
+The secret stays server-only and must **never** be prefixed with `NEXT_PUBLIC_`.
+
+Restart the dev server after saving:
+
+```bash
+npm run dev
 ```
+
+### Add to Vercel (production)
+
+**Option A — Dashboard**
+
+1. [Vercel](https://vercel.com) → your **togetha-club** project → **Settings → Environment Variables**
+2. Add each variable for **Production** (and Preview if you want payments on preview deploys):
+
+| Name | Value |
+|------|--------|
+| `RAZORPAY_KEY_ID` | Live Key ID (`rzp_live_...`) |
+| `RAZORPAY_KEY_SECRET` | Live Key Secret |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Same live Key ID |
+
+3. **Redeploy** the project (Deployments → ⋯ → Redeploy) so new env vars load
+
+**Option B — CLI**
+
+From the `togetha-club` folder (you’ll be prompted to paste each value):
+
+```bash
+vercel env add RAZORPAY_KEY_ID production
+vercel env add RAZORPAY_KEY_SECRET production
+vercel env add NEXT_PUBLIC_RAZORPAY_KEY_ID production
+vercel --prod
+```
+
+### Test a payment locally
+
+With **Test Mode** keys in `.env.local`:
+
+1. Go through apply flow → **Review & Pay**
+2. Razorpay checkout opens (not the dev mock — that only runs when keys are missing)
+3. Use Razorpay test card: `4111 1111 1111 1111`, any future expiry, any CVV, any OTP
+
+### Go live
+
+1. Complete Razorpay **KYC / account activation**
+2. Switch dashboard to **Live Mode** and generate **Live** API keys
+3. Put live keys on Vercel (not in git)
+4. Real charges will process on `togetha.club`
 
 Use **Test** keys locally until you are ready for real charges.
 

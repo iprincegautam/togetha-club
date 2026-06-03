@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { tryDevPromoFallback, validatePromoCode } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
@@ -18,7 +19,7 @@ function devOrderResponse(applicantId: string, batchSlug: string, amount?: numbe
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { applicantId, name, phone, gender, batchSlug, dateChoice } = body
+    const { applicantId, name, phone, gender, batchSlug, dateChoice, promoCode } = body
 
     if (!applicantId) {
       return NextResponse.json({ error: 'applicantId required' }, { status: 400 })
@@ -47,19 +48,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
-    const { error: updateError } = await supabase
-      .from('applicants')
-      .update({
-        name: name.trim(),
-        phone: phone.trim(),
-        gender,
-        batch_slug: batchSlug,
-        date_choice: String(dateChoice),
-      })
-      .eq('id', applicantId)
-
-    if (updateError) throw updateError
-
     const { data: batch, error: batchError } = await supabase
       .from('batches')
       .select('price')
@@ -68,17 +56,66 @@ export async function POST(req: NextRequest) {
 
     if (batchError || !batch?.price) throw batchError ?? new Error('Batch not found')
 
-    const amount = batch.price * 100
+    const originalAmount = batch.price * 100
+    let discountAmount = 0
+    let finalAmount = originalAmount
+    let promoCodeId: string | null = null
+    let influencerId: string | null = null
+    let priorityReview = false
+
+    if (promoCode?.trim()) {
+      let promoResult = await validatePromoCode(supabase, promoCode, batchSlug, originalAmount)
+      if (!promoResult.valid) {
+        const devFallback = tryDevPromoFallback(promoCode, batchSlug, originalAmount)
+        if (devFallback) {
+          promoResult = devFallback
+        } else {
+          return NextResponse.json({ error: promoResult.error || 'Invalid promo code' }, { status: 400 })
+        }
+      }
+      discountAmount = promoResult.discountAmount ?? 0
+      finalAmount = promoResult.finalAmount ?? originalAmount
+      promoCodeId = promoResult.promo?.id ?? null
+      influencerId = promoResult.promo?.influencer_id ?? null
+      priorityReview = promoResult.grantsPriority ?? false
+    }
+
+    const { error: updateError } = await supabase
+      .from('applicants')
+      .update({
+        name: name.trim(),
+        phone: phone.trim(),
+        gender,
+        batch_slug: batchSlug,
+        date_choice: String(dateChoice),
+        promo_code_id: promoCodeId,
+        influencer_id: influencerId,
+        original_amount: originalAmount,
+        discount_amount: discountAmount,
+        final_amount: finalAmount,
+        priority_review: priorityReview,
+      })
+      .eq('id', applicantId)
+
+    if (updateError) throw updateError
 
     if (!isRazorpayConfigured()) {
       if (isDevelopment()) {
-        return devOrderResponse(applicantId, batchSlug, amount)
+        return NextResponse.json({
+          orderId: `dev_order_${applicantId}`,
+          amount: finalAmount,
+          originalAmount,
+          discountAmount,
+          currency: 'INR',
+          keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'dev_key',
+          dev: true,
+        })
       }
       return NextResponse.json({ error: 'Payment not configured' }, { status: 503 })
     }
 
     const order = await razorpay.orders.create({
-      amount,
+      amount: finalAmount,
       currency: 'INR',
       receipt: applicantId,
     })
@@ -92,7 +129,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       orderId: order.id,
-      amount,
+      amount: finalAmount,
+      originalAmount,
+      discountAmount,
       currency: 'INR',
       keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     })

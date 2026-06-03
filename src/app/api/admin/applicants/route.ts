@@ -22,7 +22,9 @@ export async function GET() {
         quiz_score,
         status,
         created_at,
-        batches ( name, slug )
+        priority_review,
+        batches ( name, slug ),
+        promo_codes ( code )
       `
       )
       .order('created_at', { ascending: false })

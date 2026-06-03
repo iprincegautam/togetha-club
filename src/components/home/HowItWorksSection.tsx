@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Reveal from '@/components/ui/Reveal'
 import SectionLabel from '@/components/ui/SectionLabel'
 import { ROUTES } from '@/constants/routes'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
@@ -46,7 +47,8 @@ export default function HowItWorksSection() {
   }
 
   return (
-    <section className="sec" id="how">
+    <Reveal>
+      <section className="sec" id="how">
       <div className="sec-inner">
         <SectionLabel>How It Works</SectionLabel>
         <h2 className="sec-title">
@@ -83,5 +85,6 @@ export default function HowItWorksSection() {
         </div>
       </div>
     </section>
+    </Reveal>
   )
 }

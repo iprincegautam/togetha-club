@@ -6,5 +6,6 @@ export const ROUTES = {
   confirmation: '/confirmation',
   waitlist: '/waitlist',
   admin: '/admin',
+  adminAffiliates: '/admin/affiliates',
   adminLogin: '/admin/login',
 } as const

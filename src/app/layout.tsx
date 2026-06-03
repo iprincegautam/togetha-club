@@ -8,8 +8,10 @@ import {
 } from 'next/font/google'
 import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
+import SiteMotion from '@/components/layout/SiteMotion'
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from '@/lib/metadata'
 import './globals.css'
+import '@/styles/motion.css'
 import '@/components/home/home.css'
 import '@/components/batches/batches.css'
 import '@/components/apply/apply.css'
@@ -44,6 +46,10 @@ export const metadata: Metadata = {
   title: DEFAULT_TITLE,
   description: DEFAULT_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
@@ -71,7 +77,9 @@ export default function RootLayout({
     >
       <body>
         <Nav />
-        <main>{children}</main>
+        <main className="site-main">
+          <SiteMotion>{children}</SiteMotion>
+        </main>
         <Footer />
       </body>
     </html>

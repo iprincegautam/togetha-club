@@ -143,9 +143,79 @@
   background: #1ebe57;
 }
 
+.admin-nav-links-bar {
+  display: flex;
+  gap: 20px;
+}
+
+.admin-nav-links-bar a {
+  font-family: var(--font-family-caveat);
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(245, 237, 216, 0.7);
+  text-decoration: none;
+}
+
+.admin-nav-links-bar a.active,
+.admin-nav-links-bar a:hover {
+  color: var(--cream);
+}
+
+.admin-nav-links {
+  margin-bottom: 8px;
+}
+
+.admin-nav-links a,
+.admin-inline-link {
+  font-family: var(--font-family-caveat);
+  font-weight: 700;
+  color: var(--teal-stamp);
+  text-decoration: none;
+}
+
+.admin-section {
+  margin-top: 32px;
+}
+
+.admin-section-title {
+  font-family: var(--font-playfair);
+  font-size: 1.4rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.admin-code {
+  font-family: monospace;
+  font-size: 0.82rem;
+  background: var(--cream-dark);
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.admin-empty,
+.admin-loading {
+  text-align: center;
+  color: var(--ink-mid);
+  font-style: italic;
+  padding: 24px;
+}
+
+.admin-affiliates {
+  margin-top: 8px;
+}
+
 @media (max-width: 768px) {
   .admin-nav {
     padding: 14px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-nav-links-bar {
+    order: 3;
+    width: 100%;
+    justify-content: center;
   }
 
   .admin-table th,
