@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { tryDevPromoFallback, normalizePromoCode, validatePromoCode } from '@/lib/promo'
+import { normalizePromoCode, resolvePromoDiscount } from '@/lib/promo'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
 const VALID_SLUGS = ['batch-a', 'batch-b']
@@ -34,24 +34,17 @@ export async function POST(req: NextRequest) {
       amountPaise = batchSlug === 'batch-b' ? 2299900 : 1899900
     }
 
-    let result: Awaited<ReturnType<typeof validatePromoCode>> = { valid: false, error: 'Invalid promo code.' }
-
-    if (supabase) {
-      result = await validatePromoCode(supabase, code, batchSlug, amountPaise)
+    if (!supabase) {
+      return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
+    const result = await resolvePromoDiscount(supabase, code, batchSlug, amountPaise)
+
     if (!result.valid) {
-      const devFallback = tryDevPromoFallback(code, batchSlug, amountPaise)
-      if (devFallback) {
-        result = devFallback
-      } else if (!supabase) {
-        return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
-      } else {
-        return NextResponse.json({
-          valid: false,
-          error: result.error,
-        })
-      }
+      return NextResponse.json({
+        valid: false,
+        error: result.error,
+      })
     }
 
     const normalizedCode = result.promo?.code ?? normalizePromoCode(code)

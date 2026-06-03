@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
-import { tryDevPromoFallback, validatePromoCode } from '@/lib/promo'
+import { isMissingColumnError, resolvePromoDiscount } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
@@ -64,38 +64,61 @@ export async function POST(req: NextRequest) {
     let priorityReview = false
 
     if (promoCode?.trim()) {
-      let promoResult = await validatePromoCode(supabase, promoCode, batchSlug, originalAmount)
+      const promoResult = await resolvePromoDiscount(
+        supabase,
+        promoCode,
+        batchSlug,
+        originalAmount
+      )
       if (!promoResult.valid) {
-        const devFallback = tryDevPromoFallback(promoCode, batchSlug, originalAmount)
-        if (devFallback) {
-          promoResult = devFallback
-        } else {
-          return NextResponse.json({ error: promoResult.error || 'Invalid promo code' }, { status: 400 })
-        }
+        return NextResponse.json(
+          { error: promoResult.error || 'Invalid promo code' },
+          { status: 400 }
+        )
       }
       discountAmount = promoResult.discountAmount ?? 0
       finalAmount = promoResult.finalAmount ?? originalAmount
-      promoCodeId = promoResult.promo?.id ?? null
-      influencerId = promoResult.promo?.influencer_id ?? null
+      const promoId = promoResult.promo?.id
+      promoCodeId = promoId && promoId !== 'static' ? promoId : null
+      const infId = promoResult.promo?.influencer_id
+      influencerId = infId && infId !== 'static' ? infId : null
       priorityReview = promoResult.grantsPriority ?? false
     }
 
-    const { error: updateError } = await supabase
+    const fullUpdate = {
+      name: name.trim(),
+      phone: phone.trim(),
+      gender,
+      batch_slug: batchSlug,
+      date_choice: String(dateChoice),
+      promo_code_id: promoCodeId,
+      influencer_id: influencerId,
+      original_amount: originalAmount,
+      discount_amount: discountAmount,
+      final_amount: finalAmount,
+      priority_review: priorityReview,
+    }
+
+    let { error: updateError } = await supabase
       .from('applicants')
-      .update({
-        name: name.trim(),
-        phone: phone.trim(),
-        gender,
-        batch_slug: batchSlug,
-        date_choice: String(dateChoice),
-        promo_code_id: promoCodeId,
-        influencer_id: influencerId,
-        original_amount: originalAmount,
-        discount_amount: discountAmount,
-        final_amount: finalAmount,
-        priority_review: priorityReview,
-      })
+      .update(fullUpdate)
       .eq('id', applicantId)
+
+    if (updateError && isMissingColumnError(updateError)) {
+      const {
+        promo_code_id: _p,
+        influencer_id: _i,
+        original_amount: _o,
+        discount_amount: _d,
+        final_amount: _f,
+        priority_review: _pr,
+        ...baseUpdate
+      } = fullUpdate
+      ;({ error: updateError } = await supabase
+        .from('applicants')
+        .update(baseUpdate)
+        .eq('id', applicantId))
+    }
 
     if (updateError) throw updateError
 

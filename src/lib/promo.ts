@@ -31,22 +31,33 @@ export interface PromoValidationResult {
 
 const MIN_FINAL_PAISE = 100
 
-const DEV_PROMO_CODES: Record<
+const STATIC_PROMO_CODES: Record<
   string,
   { discountType: DiscountType; discountValue: number; grantsPriority: boolean }
 > = {
   SARAH200: { discountType: 'fixed_inr', discountValue: 2000, grantsPriority: true },
 }
 
-/** Local dev fallback when promo tables or seed data are not in Supabase yet. */
-export function tryDevPromoFallback(
+let promoSchemaUnavailableCache: boolean | null = null
+
+/** True when migration 002 has not been applied (promo_codes missing). */
+export async function isPromoSchemaUnavailable(
+  supabase: SupabaseClient
+): Promise<boolean> {
+  if (promoSchemaUnavailableCache !== null) return promoSchemaUnavailableCache
+  const { error } = await supabase.from('promo_codes').select('id').limit(1)
+  promoSchemaUnavailableCache =
+    error?.code === 'PGRST205' ||
+    (typeof error?.message === 'string' && error.message.includes('schema cache'))
+  return promoSchemaUnavailableCache
+}
+
+function tryStaticPromoFallback(
   code: string,
   _batchSlug: string,
   originalAmountPaise: number
 ): PromoValidationResult | null {
-  if (!isDevelopment()) return null
-
-  const config = DEV_PROMO_CODES[normalizePromoCode(code)]
+  const config = STATIC_PROMO_CODES[normalizePromoCode(code)]
   if (!config) return null
 
   const { discountAmount, finalAmount } = calculateDiscount(
@@ -57,11 +68,60 @@ export function tryDevPromoFallback(
 
   return {
     valid: true,
+    promo: {
+      id: 'static',
+      code: normalizePromoCode(code),
+      influencer_id: 'static',
+      discount_type: config.discountType,
+      discount_value: config.discountValue,
+      commission_amount: 0,
+      grants_priority: config.grantsPriority,
+      max_uses: null,
+      uses_count: 0,
+      valid_from: null,
+      valid_until: null,
+      batch_slugs: null,
+      active: true,
+    },
     originalAmount: originalAmountPaise,
     discountAmount,
     finalAmount,
     grantsPriority: config.grantsPriority,
   }
+}
+
+/** Dev-only shortcut (also used by tests). */
+export function tryDevPromoFallback(
+  code: string,
+  batchSlug: string,
+  originalAmountPaise: number
+): PromoValidationResult | null {
+  if (!isDevelopment()) return null
+  return tryStaticPromoFallback(code, batchSlug, originalAmountPaise)
+}
+
+/** DB validation with static fallback while migration 002 is pending. */
+export async function resolvePromoDiscount(
+  supabase: SupabaseClient,
+  code: string,
+  batchSlug: string,
+  originalAmountPaise: number
+): Promise<PromoValidationResult> {
+  const schemaMissing = await isPromoSchemaUnavailable(supabase)
+  if (!schemaMissing) {
+    const dbResult = await validatePromoCode(supabase, code, batchSlug, originalAmountPaise)
+    if (dbResult.valid) return dbResult
+    return dbResult
+  }
+
+  const staticResult = tryStaticPromoFallback(code, batchSlug, originalAmountPaise)
+  if (staticResult) return staticResult
+
+  return { valid: false, error: 'Invalid promo code.' }
+}
+
+export function isMissingColumnError(error: { code?: string } | null): boolean {
+  return error?.code === '42703'
 }
 
 export function normalizePromoCode(code: string): string {
