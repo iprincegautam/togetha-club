@@ -33,6 +33,23 @@ if [ "$status" != "200" ]; then
 fi
 echo "OK: admin login ($status)"
 
+echo "→ POST /api/promo/validate (SARAH200)"
+promo_res=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/promo/validate" \
+  -H "Content-Type: application/json" \
+  -d '{"code":"SARAH200","batchSlug":"batch-a","originalAmount":1899900}')
+promo_status=$(echo "$promo_res" | tail -1)
+promo_body=$(echo "$promo_res" | sed '$d')
+if [ "$promo_status" != "200" ]; then
+  echo "FAIL: promo validate returned $promo_status"
+  exit 1
+fi
+if echo "$promo_body" | grep -q '"valid":true'; then
+  echo "OK: promo SARAH200 ($promo_status)"
+else
+  echo "WARN: promo not valid — run migration 002 in Supabase SQL Editor"
+  echo "     $promo_body"
+fi
+
 echo "→ POST /api/waitlist (invalid email)"
 res=$(curl -s -w "\n%{http_code}" -X POST "$BASE_URL/api/waitlist" \
   -H "Content-Type: application/json" \
