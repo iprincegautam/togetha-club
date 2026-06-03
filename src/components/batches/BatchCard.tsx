@@ -7,7 +7,8 @@ import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
 import BatchTabs from '@/components/batches/BatchTabs'
 import DatePicker from '@/components/batches/DatePicker'
-import { BatchAFullVisual, BatchBFullVisual } from '@/components/batches/BatchVisuals'
+import BatchVisualCarousel from '@/components/batches/BatchVisualCarousel'
+import { BATCH_GALLERY } from '@/constants/batch-gallery'
 
 interface BatchCardProps {
   slug: string
@@ -126,14 +127,13 @@ export default function BatchCard({
   const badge = statusBadge(status, config.roseAccent)
 
   const [selectedDate, setSelectedDate] = useState<number | null>(0)
-
-  const Visual = slug === 'batch-b' ? BatchBFullVisual : BatchAFullVisual
+  const gallerySlides = BATCH_GALLERY[slug] ?? BATCH_GALLERY['batch-a']
 
   return (
     <div className="product-card">
       <div className="product-hero">
         <div className="product-visual">
-          <Visual />
+          <BatchVisualCarousel slides={gallerySlides} accentColor={accentColor} />
         </div>
         <div className={`product-info${config.infoClass ? ` ${config.infoClass}` : ''}`}>
           <div className="product-badges">
