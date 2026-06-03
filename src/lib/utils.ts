@@ -6,8 +6,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPrice(paise: number): string {
-  return `₹${paise.toLocaleString('en-IN')}`
+/** Format a price in whole rupees (rounds paise fractions). */
+export function formatPrice(rupees: number): string {
+  const whole = Math.round(rupees)
+  return `₹${whole.toLocaleString('en-IN')}`
+}
+
+/** Format an amount stored in paise. */
+export function formatPaise(paise: number): string {
+  return formatPrice(paise / 100)
 }
 
 export function calculateQuizResult(answers: QuizAnswers): QuizResult {

@@ -11,8 +11,8 @@ interface GenderSelectorProps {
 export default function GenderSelector({
   value,
   onChange,
-  maleLabel = '🧑 A boy',
-  femaleLabel = '👧 A girl',
+  maleLabel = 'A boy',
+  femaleLabel = 'A girl',
   className,
 }: GenderSelectorProps) {
   return (

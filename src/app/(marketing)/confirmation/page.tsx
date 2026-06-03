@@ -36,9 +36,10 @@ export async function generateMetadata({
 export default async function ConfirmationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ batch?: string }>
+  searchParams: Promise<{ batch?: string; plan?: string }>
 }) {
-  const { batch } = await searchParams
+  const { batch, plan } = await searchParams
+  const isDeposit = plan === 'deposit'
   const meta = batch && batch in BATCH_META ? BATCH_META[batch as keyof typeof BATCH_META] : null
   const batchNameFromDb = batch ? await fetchBatchName(batch) : null
   const batchName = batchNameFromDb ?? meta?.label ?? null
@@ -50,6 +51,7 @@ export default async function ConfirmationPage({
         color="var(--teal-stamp)"
         size={100}
         rotation={-10}
+        opacity={0.35}
         className="apply-stamp apply-stamp-left"
       />
       <StampCircle
@@ -57,18 +59,27 @@ export default async function ConfirmationPage({
         color="var(--rose)"
         size={90}
         rotation={12}
+        opacity={0.35}
         className="apply-stamp apply-stamp-right"
       />
 
       <div className="apply-shell confirm-shell">
         <div className="apply-card confirm-card">
           <div className="confirm-icon confirm-star">✦</div>
-          <p className="apply-eyebrow">Payment confirmed</p>
-          <h1 className="apply-title confirm-headline">You&apos;re in.</h1>
+          <p className="apply-eyebrow">
+            {isDeposit ? 'Slot reserved' : 'Payment confirmed'}
+          </p>
+          <h1 className="apply-title confirm-headline">
+            {isDeposit ? 'Your slot is reserved.' : "You're in."}
+          </h1>
           <p className="apply-sub confirm-message">
-            {batchName
-              ? `Your spot for ${batchName} is confirmed. We'll email you within 48 hours with your pre-trip pack — what to pack, who you'll meet, and everything else.`
-              : "Your spot is confirmed. We'll email you within 48 hours with your pre-trip pack and everything you need."}
+            {isDeposit
+              ? batchName
+                ? `We've received your booking deposit for ${batchName}. Your spot is held — we'll email you payment details for the remaining balance before departure.`
+                : "We've received your booking deposit. Your spot is held — we'll email you payment details for the remaining balance before departure."
+              : batchName
+                ? `Your spot for ${batchName} is confirmed. We'll email you within 48 hours with your pre-trip pack — what to pack, who you'll meet, and everything else.`
+                : "Your spot is confirmed. We'll email you within 48 hours with your pre-trip pack and everything you need."}
           </p>
           <p className="apply-foot">
             Join the group WhatsApp for updates and introductions before departure.

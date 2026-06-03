@@ -32,7 +32,7 @@ export default function WaitlistPage() {
 
         <div className="apply-card batch-c-info">
           <div className="batch-c-details-box">
-            <div className="batch-c-details-title">🔒 Details drop August 1st</div>
+            <div className="batch-c-details-title">✦ Details drop August 1st</div>
             <p className="batch-c-details-text">
               New route. Different format. Same magic. No commitment required to join the list.
             </p>

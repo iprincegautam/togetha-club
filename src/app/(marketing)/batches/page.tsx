@@ -16,6 +16,7 @@ import {
 } from '@/components/batches/BatchTabPanels'
 import Reveal from '@/components/ui/Reveal'
 import StampCircle from '@/components/ui/StampCircle'
+import { INCLUDE_GLYPH, VIBE_GLYPH } from '@/constants/brand-glyphs'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
@@ -33,89 +34,89 @@ export function generateMetadata() {
 const BATCH_A_ITINERARY: ItineraryDay[] = [
   {
     num: 1,
-    location: '✈ Delhi → Manali',
+    location: 'Delhi → Manali',
     title: 'The Beginning of Something',
     activities: [
-      'Overnight Volvo from Delhi',
+      { text: 'Overnight Volvo from Delhi', variant: 'gold' },
       { text: 'First Meeting — Ice Breaker Round 1', variant: 'highlight' },
-      'Name game that gets weird fast',
-      'Arrive Manali dawn',
+      { text: 'Name game that gets weird fast', variant: 'highlight' },
+      { text: 'Arrive Manali dawn', variant: 'gold' },
     ],
   },
   {
     num: 2,
-    location: '🏔 Manali Town',
+    location: '△ Manali Town',
     title: 'Chaos, Chai & First Impressions',
     activities: [
-      'Breakfast together (your first proper meal)',
+      { text: 'Breakfast together (your first proper meal)', variant: 'gold' },
       { text: 'Ice Breaker Games — Round 2', variant: 'highlight' },
-      'Old Manali café crawl',
-      'Hadimba Temple walk',
-      { text: 'Evening group dinner — assigned seats (by us)', variant: 'rose' },
-      'Rooftop chai with strangers becoming friends',
+      { text: 'Old Manali café crawl', variant: 'gold' },
+      { text: 'Hadimba Temple walk', variant: 'gold' },
+      { text: 'Evening group dinner — assigned seats (by us)', variant: 'highlight' },
+      { text: 'Rooftop chai with strangers becoming friends', variant: 'gold' },
     ],
   },
   {
     num: 3,
-    location: '🌿 Kasol',
+    location: 'Kasol',
     title: 'The Day Everything Opens Up',
     activities: [
-      'Manali → Kasol road trip (the most beautiful 4 hrs)',
+      { text: 'Manali → Kasol road trip (the most beautiful 4 hrs)', variant: 'gold' },
       { text: 'Paired activities (we choose the pairs)', variant: 'highlight' },
-      'Parvati River walk',
+      { text: 'Parvati River walk', variant: 'gold' },
       { text: "Sunset at the ghats — it's a lot", variant: 'gold' },
-      { text: 'Paired dinner (yes, we pair you)', variant: 'rose' },
+      { text: 'Paired dinner (yes, we pair you)', variant: 'highlight' },
     ],
   },
   {
     num: 4,
-    location: '🔥 Kasol',
+    location: '♡ Kasol',
     title: 'THE Night — Bonfire + Stars',
     activities: [
-      'Morning hike to Kheerganga trail start',
-      'Lazy afternoon — explore or do nothing',
-      { text: 'BONFIRE NIGHT — The signature evening', variant: 'highlight' },
-      'Guitar. Stories. Unfiltered conversation.',
+      { text: 'Morning hike to Kheerganga trail start', variant: 'gold' },
+      { text: 'Lazy afternoon — explore or do nothing', variant: 'gold' },
+      { text: 'BONFIRE NIGHT — The signature evening', variant: 'rose' },
+      { text: 'Guitar. Stories. Unfiltered conversation.', variant: 'gold' },
       { text: 'Stargazing at 9,000 ft', variant: 'gold' },
-      'Ends when it ends',
+      { text: 'Ends when it ends', variant: 'gold' },
     ],
   },
   {
     num: 5,
-    location: '❄️ Sissu, Lahaul',
+    location: '△ Sissu, Lahaul',
     title: 'The Mountains Decide Everything',
     activities: [
-      'Kasol → Sissu via Rohtang (when open)',
+      { text: 'Kasol → Sissu via Rohtang (when open)', variant: 'gold' },
       { text: 'Sissu Lake — glassy water at 10,000 ft', variant: 'gold' },
       { text: 'Last group game — brutal honesty round', variant: 'highlight' },
-      'Dinner at Sissu village',
-      { text: 'Group reflection circle — what happened this week', variant: 'rose' },
+      { text: 'Dinner at Sissu village', variant: 'gold' },
+      { text: 'Group reflection circle — what happened this week', variant: 'highlight' },
     ],
   },
   {
     num: 6,
-    location: '🚌 Sissu → Delhi',
+    location: '→ Sissu → Delhi',
     title: "You Won't Go Back the Same",
     activities: [
-      'Morning in Sissu — last looks',
-      'Journey back, Volvo AC',
-      { text: 'Private group WhatsApp unlocked', variant: 'highlight' },
-      { text: 'Arrive Delhi late evening', variant: 'rose' },
+      { text: 'Morning in Sissu — last looks', variant: 'gold' },
+      { text: 'Journey back, Volvo AC', variant: 'gold' },
+      { text: 'Private group WhatsApp unlocked', variant: 'gold' },
+      { text: 'Arrive Delhi late evening', variant: 'gold' },
       'Whatever happens next is up to you.',
     ],
   },
 ]
 
 const BATCH_A_INCLUDES: IncludeItem[] = [
-  { icon: '🚌', title: 'Delhi–Manali–Delhi Transport', desc: 'AC Volvo sleeper both ways. We travel together from Day 1.' },
-  { icon: '🏨', title: '5 Nights Accommodation', desc: 'Comfortable guesthouses & camps. Single-gender sharing rooms.' },
-  { icon: '🍽️', title: 'All Meals Included', desc: 'Breakfast, lunch, dinner. Group meals only — no solo dining allowed.' },
-  { icon: '🎮', title: 'Ice Breaker Game Sets', desc: 'Custom-designed games. 3 rounds over 6 days. Gets progressively more real.' },
-  { icon: '🔥', title: 'Bonfire Night Setup', desc: 'Wood, chai, snacks, guitar. We handle everything. You just show up.' },
-  { icon: '👤', title: 'Dedicated Trip Lead', desc: 'Trained facilitator with you 24/7. Not a tour guide — a vibe curator.' },
-  { icon: '📱', title: 'Private Group Access', desc: 'WhatsApp group unlocked on Day 6. Pre-trip info channel from Day 1.' },
-  { icon: '🪪', title: 'Identity Verification', desc: 'Everyone in your group is verified. No catfishing. No surprises.' },
-  { icon: '💊', title: 'First Aid & Emergency', desc: 'First aid kit, altitude medication, emergency SOS. Mountain-ready.' },
+  { icon: INCLUDE_GLYPH.transport, title: 'Delhi–Manali–Delhi Transport', desc: 'AC Volvo sleeper both ways. We travel together from Day 1.' },
+  { icon: INCLUDE_GLYPH.stay, title: '5 Nights Accommodation', desc: 'Comfortable guesthouses & camps. Single-gender sharing rooms.' },
+  { icon: INCLUDE_GLYPH.meals, title: 'All Meals Included', desc: 'Breakfast, lunch, dinner. Group meals only — no solo dining allowed.' },
+  { icon: INCLUDE_GLYPH.games, title: 'Ice Breaker Game Sets', desc: 'Custom-designed games. 3 rounds over 6 days. Gets progressively more real.' },
+  { icon: INCLUDE_GLYPH.bonfire, title: 'Bonfire Night Setup', desc: 'Wood, chai, snacks, guitar. We handle everything. You just show up.' },
+  { icon: INCLUDE_GLYPH.guide, title: 'Dedicated Trip Lead', desc: 'Trained facilitator with you 24/7. Not a tour guide — a vibe curator.' },
+  { icon: INCLUDE_GLYPH.group, title: 'Private Group Access', desc: 'WhatsApp group unlocked on Day 6. Pre-trip info channel from Day 1.' },
+  { icon: INCLUDE_GLYPH.verify, title: 'Identity Verification', desc: 'Everyone in your group is verified. No catfishing. No surprises.' },
+  { icon: INCLUDE_GLYPH.safety, title: 'First Aid & Emergency', desc: 'First aid kit, altitude medication, emergency SOS. Mountain-ready.' },
 ]
 
 const BATCH_A_NOT_INCLUDED = [
@@ -127,12 +128,12 @@ const BATCH_A_NOT_INCLUDED = [
 ]
 
 const BATCH_A_VIBE_CARDS: VibeCardData[] = [
-  { icon: '⚡', title: 'Electric Energy', desc: 'GenZ moves fast. Our games and activities match that pace. Nothing is slow or boring.' },
-  { icon: '🎭', title: 'Unscripted Moments', desc: "We create conditions. The chaos is yours. You'll have stories you can't put in a caption." },
-  { icon: '🫂', title: 'Zero Pressure', desc: 'No roses, no eliminations. If something happens, it happens. If not, you made 23 great friends.' },
-  { icon: '🏔️', title: 'Real Settings', desc: "Mountains strip pretense. By day 3 nobody is performing. That's when the real stuff starts." },
-  { icon: '🌙', title: 'Midnight Confessions', desc: 'The best conversations happen after midnight at altitude. We create space for those.' },
-  { icon: '📵', title: 'Low-Wifi, High-Vibe', desc: "Patchy signal means actual eye contact. You'll notice you don't miss the phone." },
+  { icon: VIBE_GLYPH.energy, title: 'Electric Energy', desc: 'GenZ moves fast. Our games and activities match that pace. Nothing is slow or boring.' },
+  { icon: VIBE_GLYPH.unscripted, title: 'Unscripted Moments', desc: "We create conditions. The chaos is yours. You'll have stories you can't put in a caption." },
+  { icon: VIBE_GLYPH.ease, title: 'Zero Pressure', desc: 'No roses, no eliminations. If something happens, it happens. If not, you made 23 great friends.' },
+  { icon: VIBE_GLYPH.mountains, title: 'Real Settings', desc: "Mountains strip pretense. By day 3 nobody is performing. That's when the real stuff starts." },
+  { icon: VIBE_GLYPH.night, title: 'Midnight Confessions', desc: 'The best conversations happen after midnight at altitude. We create space for those.' },
+  { icon: VIBE_GLYPH.offline, title: 'Low-Wifi, High-Vibe', desc: "Patchy signal means actual eye contact. You'll notice you don't miss the phone." },
 ]
 
 const BATCH_A_REVIEWS: ReviewData[] = [
@@ -160,12 +161,12 @@ const BATCH_A_REVIEWS: ReviewData[] = [
 ]
 
 const BATCH_A_POLICIES: PolicyData[] = [
-  { title: '💸 Cancellation — 30+ days', text: 'Full refund minus ₹999 processing fee. No questions asked.' },
-  { title: '💸 Cancellation — 15–29 days', text: '50% refund. You may transfer your spot to another approved applicant.' },
-  { title: '💸 Cancellation — under 15 days', text: 'No refund. However, spot transfer allowed up to 7 days before departure.' },
-  { title: '🪪 Verification failure', text: 'If your ID verification fails post-payment, full refund within 5–7 business days.' },
-  { title: '⚖️ Code of conduct', text: 'Zero tolerance for harassment or disrespect. Violators are removed immediately with no refund.' },
-  { title: '⛰️ Weather / Force majeure', text: 'If weather forces route change, we find the best alternative. If trip cancels, full refund.' },
+  { title: '— Cancellation — 30+ days', text: 'Full refund minus ₹999 processing fee. No questions asked.' },
+  { title: '— Cancellation — 15–29 days', text: '50% refund. You may transfer your spot to another approved applicant.' },
+  { title: '— Cancellation — under 15 days', text: 'No refund. However, spot transfer allowed up to 7 days before departure.' },
+  { title: '✓ Verification failure', text: 'If your ID verification fails post-payment, full refund within 5–7 business days.' },
+  { title: '± Code of conduct', text: 'Zero tolerance for harassment or disrespect. Violators are removed immediately with no refund.' },
+  { title: '△ Weather / Force majeure', text: 'If weather forces route change, we find the best alternative. If trip cancels, full refund.' },
 ]
 
 const BATCH_A_FAQ = [
@@ -214,93 +215,93 @@ const BATCH_A_FAQ = [
 const BATCH_B_ITINERARY: ItineraryDay[] = [
   {
     num: 1,
-    location: '✈ Delhi → Manali',
+    location: 'Delhi → Manali',
     title: 'Leave the city behind',
     activities: [
-      'Premium Volvo — Delhi pickup',
-      { text: 'Welcome letter in your seat', variant: 'rose' },
-      'Arrival at sunrise',
+      { text: 'Premium Volvo — Delhi pickup', variant: 'gold' },
+      { text: 'Welcome letter in your seat', variant: 'gold' },
+      { text: 'Arrival at sunrise', variant: 'gold' },
       { text: 'Welcome circle + introductions', variant: 'highlight' },
     ],
   },
   {
     num: 2,
-    location: '🏔 Manali',
+    location: '△ Manali',
     title: 'Slow mornings, deep conversations',
     activities: [
-      'Leisurely breakfast — no rush',
-      { text: 'Deep Connection Game — Round 1', variant: 'highlight' },
-      "Manali's old district walk",
-      'Curated dinner — assigned seating by personality type',
+      { text: 'Leisurely breakfast — no rush', variant: 'gold' },
+      { text: 'Deep Connection Game — Round 1', variant: 'rose' },
+      { text: "Manali's old district walk", variant: 'gold' },
+      { text: 'Curated dinner — assigned seating by personality type', variant: 'highlight' },
       { text: 'Evening wine & stories at guesthouse', variant: 'gold' },
     ],
   },
   {
     num: 3,
-    location: '🌿 Kasol',
+    location: 'Kasol',
     title: 'The Parvati Valley changes people',
     activities: [
-      'Scenic drive — Manali to Kasol',
+      { text: 'Scenic drive — Manali to Kasol', variant: 'gold' },
       { text: 'Riverside lunch at a local dhaba', variant: 'gold' },
       { text: 'Paired evening walk (we assign pairs)', variant: 'highlight' },
-      'Sunset meditation / journaling hour',
-      'Group dinner under fairy lights',
+      { text: 'Sunset meditation / journaling hour', variant: 'gold' },
+      { text: 'Group dinner under fairy lights', variant: 'gold' },
     ],
   },
   {
     num: 4,
-    location: '🔥 Kasol',
+    location: '♡ Kasol',
     title: 'The bonfire that stays with you',
     activities: [
-      'Free morning — explore or rest',
-      { text: 'BONFIRE NIGHT — The signature evening', variant: 'highlight' },
-      'Stories, music, real conversation',
+      { text: 'Free morning — explore or rest', variant: 'gold' },
+      { text: 'BONFIRE NIGHT — The signature evening', variant: 'rose' },
+      { text: 'Stories, music, real conversation', variant: 'gold' },
       { text: 'Premium whisky & wine (Millennial edition perk)', variant: 'gold' },
-      'Stargazing until the mountains ask you to sleep',
+      { text: 'Stargazing until the mountains ask you to sleep', variant: 'gold' },
     ],
   },
   {
     num: 5,
-    location: '❄️ Sissu',
+    location: '△ Sissu',
     title: 'Above the clouds. Above pretense.',
     activities: [
-      'Journey to Sissu via Atal Tunnel',
+      { text: 'Journey to Sissu via Atal Tunnel', variant: 'gold' },
       { text: 'Sissu Lake — reflections (literal and otherwise)', variant: 'gold' },
-      { text: 'Deep connection round 3 — what you want, actually', variant: 'highlight' },
-      'Village dinner — cooked by local family',
+      { text: 'Deep connection round 3 — what you want, actually', variant: 'rose' },
+      { text: 'Village dinner — cooked by local family', variant: 'gold' },
     ],
   },
   {
     num: 6,
-    location: '🚌 Return',
+    location: '→ Return',
     title: "You're different now",
     activities: [
-      'Last morning at Sissu',
+      { text: 'Last morning at Sissu', variant: 'gold' },
       { text: 'Group letter exchange — write to someone you met', variant: 'highlight' },
-      'Journey back',
+      { text: 'Journey back', variant: 'gold' },
       { text: 'Private group chat unlocked', variant: 'gold' },
     ],
   },
 ]
 
 const BATCH_B_INCLUDES: IncludeItem[] = [
-  { icon: '🚌', title: 'Premium Private Transport', desc: 'Private AC vehicle both ways. Not shared Volvo — your own vehicle for the group.' },
-  { icon: '🏨', title: 'Boutique Guesthouses', desc: 'Carefully selected properties. Views, warmth, character. Not hostels.' },
-  { icon: '🍷', title: 'Premium Meals + Drinks', desc: 'All meals. Wine & whisky at bonfire night. Curated menus, not mass catering.' },
-  { icon: '🎯', title: 'Deep Connection Facilitation', desc: 'Three guided sessions designed by a relationship psychologist. Not games — conversations with purpose.' },
-  { icon: '🔥', title: 'The Bonfire Experience', desc: 'Full setup, live music, curated playlist, premium bonfire experience under open sky.' },
-  { icon: '✉️', title: 'Letter Exchange Kit', desc: 'Stationery to write to someone in your group. Anonymous delivery on Day 6.' },
-  { icon: '👤', title: 'Lead + Co-Lead', desc: "Two trained facilitators. They've done this before. They know when to step in and when to disappear." },
-  { icon: '📷', title: 'Photography Moments', desc: "Two curated photography sessions. You'll have actual good photos from this trip." },
+  { icon: INCLUDE_GLYPH.transport, title: 'Premium Private Transport', desc: 'Private AC vehicle both ways. Not shared Volvo — your own vehicle for the group.' },
+  { icon: INCLUDE_GLYPH.stay, title: 'Boutique Guesthouses', desc: 'Carefully selected properties. Views, warmth, character. Not hostels.' },
+  { icon: INCLUDE_GLYPH.drinks, title: 'Premium Meals + Drinks', desc: 'All meals. Wine & whisky at bonfire night. Curated menus, not mass catering.' },
+  { icon: INCLUDE_GLYPH.connection, title: 'Deep Connection Facilitation', desc: 'Three guided sessions designed by a relationship psychologist. Not games — conversations with purpose.' },
+  { icon: INCLUDE_GLYPH.bonfire, title: 'The Bonfire Experience', desc: 'Full setup, live music, curated playlist, premium bonfire experience under open sky.' },
+  { icon: INCLUDE_GLYPH.letter, title: 'Letter Exchange Kit', desc: 'Stationery to write to someone in your group. Anonymous delivery on Day 6.' },
+  { icon: INCLUDE_GLYPH.guide, title: 'Lead + Co-Lead', desc: "Two trained facilitators. They've done this before. They know when to step in and when to disappear." },
+  { icon: INCLUDE_GLYPH.photo, title: 'Photography Moments', desc: "Two curated photography sessions. You'll have actual good photos from this trip." },
 ]
 
 const BATCH_B_VIBE_CARDS: VibeCardData[] = [
-  { icon: '🍷', title: 'Slower Pace', desc: 'More sitting, more conversations, more depth. Less running around, more noticing.' },
-  { icon: '🧠', title: 'Deeper Prompts', desc: "Our connection sessions are designed for people who've thought about what they want." },
-  { icon: '✉️', title: 'The Letter Exchange', desc: 'Write to someone. Anonymous. Delivered on the last day. We added this because it keeps working.' },
-  { icon: '🌙', title: 'No Performance', desc: "Everyone here has done the thing where you perform at first. You won't need to here." },
-  { icon: '🎶', title: 'Live Music', desc: 'A musician at the bonfire night. Not a playlist — a person playing in the mountains.' },
-  { icon: '📖', title: 'Journaling Ritual', desc: 'A guided journaling hour on Day 3. For the people who think by writing. Yours to keep.' },
+  { icon: VIBE_GLYPH.pace, title: 'Slower Pace', desc: 'More sitting, more conversations, more depth. Less running around, more noticing.' },
+  { icon: VIBE_GLYPH.depth, title: 'Deeper Prompts', desc: "Our connection sessions are designed for people who've thought about what they want." },
+  { icon: VIBE_GLYPH.letter, title: 'The Letter Exchange', desc: 'Write to someone. Anonymous. Delivered on the last day. We added this because it keeps working.' },
+  { icon: VIBE_GLYPH.stillness, title: 'No Performance', desc: "Everyone here has done the thing where you perform at first. You won't need to here." },
+  { icon: VIBE_GLYPH.live, title: 'Live Music', desc: 'A musician at the bonfire night. Not a playlist — a person playing in the mountains.' },
+  { icon: VIBE_GLYPH.write, title: 'Journaling Ritual', desc: 'A guided journaling hour on Day 3. For the people who think by writing. Yours to keep.' },
 ]
 
 const BATCH_B_REVIEWS: ReviewData[] = [
@@ -328,12 +329,12 @@ const BATCH_B_REVIEWS: ReviewData[] = [
 ]
 
 const BATCH_B_POLICIES: PolicyData[] = [
-  { title: '💸 30+ days before', text: 'Full refund minus ₹999 processing fee.' },
-  { title: '💸 15–29 days before', text: '50% refund. Spot transfer allowed to another approved applicant.' },
-  { title: '💸 Under 15 days', text: 'No refund. Spot transfer allowed up to 7 days before departure.' },
-  { title: '🪪 KYC failure', text: 'Full refund within 5–7 business days if verification fails.' },
-  { title: '⚖️ Conduct', text: 'Zero tolerance policy. Removed immediately with no refund.' },
-  { title: '⛰️ Force majeure', text: 'Route changes if needed. Trip cancellation = full refund.' },
+  { title: '— 30+ days before', text: 'Full refund minus ₹999 processing fee.' },
+  { title: '— 15–29 days before', text: '50% refund. Spot transfer allowed to another approved applicant.' },
+  { title: '— Under 15 days', text: 'No refund. Spot transfer allowed up to 7 days before departure.' },
+  { title: '✓ KYC failure', text: 'Full refund within 5–7 business days if verification fails.' },
+  { title: '± Conduct', text: 'Zero tolerance policy. Removed immediately with no refund.' },
+  { title: '△ Force majeure', text: 'Route changes if needed. Trip cancellation = full refund.' },
 ]
 
 const BATCH_B_FAQ = [

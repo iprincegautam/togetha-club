@@ -120,8 +120,14 @@ export async function resolvePromoDiscount(
   return { valid: false, error: 'Invalid promo code.' }
 }
 
-export function isMissingColumnError(error: { code?: string } | null): boolean {
-  return error?.code === '42703'
+/** Postgres undefined column or PostgREST unknown column in schema cache. */
+export function isMissingColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false
+  if (error.code === '42703' || error.code === 'PGRST204') return true
+  return (
+    typeof error.message === 'string' &&
+    /column.*does not exist|Could not find the .* column/i.test(error.message)
+  )
 }
 
 export function normalizePromoCode(code: string): string {

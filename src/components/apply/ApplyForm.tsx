@@ -6,7 +6,13 @@ import DatePicker from '@/components/batches/DatePicker'
 import GenderSelector from '@/components/batches/GenderSelector'
 import RazorpayButton from '@/components/apply/RazorpayButton'
 import { ROUTES } from '@/constants/routes'
-import { formatPrice } from '@/lib/utils'
+import {
+  calculatePaymentAmounts,
+  depositAmountForTotal,
+  DEPOSIT_PERCENT,
+  type PaymentPlan,
+} from '@/lib/payment-plan'
+import { formatPaise } from '@/lib/utils'
 import '@/components/batches/batches.css'
 
 interface PromoPreview {
@@ -69,8 +75,7 @@ export default function ApplyForm({
   const [applicantId, setApplicantId] = useState(
     initialApplicantId || (isPreview ? 'preview-applicant-id' : '')
   )
-  const [orderId, setOrderId] = useState(isPreview && previewStep === 3 ? 'dev_order_preview' : '')
-  const [amount, setAmount] = useState(
+  const [totalDue, setTotalDue] = useState(
     isPreview && previewStep === 3 ? previewOriginal - previewDiscount : batchPrice * 100
   )
   const [originalAmount, setOriginalAmount] = useState(
@@ -79,7 +84,7 @@ export default function ApplyForm({
   const [discountAmount, setDiscountAmount] = useState(
     isPreview && previewStep === 3 ? previewDiscount : 0
   )
-  const [keyId, setKeyId] = useState('')
+  const [paymentPlan, setPaymentPlan] = useState<PaymentPlan>('deposit')
   const [promoInput, setPromoInput] = useState(initialPromoCode || (isPreview ? 'SARAH200' : ''))
   const [appliedPromo, setAppliedPromo] = useState<PromoPreview | null>(previewPromoDefault)
   const [promoError, setPromoError] = useState('')
@@ -213,34 +218,12 @@ export default function ApplyForm({
         if (!promo) return
       }
 
-      const id = await ensureApplicantId()
-      if (!id) throw new Error('Application profile not found.')
+      await ensureApplicantId()
 
-      const res = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          applicantId: id,
-          name: name.trim(),
-          phone: phone.trim(),
-          gender,
-          batchSlug,
-          dateChoice,
-          promoCode: promo?.code ?? undefined,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Could not create payment order.')
-      }
-
-      setOrderId(data.orderId)
-      setAmount(data.amount)
-      setOriginalAmount(data.originalAmount ?? batchPrice * 100)
-      setDiscountAmount(data.discountAmount ?? 0)
-      if (data.keyId) setKeyId(data.keyId)
+      const due = promo?.finalAmount ?? batchPrice * 100
+      setTotalDue(due)
+      setOriginalAmount(promo?.originalAmount ?? batchPrice * 100)
+      setDiscountAmount(promo?.discountAmount ?? 0)
       setStep(3)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong.')
@@ -251,6 +234,41 @@ export default function ApplyForm({
 
   const selectedDate =
     dateChoice !== null ? dateOptions[dateChoice] : null
+
+  const depositDue = depositAmountForTotal(totalDue)
+  const { chargeNow, balanceDue } = calculatePaymentAmounts(totalDue, paymentPlan)
+
+  const createPaymentOrder = async () => {
+    const id = applicantId || (await ensureApplicantId())
+    if (!id) throw new Error('Application profile not found.')
+
+    const res = await fetch('/api/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        applicantId: id,
+        name: name.trim(),
+        phone: phone.trim(),
+        gender,
+        batchSlug,
+        dateChoice,
+        promoCode: appliedPromo?.code ?? undefined,
+        paymentPlan,
+      }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.error || 'Could not create payment order.')
+    }
+
+    return {
+      orderId: data.orderId as string,
+      amount: data.amount as number,
+      keyId: data.keyId as string | undefined,
+      paymentPlan: (data.paymentPlan as PaymentPlan) ?? paymentPlan,
+    }
+  }
 
   return (
     <div className="apply-card">
@@ -328,8 +346,8 @@ export default function ApplyForm({
           <GenderSelector
             value={gender}
             onChange={setGender}
-            maleLabel={roseAccent ? '🧑 A man' : '🧑 A boy'}
-            femaleLabel={roseAccent ? '👩 A woman' : '👧 A girl'}
+            maleLabel={roseAccent ? 'A man' : 'A boy'}
+            femaleLabel={roseAccent ? 'A woman' : 'A girl'}
           />
           <DatePicker
             options={dateOptions}
@@ -401,7 +419,7 @@ export default function ApplyForm({
               onClick={handleStep2Next}
               disabled={isLoading}
             >
-              {isLoading ? 'Creating order...' : 'Review & Pay →'}
+              {isLoading ? 'Saving...' : 'Review & Pay →'}
             </button>
           </div>
         </>
@@ -442,29 +460,92 @@ export default function ApplyForm({
               <>
                 <div className="apply-review-row">
                   <span>Original price</span>
-                  <strong>{formatPrice(originalAmount / 100)}</strong>
+                  <strong>{formatPaise(originalAmount)}</strong>
                 </div>
                 <div className="apply-review-row apply-review-discount">
                   <span>Discount</span>
-                  <strong>−{formatPrice(discountAmount / 100)}</strong>
+                  <strong>−{formatPaise(discountAmount)}</strong>
                 </div>
               </>
             )}
             <div className="apply-review-row apply-review-total">
-              <span>Amount due now</span>
-              <strong>{formatPrice(amount / 100)}</strong>
+              <span>Trip total</span>
+              <strong>{formatPaise(totalDue)}</strong>
             </div>
+
+            <div
+              className="apply-payment-plans apply-payment-plans-in-review"
+              role="radiogroup"
+              aria-label="Payment option"
+            >
+              <p className="apply-payment-plans-heading">Choose how to pay</p>
+              <label
+                className={`apply-plan-option${paymentPlan === 'deposit' ? ' selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="paymentPlan"
+                  value="deposit"
+                  checked={paymentPlan === 'deposit'}
+                  onChange={() => setPaymentPlan('deposit')}
+                />
+                <span className="apply-plan-body">
+                  <span className="apply-plan-title">
+                    Slot booking — {DEPOSIT_PERCENT}% now
+                  </span>
+                  <span className="apply-plan-amount">{formatPaise(depositDue)}</span>
+                  <span className="apply-plan-note">
+                    Pay {formatPaise(totalDue - depositDue)} later before departure
+                  </span>
+                </span>
+              </label>
+              <label
+                className={`apply-plan-option${paymentPlan === 'full' ? ' selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="paymentPlan"
+                  value="full"
+                  checked={paymentPlan === 'full'}
+                  onChange={() => setPaymentPlan('full')}
+                />
+                <span className="apply-plan-body">
+                  <span className="apply-plan-title">Full payment</span>
+                  <span className="apply-plan-amount">{formatPaise(totalDue)}</span>
+                  <span className="apply-plan-note">Pay everything today — fully confirmed</span>
+                </span>
+              </label>
+            </div>
+
+            <div className="apply-review-row apply-review-charge">
+              <span>Amount due now</span>
+              <strong>{formatPaise(chargeNow)}</strong>
+            </div>
+            {paymentPlan === 'deposit' && balanceDue > 0 && (
+              <p className="apply-plan-balance-note">
+                Balance of {formatPaise(balanceDue)} due before your trip.
+              </p>
+            )}
           </div>
 
           <RazorpayButton
-            orderId={orderId}
-            amount={amount}
             applicantId={applicantId}
             batchName={batchName}
             email={email}
             name={name}
-            keyId={keyId}
-            onSuccess={() => router.push(`${ROUTES.confirmation}?batch=${batchSlug}`)}
+            prepareOrder={isPreview ? undefined : createPaymentOrder}
+            orderId={isPreview ? 'dev_order_preview' : undefined}
+            amount={isPreview ? chargeNow : undefined}
+            payLabel={
+              paymentPlan === 'deposit'
+                ? `✦ Pay ${formatPaise(chargeNow)} & Reserve Slot →`
+                : `✦ Pay ${formatPaise(chargeNow)} & Confirm Spot →`
+            }
+            onSuccess={(result) => {
+              const plan = result?.paymentPlan ?? paymentPlan
+              const q = plan === 'deposit' ? '&plan=deposit' : ''
+              router.push(`${ROUTES.confirmation}?batch=${batchSlug}${q}`)
+            }}
             onError={(msg) => setError(msg)}
           />
 

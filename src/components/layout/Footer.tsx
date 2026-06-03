@@ -36,7 +36,21 @@ export default function Footer() {
           </a>
         </li>
         <li>
-          <a href="#">WhatsApp</a>
+          <Link href={ROUTES.contact}>Contact</Link>
+        </li>
+      </ul>
+      <ul className="flinks flinks-legal">
+        <li>
+          <Link href={ROUTES.terms}>Terms</Link>
+        </li>
+        <li>
+          <Link href={ROUTES.privacy}>Privacy</Link>
+        </li>
+        <li>
+          <Link href={ROUTES.cancellationRefund}>Refunds</Link>
+        </li>
+        <li>
+          <Link href={ROUTES.shipping}>Shipping</Link>
         </li>
       </ul>
       <p className="fcopy">

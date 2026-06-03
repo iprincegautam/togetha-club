@@ -26,13 +26,15 @@ const STATUS_OPTIONS: { value: ApplicantStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All statuses' },
   { value: 'pending', label: 'Pending' },
   { value: 'approved', label: 'Approved' },
-  { value: 'paid', label: 'Paid' },
+  { value: 'paid', label: 'Paid in full' },
+  { value: 'deposit_paid', label: 'Deposit paid' },
   { value: 'rejected', label: 'Rejected' },
 ]
 
 function statusBadgeColor(status: ApplicantStatus): 'teal' | 'rose' | 'gold' | 'ink' {
   switch (status) {
     case 'paid':
+    case 'deposit_paid':
     case 'approved':
       return 'teal'
     case 'rejected':

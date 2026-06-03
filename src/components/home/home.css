@@ -196,6 +196,11 @@
   align-items: center;
 }
 
+.concept-headline {
+  text-align: left;
+  max-width: 480px;
+}
+
 .stat-cards {
   display: flex;
   flex-direction: column;
@@ -445,6 +450,12 @@
   margin-bottom: 10px;
 }
 
+.ai-traits .brand-glyph {
+  display: inline-block;
+  min-width: 1.1em;
+  text-align: center;
+}
+
 .step-title {
   font-family: var(--font-family-caveat);
   font-size: 1.05rem;
@@ -634,8 +645,12 @@
 
 .reviews-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1.15fr 1fr;
   gap: 14px;
+}
+
+.rc-center .rt {
+  font-size: 1.05em;
 }
 
 .rc {

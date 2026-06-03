@@ -17,7 +17,7 @@ export default function HeroSection() {
             color="var(--rose)"
             size={125}
             rotation={-15}
-            opacity={0.6}
+            opacity={0.35}
             className="hero-stamp hero-stamp-love"
           />
         </div>
@@ -30,7 +30,7 @@ export default function HeroSection() {
             color="var(--teal)"
             size={108}
             rotation={12}
-            opacity={0.6}
+            opacity={0.35}
             className="hero-stamp hero-stamp-club"
           />
         </div>
@@ -43,7 +43,7 @@ export default function HeroSection() {
             color="var(--gold)"
             size={88}
             rotation={-8}
-            opacity={0.5}
+            opacity={0.35}
             className="hero-stamp hero-stamp-routes"
           />
         </div>
@@ -56,7 +56,7 @@ export default function HeroSection() {
             color="var(--ink-mid)"
             size={96}
             rotation={10}
-            opacity={0.4}
+            opacity={0.35}
             className="hero-stamp hero-stamp-singles"
           />
         </div>
@@ -81,7 +81,7 @@ export default function HeroSection() {
             color="var(--rose)"
             size={88}
             rotation={-12}
-            opacity={0.85}
+            opacity={0.35}
             className="hero-stamp-inline"
           />
           <StampCircle
@@ -89,7 +89,7 @@ export default function HeroSection() {
             color="var(--teal)"
             size={80}
             rotation={10}
-            opacity={0.85}
+            opacity={0.35}
             className="hero-stamp-inline"
           />
         </div>

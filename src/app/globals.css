@@ -239,7 +239,13 @@ footer {
   justify-content: center;
   flex-wrap: wrap;
   list-style: none;
+  margin-bottom: 14px;
+}
+
+.flinks-legal {
   margin-bottom: 22px;
+  opacity: 0.85;
+  font-size: 0.88rem;
 }
 
 .flinks a {
@@ -451,6 +457,13 @@ footer {
 }
 
 /* ── Postmark circles ── */
+.brand-glyph {
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
 .pc,
 .postmark-circle {
   position: absolute;
@@ -788,8 +801,20 @@ footer {
 }
 
 .qopt:hover {
-  border-color: var(--teal);
+  transform: scale(1.01);
+  transition: all 0.15s ease;
+  border-color: rgba(212, 81, 106, 0.5);
   background: rgba(26, 107, 90, 0.04);
+}
+
+.qopt.selected {
+  background: rgba(212, 81, 106, 0.08);
+  border-color: var(--rose);
+  border-width: 2px;
+}
+
+.qopt-star {
+  color: var(--rose);
 }
 
 .qopt.sel {

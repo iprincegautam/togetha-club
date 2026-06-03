@@ -19,7 +19,7 @@ export default function AdminNav() {
   return (
     <header className="admin-nav">
       <Link href={ROUTES.admin} className="admin-nav-logo">
-        ✈ Togetha.Club Admin
+        ✦ Togetha.Club Admin
       </Link>
       <nav className="admin-nav-links-bar">
         <Link

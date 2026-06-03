@@ -15,7 +15,7 @@
   border-color: var(--red-stamp);
   color: var(--red-stamp);
   transform: rotate(-15deg);
-  opacity: 0.7;
+  opacity: 0.35;
 }
 
 .page-hero .pc-2 {
@@ -26,7 +26,7 @@
   border-color: var(--teal-stamp);
   color: var(--teal-stamp);
   transform: rotate(12deg);
-  opacity: 0.7;
+  opacity: 0.35;
 }
 
 .page-hero-eyebrow {
@@ -397,11 +397,13 @@
 .product-tab.active {
   color: var(--teal-stamp);
   border-bottom-color: var(--teal-stamp);
+  font-weight: 700;
 }
 
 .product-tab.active.rose-tab {
   color: var(--rose);
   border-bottom-color: var(--rose);
+  font-weight: 700;
 }
 
 .tab-content {

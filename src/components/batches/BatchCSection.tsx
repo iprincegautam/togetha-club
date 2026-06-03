@@ -3,19 +3,21 @@ import Reveal from '@/components/ui/Reveal'
 import { BatchCBlurredVisual } from '@/components/batches/BatchVisuals'
 import { BATCH_META } from '@/constants/batches'
 
+import { CLUE_GLYPH } from '@/constants/brand-glyphs'
+
 const BATCH_C_CLUES = [
   {
-    icon: '🌊',
+    icon: CLUE_GLYPH.water,
     title: 'Water is involved',
     desc: 'Not a beach. Not a river. Something between.',
   },
   {
-    icon: '🌅',
+    icon: CLUE_GLYPH.sunrise,
     title: 'The sunrise is the thing',
     desc: "There's a specific moment on Day 3 we're building the whole trip around.",
   },
   {
-    icon: '🎪',
+    icon: CLUE_GLYPH.format,
     title: 'A new format',
     desc: "Not just mountains. Not just bonfire. We're adding something we've never done before.",
   },
@@ -73,7 +75,7 @@ export default function BatchCSection() {
               </p>
 
               <div className="batch-c-details-box">
-                <div className="batch-c-details-title">🔒 Details drop August 1st</div>
+                <div className="batch-c-details-title">✦ Details drop August 1st</div>
                 <p className="batch-c-details-text">
                   Waitlist members get 48-hour early access before public reveal. Expect: new route,
                   different format, same magic.
@@ -121,7 +123,7 @@ export default function BatchCSection() {
             <div className="vibe-grid batch-c-clue-grid">
               {BATCH_C_CLUES.map((clue) => (
                 <div className="vibe-card lavender" key={clue.title}>
-                  <div className="vibe-icon">{clue.icon}</div>
+                  <div className="vibe-icon brand-glyph">{clue.icon}</div>
                   <div className="vibe-title">{clue.title}</div>
                   <div className="vibe-desc">{clue.desc}</div>
                 </div>

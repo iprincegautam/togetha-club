@@ -7,7 +7,7 @@ export default function QuizSection() {
     <section className="quiz-sec" id="quiz">
       <div className="quiz-wrap">
         <div className="quiz-header">
-          <div className="quiz-badge">🤖 AI Compatibility Quiz</div>
+          <div className="quiz-badge">✦ AI Compatibility Quiz</div>
           <h2 className="sec-title quiz-header-title">
             Find your <span className="t">perfect batch.</span>
           </h2>

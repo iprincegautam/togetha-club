@@ -88,6 +88,7 @@ export default async function ApplyPage({
         color={meta.color}
         size={90}
         rotation={-12}
+        opacity={0.35}
         className="apply-stamp apply-stamp-left"
       />
       <StampCircle
@@ -95,6 +96,7 @@ export default async function ApplyPage({
         color={meta.color}
         size={80}
         rotation={10}
+        opacity={0.35}
         className="apply-stamp apply-stamp-right"
       />
 

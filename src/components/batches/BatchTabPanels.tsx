@@ -41,19 +41,12 @@ function activityClass(variant?: string): string {
   return 'activity-tag'
 }
 
-function renderActivity(tag: ActivityTag, roseAccent?: boolean) {
+function renderActivity(tag: ActivityTag, _roseAccent?: boolean) {
   if (typeof tag === 'string') {
     return <span className="activity-tag">{tag}</span>
   }
-  const cls = tag.variant === 'highlight' && roseAccent
-    ? 'activity-tag highlight rose-highlight'
-    : activityClass(tag.variant)
   return (
-    <span
-      key={tag.text}
-      className={cls}
-      style={tag.variant === 'highlight' && roseAccent ? { background: 'var(--rose)' } : undefined}
-    >
+    <span key={tag.text} className={activityClass(tag.variant)}>
       {tag.text}
     </span>
   )
@@ -118,7 +111,7 @@ export function IncludesTab({
       <div className="includes-grid">
         {items.map((item) => (
           <div className="include-item" key={item.title}>
-            <div className="include-icon">{item.icon}</div>
+            <div className="include-icon brand-glyph">{item.icon}</div>
             <div>
               <div className="include-title">{item.title}</div>
               <div className="include-desc">{item.desc}</div>
@@ -172,7 +165,7 @@ export function VibeTab({
       <div className="vibe-grid">
         {cards.map((card) => (
           <div className="vibe-card" key={card.title}>
-            <div className="vibe-icon">{card.icon}</div>
+            <div className="vibe-icon brand-glyph">{card.icon}</div>
             <div className="vibe-title">{card.title}</div>
             <div className="vibe-desc">{card.desc}</div>
           </div>

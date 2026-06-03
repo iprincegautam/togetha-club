@@ -68,7 +68,7 @@ export default function WaitlistForm({ accentColor = 'var(--lavender)' }: Waitli
           onClick={() => setGender('m')}
           disabled={status === 'loading' || status === 'success'}
         >
-          🧑 Boy
+          A boy
         </button>
         <button
           type="button"
@@ -76,7 +76,7 @@ export default function WaitlistForm({ accentColor = 'var(--lavender)' }: Waitli
           onClick={() => setGender('f')}
           disabled={status === 'loading' || status === 'success'}
         >
-          👧 Girl
+          A girl
         </button>
       </div>
       <button

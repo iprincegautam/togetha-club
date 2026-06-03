@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import {
+  calculatePaymentAmounts,
+  type PaymentPlan,
+} from '@/lib/payment-plan'
 import { isMissingColumnError, resolvePromoDiscount } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
 const VALID_SLUGS = ['batch-a', 'batch-b']
 
-function devOrderResponse(applicantId: string, batchSlug: string, amount?: number) {
+function devOrderResponse(
+  applicantId: string,
+  batchSlug: string,
+  chargeNow: number,
+  totalDue: number,
+  paymentPlan: PaymentPlan
+) {
   return NextResponse.json({
     orderId: `dev_order_${applicantId}`,
-    amount: amount ?? (batchSlug === 'batch-b' ? 2299900 : 1899900),
+    amount: chargeNow,
+    totalAmount: totalDue,
+    balanceDue: paymentPlan === 'deposit' ? totalDue - chargeNow : 0,
+    paymentPlan,
     currency: 'INR',
     keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'dev_key',
     dev: true,
@@ -19,7 +32,10 @@ function devOrderResponse(applicantId: string, batchSlug: string, amount?: numbe
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { applicantId, name, phone, gender, batchSlug, dateChoice, promoCode } = body
+    const { applicantId, name, phone, gender, batchSlug, dateChoice, promoCode, paymentPlan } =
+      body
+
+    const plan: PaymentPlan = paymentPlan === 'deposit' ? 'deposit' : 'full'
 
     if (!applicantId) {
       return NextResponse.json({ error: 'applicantId required' }, { status: 400 })
@@ -43,7 +59,12 @@ export async function POST(req: NextRequest) {
     const supabase = tryCreateServiceRoleClient()
     if (!supabase) {
       if (isDevelopment()) {
-        return devOrderResponse(applicantId, batchSlug)
+        const fallbackTotal = batchSlug === 'batch-b' ? 2299900 : 1899900
+        const { chargeNow, balanceDue, totalDue } = calculatePaymentAmounts(
+          fallbackTotal,
+          plan
+        )
+        return devOrderResponse(applicantId, batchSlug, chargeNow, totalDue, plan)
       }
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
@@ -85,48 +106,52 @@ export async function POST(req: NextRequest) {
       priorityReview = promoResult.grantsPriority ?? false
     }
 
-    const fullUpdate = {
+    const { chargeNow, balanceDue, totalDue } = calculatePaymentAmounts(finalAmount, plan)
+
+    const baseUpdate = {
       name: name.trim(),
       phone: phone.trim(),
       gender,
       batch_slug: batchSlug,
       date_choice: String(dateChoice),
+    }
+
+    const extendedUpdate = {
       promo_code_id: promoCodeId,
       influencer_id: influencerId,
       original_amount: originalAmount,
       discount_amount: discountAmount,
-      final_amount: finalAmount,
+      final_amount: totalDue,
       priority_review: priorityReview,
+      payment_plan: plan,
+      amount_paid: chargeNow,
+      balance_due: balanceDue,
     }
 
-    let { error: updateError } = await supabase
+    const { error: baseError } = await supabase
       .from('applicants')
-      .update(fullUpdate)
+      .update(baseUpdate)
       .eq('id', applicantId)
 
-    if (updateError && isMissingColumnError(updateError)) {
-      const {
-        promo_code_id: _p,
-        influencer_id: _i,
-        original_amount: _o,
-        discount_amount: _d,
-        final_amount: _f,
-        priority_review: _pr,
-        ...baseUpdate
-      } = fullUpdate
-      ;({ error: updateError } = await supabase
-        .from('applicants')
-        .update(baseUpdate)
-        .eq('id', applicantId))
-    }
+    if (baseError) throw baseError
 
-    if (updateError) throw updateError
+    const { error: extendedError } = await supabase
+      .from('applicants')
+      .update(extendedUpdate)
+      .eq('id', applicantId)
+
+    if (extendedError && !isMissingColumnError(extendedError)) {
+      console.warn('[POST /api/apply] extended fields not saved:', extendedError.message)
+    }
 
     if (!isRazorpayConfigured()) {
       if (isDevelopment()) {
         return NextResponse.json({
           orderId: `dev_order_${applicantId}`,
-          amount: finalAmount,
+          amount: chargeNow,
+          totalAmount: totalDue,
+          balanceDue,
+          paymentPlan: plan,
           originalAmount,
           discountAmount,
           currency: 'INR',
@@ -138,9 +163,10 @@ export async function POST(req: NextRequest) {
     }
 
     const order = await razorpay.orders.create({
-      amount: finalAmount,
+      amount: chargeNow,
       currency: 'INR',
       receipt: applicantId,
+      notes: { payment_plan: plan },
     })
 
     const { error: orderError } = await supabase
@@ -152,7 +178,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       orderId: order.id,
-      amount: finalAmount,
+      amount: chargeNow,
+      totalAmount: totalDue,
+      balanceDue,
+      paymentPlan: plan,
       originalAmount,
       discountAmount,
       currency: 'INR',

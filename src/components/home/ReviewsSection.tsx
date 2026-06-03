@@ -42,8 +42,11 @@ export default function ReviewsSection() {
         </h2>
         <p className="sec-sub">From our 2025 pilot batches.</p>
         <div className="reviews-grid">
-          {REVIEWS.map((review) => (
-            <div key={review.initials} className="rc">
+          {REVIEWS.map((review, index) => (
+            <div
+              key={review.initials}
+              className={`rc${index === 1 ? ' rc-center' : ''}`}
+            >
               <div className="rq">{review.quote}</div>
               <div className="rt">{review.text}</div>
               <div className="ra">

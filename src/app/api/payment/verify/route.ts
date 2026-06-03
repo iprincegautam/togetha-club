@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { statusForPaymentPlan, type PaymentPlan } from '@/lib/payment-plan'
 import { recordPromoRedemption } from '@/lib/promo'
-import { isRazorpayConfigured, verifyRazorpaySignature } from '@/lib/razorpay'
+import { isRazorpayConfigured, razorpay, verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
@@ -40,17 +41,55 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment not configured' }, { status: 503 })
     }
 
-    const { error: updateError } = await supabase
+    let paymentPlan: PaymentPlan = 'full'
+    if (!isDevOrder && isRazorpayConfigured()) {
+      try {
+        const order = await razorpay.orders.fetch(razorpayOrderId)
+        if (order.notes?.payment_plan === 'deposit') {
+          paymentPlan = 'deposit'
+        }
+      } catch (fetchErr) {
+        console.error('[POST /api/payment/verify] order fetch', fetchErr)
+      }
+    }
+
+    const { data: applicantPlanRow } = await supabase
+      .from('applicants')
+      .select('payment_plan')
+      .eq('id', applicantId)
+      .maybeSingle()
+
+    if (applicantPlanRow?.payment_plan === 'deposit') {
+      paymentPlan = 'deposit'
+    } else if (applicantPlanRow?.payment_plan === 'full') {
+      paymentPlan = 'full'
+    }
+
+    const newStatus = statusForPaymentPlan(paymentPlan)
+
+    let { error: updateError } = await supabase
       .from('applicants')
       .update({
-        status: 'paid',
+        status: newStatus,
         razorpay_payment_id: razorpayPaymentId,
       })
       .eq('id', applicantId)
 
+    if (updateError?.code === '23514') {
+      ;({ error: updateError } = await supabase
+        .from('applicants')
+        .update({
+          status: 'paid',
+          razorpay_payment_id: razorpayPaymentId,
+        })
+        .eq('id', applicantId))
+    }
+
     if (updateError) throw updateError
 
-    await recordPromoRedemption(supabase, applicantId)
+    if (paymentPlan === 'full') {
+      await recordPromoRedemption(supabase, applicantId)
+    }
 
     const { data: applicant, error: fetchError } = await supabase
       .from('applicants')
@@ -93,7 +132,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      paymentPlan,
+      status: newStatus,
+    })
   } catch (err) {
     console.error('[POST /api/payment/verify]', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

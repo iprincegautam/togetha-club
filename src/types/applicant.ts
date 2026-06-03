@@ -1,4 +1,11 @@
-export type ApplicantStatus = 'pending' | 'approved' | 'rejected' | 'paid'
+export type ApplicantStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'paid'
+  | 'deposit_paid'
+
+export type PaymentPlan = 'deposit' | 'full'
 export type Gender = 'm' | 'f'
 
 export interface Applicant {

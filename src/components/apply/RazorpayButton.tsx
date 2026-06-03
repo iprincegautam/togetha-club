@@ -2,15 +2,24 @@
 
 import { useEffect, useState } from 'react'
 
-interface RazorpayButtonProps {
+export interface PreparedOrder {
   orderId: string
   amount: number
+  keyId?: string
+  paymentPlan?: 'deposit' | 'full'
+}
+
+interface RazorpayButtonProps {
+  orderId?: string
+  amount?: number
   applicantId: string
   batchName: string
   email: string
   name: string
   keyId?: string
-  onSuccess: () => void
+  prepareOrder?: () => Promise<PreparedOrder>
+  payLabel?: string
+  onSuccess: (result?: { paymentPlan?: 'deposit' | 'full' }) => void
   onError: (msg: string) => void
 }
 
@@ -27,13 +36,15 @@ declare global {
 }
 
 export default function RazorpayButton({
-  orderId,
-  amount,
+  orderId: initialOrderId,
+  amount: initialAmount,
   applicantId,
   batchName,
   email,
   name,
-  keyId,
+  keyId: initialKeyId,
+  prepareOrder,
+  payLabel = '✦ Pay & Confirm Spot →',
   onSuccess,
   onError,
 }: RazorpayButtonProps) {
@@ -58,6 +69,29 @@ export default function RazorpayButton({
   }, [onError])
 
   const handlePay = async () => {
+    let orderId = initialOrderId
+    let amount = initialAmount
+    let keyId = initialKeyId
+    let paymentPlan: 'deposit' | 'full' | undefined
+
+    if (prepareOrder) {
+      try {
+        const prepared = await prepareOrder()
+        orderId = prepared.orderId
+        amount = prepared.amount
+        keyId = prepared.keyId ?? keyId
+        paymentPlan = prepared.paymentPlan
+      } catch (err) {
+        onError(err instanceof Error ? err.message : 'Could not start payment.')
+        return
+      }
+    }
+
+    if (!orderId || amount === undefined) {
+      onError('Payment is not ready. Please try again.')
+      return
+    }
+
     const isDevOrder =
       process.env.NODE_ENV === 'development' && orderId.startsWith('dev_order_')
 
@@ -76,7 +110,7 @@ export default function RazorpayButton({
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || 'Payment verification failed.')
-        onSuccess()
+        onSuccess({ paymentPlan: data.paymentPlan ?? paymentPlan })
       } catch (err) {
         onError(err instanceof Error ? err.message : 'Payment verification failed.')
       } finally {
@@ -90,7 +124,7 @@ export default function RazorpayButton({
       return
     }
 
-    const razorpayKey = keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+    const razorpayKey = keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
     if (!razorpayKey) {
       onError('Payment is not configured. Please contact support.')
       return
@@ -125,7 +159,9 @@ export default function RazorpayButton({
             throw new Error(data.error || 'Payment verification failed.')
           }
 
-          onSuccess()
+          onSuccess({
+            paymentPlan: data.paymentPlan ?? paymentPlan,
+          })
         } catch (err) {
           onError(err instanceof Error ? err.message : 'Payment verification failed.')
         } finally {
@@ -147,7 +183,7 @@ export default function RazorpayButton({
       onClick={handlePay}
       disabled={!scriptReady || paying}
     >
-      {!scriptReady ? 'Loading payment...' : paying ? 'Processing...' : '✦ Pay & Confirm Spot →'}
+      {!scriptReady ? 'Loading payment...' : paying ? 'Processing...' : payLabel}
     </button>
   )
 }

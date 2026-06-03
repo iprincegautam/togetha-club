@@ -6,31 +6,33 @@ import SectionLabel from '@/components/ui/SectionLabel'
 import { ROUTES } from '@/constants/routes'
 import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 
+import { HOW_IT_WORKS_GLYPH } from '@/constants/brand-glyphs'
+
 const STEPS = [
   {
     num: '01',
-    icon: '📋',
+    icon: HOW_IT_WORKS_GLYPH.quiz,
     title: 'Take the quiz & apply',
     desc: '10 questions that reveal more than a year on an app. Our AI uses your answers to build your compatibility profile. Then we read your application personally.',
     action: 'quiz' as const,
   },
   {
     num: '02',
-    icon: '🤖',
+    icon: HOW_IT_WORKS_GLYPH.ai,
     title: 'AI builds your batch',
     desc: "Once approved, the algorithm places you in the batch where your compatibility score is highest. You don't know who's in it. That's intentional.",
     action: null,
   },
   {
     num: '03',
-    icon: '🏔️',
+    icon: HOW_IT_WORKS_GLYPH.mountains,
     title: 'Go to the mountains',
     desc: 'Manali → Kasol → Sissu. 5 nights, 6 days. Ice breakers, bonfires, sunrises, real conversations. The mountains do the rest.',
     action: 'batches' as const,
   },
   {
     num: '04',
-    icon: '💛',
+    icon: HOW_IT_WORKS_GLYPH.connection,
     title: 'Find your person',
     desc: 'No roses. No eliminations. No cameras. Just 24 verified singles and six days. What happens next is entirely yours.',
     action: null,
@@ -77,7 +79,7 @@ export default function HowItWorksSection() {
               tabIndex={step.action ? 0 : undefined}
             >
               <div className="step-num">{step.num}</div>
-              <div className="step-icon">{step.icon}</div>
+              <div className="step-icon brand-glyph">{step.icon}</div>
               <div className="step-title">{step.title}</div>
               <div className="step-desc">{step.desc}</div>
             </div>

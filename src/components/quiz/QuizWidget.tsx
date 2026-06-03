@@ -98,14 +98,14 @@ export default function QuizWidget() {
               <div className="qopts">
                 {question.opts.map((opt, i) => {
                   const selected = ans[question.id] === i
-                  const selClass = selected ? (i >= 2 ? 'sel-r' : 'sel') : ''
                   return (
                     <button
                       key={opt}
                       type="button"
-                      className={`qopt ${selClass}`.trim()}
+                      className={`qopt${selected ? ' selected' : ''}`.trim()}
                       onClick={() => pick(question.id, i)}
                     >
+                      {selected && <span className="qopt-star">✦ </span>}
                       {opt}
                     </button>
                   )

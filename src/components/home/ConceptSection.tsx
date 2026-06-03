@@ -62,7 +62,7 @@ export default function ConceptSection() {
         <div className="concept-grid">
           <div>
             <SectionLabel>The Idea</SectionLabel>
-            <h2 className="sec-title">
+            <h2 className="sec-title concept-headline">
               Travel is the best
               <br />
               <span className="t">first date</span> you&apos;ll

@@ -2,15 +2,17 @@
 
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 
+import { TRAIT_GLYPH } from '@/constants/brand-glyphs'
+
 const TRAITS = [
-  { emoji: '🧠', label: 'Personality type' },
-  { emoji: '💬', label: 'Communication style' },
-  { emoji: '❤️', label: 'Love language' },
-  { emoji: '🌍', label: 'Life values & dreams' },
-  { emoji: '😂', label: 'Humour compatibility' },
-  { emoji: '🎯', label: 'Ambition alignment' },
-  { emoji: '🌙', label: 'Energy & pace of life' },
-  { emoji: '🎭', label: 'Conflict style' },
+  { mark: TRAIT_GLYPH.personality, label: 'Personality type' },
+  { mark: TRAIT_GLYPH.communication, label: 'Communication style' },
+  { mark: TRAIT_GLYPH.loveLanguage, label: 'Love language' },
+  { mark: TRAIT_GLYPH.values, label: 'Life values & dreams' },
+  { mark: TRAIT_GLYPH.humour, label: 'Humour compatibility' },
+  { mark: TRAIT_GLYPH.ambition, label: 'Ambition alignment' },
+  { mark: TRAIT_GLYPH.energy, label: 'Energy & pace of life' },
+  { mark: TRAIT_GLYPH.conflict, label: 'Conflict style' },
 ] as const
 
 export default function AISection() {
@@ -41,7 +43,7 @@ export default function AISection() {
             <div className="ai-traits">
               {TRAITS.map((trait) => (
                 <div key={trait.label} className="tp">
-                  <span>{trait.emoji}</span> {trait.label}
+                  <span className="brand-glyph">{trait.mark}</span> {trait.label}
                 </div>
               ))}
             </div>
