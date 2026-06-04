@@ -43,7 +43,7 @@ export default function Nav() {
 
   return (
     <>
-      <nav className={scrolled ? 'scrolled' : undefined}>
+      <nav className={scrolled ? 'site-nav scrolled' : 'site-nav'}>
         <SiteLogo className="nav-logo" imageClassName="nav-logo-img" />
 
         <ul className="nav-links">

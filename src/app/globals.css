@@ -64,8 +64,8 @@ body::before {
   padding: 0 40px;
 }
 
-/* ── Nav ── */
-nav {
+/* ── Marketing site header only (not portal sidebar <nav>) ── */
+.site-nav {
   position: fixed;
   top: 0;
   width: 100%;
@@ -80,7 +80,7 @@ nav {
   transition: box-shadow 0.2s ease;
 }
 
-nav.scrolled {
+.site-nav.scrolled {
   box-shadow: 0 2px 16px rgba(44, 24, 16, 0.08);
 }
 
@@ -1407,7 +1407,7 @@ footer {
     padding: 0 18px;
   }
 
-  nav {
+  .site-nav {
     padding: 12px 18px;
   }
 

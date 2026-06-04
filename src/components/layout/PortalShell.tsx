@@ -71,7 +71,7 @@ export default function PortalShell({
             {brand}
           </Link>
         </div>
-        <nav className="portal-sidebar-nav">
+        <div className="portal-sidebar-nav" role="navigation">
           {nav.map((item) => {
             const active = navItemActive(pathname, item)
             return (
@@ -85,7 +85,7 @@ export default function PortalShell({
               </Link>
             )
           })}
-        </nav>
+        </div>
         <div className="portal-sidebar-foot">
           <button type="button" className="portal-signout" onClick={signOut}>
             Sign out
