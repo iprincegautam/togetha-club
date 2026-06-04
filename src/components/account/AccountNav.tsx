@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
+import PortalBackLink from '@/components/layout/PortalBackLink'
 
 const NAV = [
   { href: ROUTES.account, label: 'My booking' },
@@ -23,9 +24,12 @@ export default function AccountNav() {
 
   return (
     <header className="account-nav">
-      <Link href={ROUTES.account} className="account-nav-logo">
-        ✦ My Togetha.Club
-      </Link>
+      <div className="portal-nav-start">
+        <PortalBackLink variant="dark" />
+        <Link href={ROUTES.account} className="account-nav-logo">
+          ✦ My Togetha.Club
+        </Link>
+      </div>
       <nav className="account-nav-links">
         {NAV.map((item) => (
           <Link

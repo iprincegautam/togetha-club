@@ -1,6 +1,8 @@
 import AdminNav from '@/components/admin/AdminNav'
+import PortalBackLink from '@/components/layout/PortalBackLink'
 import { getAdminSession } from '@/lib/supabase/server'
 import '@/components/admin/admin.css'
+import '@/styles/portal-nav.css'
 
 export default async function AdminLayout({
   children,
@@ -9,13 +11,15 @@ export default async function AdminLayout({
 }) {
   const { session } = await getAdminSession()
 
-  if (!session) {
-    return <div className="admin-layout">{children}</div>
-  }
-
   return (
     <div className="admin-layout">
-      <AdminNav />
+      {session ? (
+        <AdminNav />
+      ) : (
+        <div className="portal-back-bar portal-back-bar--light">
+          <PortalBackLink variant="light" />
+        </div>
+      )}
       <div className="admin-layout-body">{children}</div>
     </div>
   )

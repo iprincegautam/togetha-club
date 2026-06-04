@@ -103,12 +103,6 @@ export default function AdminLoginPage() {
             {loading ? 'Signing in...' : 'Sign in →'}
           </button>
         </form>
-
-        <p className="apply-foot">
-          <Link href={ROUTES.home} style={{ color: 'var(--ink-mid)' }}>
-            ← Back to site
-          </Link>
-        </p>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
+import PortalBackLink from '@/components/layout/PortalBackLink'
 
 const NAV = [
   { href: ROUTES.admin, label: 'Applicants' },
@@ -25,9 +26,12 @@ export default function AdminNav() {
 
   return (
     <header className="admin-nav">
-      <Link href={ROUTES.admin} className="admin-nav-logo">
-        ✦ Togetha.Club Admin
-      </Link>
+      <div className="portal-nav-start">
+        <PortalBackLink variant="dark" />
+        <Link href={ROUTES.admin} className="admin-nav-logo">
+          ✦ Togetha.Club Admin
+        </Link>
+      </div>
       <nav className="admin-nav-links-bar">
         {NAV.map((item) => (
           <Link

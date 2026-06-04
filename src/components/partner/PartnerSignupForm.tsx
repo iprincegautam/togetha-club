@@ -158,7 +158,6 @@ export default function PartnerSignupForm() {
 
       <div className="auth-links">
         <Link href={ROUTES.partnerLogin}>Already have login? Sign in</Link>
-        <Link href={ROUTES.home}>← Back to site</Link>
       </div>
     </div>
   )

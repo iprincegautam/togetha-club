@@ -170,7 +170,6 @@ export default function AccountSignupForm() {
 
       <div className="auth-links">
         <Link href={ROUTES.accountLogin}>Already have an account? Sign in</Link>
-        <Link href={ROUTES.home}>← Back to site</Link>
       </div>
     </div>
   )

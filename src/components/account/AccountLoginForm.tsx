@@ -95,7 +95,6 @@ export default function AccountLoginForm() {
       <div className="auth-links">
         <Link href={ROUTES.accountForgotPassword}>Forgot password?</Link>
         <Link href={ROUTES.accountSignup}>Create an account</Link>
-        <Link href={ROUTES.home}>← Back to site</Link>
       </div>
     </div>
   )
