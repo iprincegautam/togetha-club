@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { provisionMemberAccount } from '@/lib/member-account'
 import { statusForPaymentPlan, type PaymentPlan } from '@/lib/payment-plan'
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay, verifyRazorpaySignature } from '@/lib/razorpay'
@@ -93,11 +94,18 @@ export async function POST(req: NextRequest) {
 
     const { data: applicant, error: fetchError } = await supabase
       .from('applicants')
-      .select('name, email, gender, batch_slug')
+      .select('name, email, phone, gender, batch_slug')
       .eq('id', applicantId)
       .single()
 
     if (fetchError || !applicant) throw fetchError ?? new Error('Applicant not found')
+
+    await provisionMemberAccount(supabase, {
+      applicantId,
+      email: applicant.email,
+      name: applicant.name,
+      phone: applicant.phone,
+    })
 
     if (applicant.batch_slug && applicant.gender) {
       const spotField = applicant.gender === 'm' ? 'spots_taken_m' : 'spots_taken_f'

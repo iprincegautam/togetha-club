@@ -11,6 +11,13 @@ export const ROUTES = {
   shipping: '/shipping-and-exchange',
   contact: '/contact-us',
   admin: '/admin',
+  adminBatches: '/admin/batches',
+  adminBatchDepartures: (slug: string) => `/admin/batches/${slug}`,
+  adminApplicant: (id: string) => `/admin/applicants/${id}`,
+  adminWaitlist: '/admin/waitlist',
   adminAffiliates: '/admin/affiliates',
   adminLogin: '/admin/login',
+  account: '/account',
+  accountLogin: '/account/login',
+  accountProfile: '/account/profile',
 } as const

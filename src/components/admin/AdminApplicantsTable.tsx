@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
+import { ROUTES } from '@/constants/routes'
 import type { ApplicantStatus } from '@/types/applicant'
 
 export interface AdminApplicantRow {
@@ -125,19 +127,24 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
               <th>Quiz score</th>
               <th>Status</th>
               <th>Applied</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="admin-table-empty">
+                <td colSpan={10} className="admin-table-empty">
                   No applicants found.
                 </td>
               </tr>
             ) : (
               filtered.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.name || '—'}</td>
+                  <td>
+                    <Link href={ROUTES.adminApplicant(row.id)} className="admin-row-link">
+                      {row.name || '—'}
+                    </Link>
+                  </td>
                   <td>{row.email}</td>
                   <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
                   <td>{row.batchName || row.batchSlug || '—'}</td>
@@ -148,6 +155,11 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                     <Badge color={statusBadgeColor(row.status)}>{row.status}</Badge>
                   </td>
                   <td>{formatDate(row.createdAt)}</td>
+                  <td>
+                    <Link href={ROUTES.adminApplicant(row.id)} className="admin-inline-link">
+                      View →
+                    </Link>
+                  </td>
                 </tr>
               ))
             )}

@@ -5,6 +5,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
+const NAV = [
+  { href: ROUTES.admin, label: 'Applicants' },
+  { href: ROUTES.adminBatches, label: 'Batches' },
+  { href: ROUTES.adminWaitlist, label: 'Waitlist' },
+  { href: ROUTES.adminAffiliates, label: 'Affiliates' },
+] as const
+
 export default function AdminNav() {
   const router = useRouter()
   const pathname = usePathname()
@@ -22,18 +29,19 @@ export default function AdminNav() {
         ✦ Togetha.Club Admin
       </Link>
       <nav className="admin-nav-links-bar">
-        <Link
-          href={ROUTES.admin}
-          className={pathname === ROUTES.admin ? 'active' : undefined}
-        >
-          Applicants
-        </Link>
-        <Link
-          href="/admin/affiliates"
-          className={pathname === '/admin/affiliates' ? 'active' : undefined}
-        >
-          Affiliates
-        </Link>
+        {NAV.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={
+              pathname === item.href || pathname.startsWith(`${item.href}/`)
+                ? 'active'
+                : undefined
+            }
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
       <button type="button" className="admin-nav-signout" onClick={handleSignOut}>
         Sign out

@@ -1,7 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import ApplyForm from '@/components/apply/ApplyForm'
 import StampCircle from '@/components/ui/StampCircle'
-import { BATCH_DATE_OPTIONS, BATCH_META } from '@/constants/batches'
+import { BATCH_META } from '@/constants/batches'
+import { fetchBatchDepartures } from '@/lib/batches'
 import { ROUTES } from '@/constants/routes'
 import { formatPrice } from '@/lib/utils'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
@@ -75,7 +76,8 @@ export default async function ApplyPage({
   }
 
   const meta = BATCH_META[batchSlug]
-  const dateOptions = BATCH_DATE_OPTIONS[batchSlug] ?? []
+  const supabase = tryCreateServerSupabaseClient()
+  const dateOptions = await fetchBatchDepartures(supabase, batchSlug)
   const previewStep =
     process.env.NODE_ENV === 'development' && (query.step === '2' || query.step === '3')
       ? (Number(query.step) as 2 | 3)

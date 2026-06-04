@@ -36,6 +36,9 @@ export default function Footer() {
           </a>
         </li>
         <li>
+          <Link href={ROUTES.accountLogin}>My booking</Link>
+        </li>
+        <li>
           <Link href={ROUTES.contact}>Contact</Link>
         </li>
       </ul>

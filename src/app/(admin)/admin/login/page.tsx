@@ -1,18 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 import '@/components/apply/apply.css'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'forbidden') {
+      setError('This account does not have admin access. Contact the team lead.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

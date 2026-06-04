@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAdminSession } from '@/lib/supabase/server'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
 
 function firstRelation<T>(rel: T | T[] | null): T | null {
   if (!rel) return null
@@ -9,20 +9,19 @@ function firstRelation<T>(rel: T | T[] | null): T | null {
 
 export async function GET() {
   try {
-    const { supabase, session } = await getAdminSession()
-
-    if (!supabase || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdminApiAccess()
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
-    const { data: influencers, error: infError } = await supabase
+    const { data: influencers, error: infError } = await auth.service
       .from('influencers')
       .select('id, name, email, status')
       .order('name')
 
     if (infError) throw infError
 
-    const { data: promoCodes, error: promoError } = await supabase
+    const { data: promoCodes, error: promoError } = await auth.service
       .from('promo_codes')
       .select(
         `
@@ -42,7 +41,7 @@ export async function GET() {
 
     if (promoError) throw promoError
 
-    const { data: redemptions, error: redError } = await supabase
+    const { data: redemptions, error: redError } = await auth.service
       .from('promo_redemptions')
       .select(
         `

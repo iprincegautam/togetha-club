@@ -86,6 +86,9 @@ export default async function ConfirmationPage({
           </p>
 
           <div className="confirm-actions">
+            <Link href={ROUTES.accountLogin} className="confirm-link">
+              ✦ Track my booking →
+            </Link>
             <a
               href={WHATSAPP_URL}
               target="_blank"

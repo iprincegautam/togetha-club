@@ -18,6 +18,7 @@ import Reveal from '@/components/ui/Reveal'
 import StampCircle from '@/components/ui/StampCircle'
 import { INCLUDE_GLYPH, VIBE_GLYPH } from '@/constants/brand-glyphs'
 import { BATCH_META } from '@/constants/batches'
+import { fetchAllBatchDepartures } from '@/lib/batches'
 import { ROUTES } from '@/constants/routes'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
@@ -548,9 +549,15 @@ async function fetchBatches(): Promise<BatchRow[]> {
 }
 
 export default async function BatchesPage() {
-  const batches = await fetchBatches()
+  const supabase = tryCreateServerSupabaseClient()
+  const [batches, departureMap] = await Promise.all([
+    fetchBatches(),
+    fetchAllBatchDepartures(supabase),
+  ])
   const batchA = batches.find((b) => b.slug === 'batch-a') ?? FALLBACK_BATCHES[0]
   const batchB = batches.find((b) => b.slug === 'batch-b') ?? FALLBACK_BATCHES[1]
+  const batchADates = departureMap['batch-a']?.length ? departureMap['batch-a'] : BATCH_A_DATES
+  const batchBDates = departureMap['batch-b']?.length ? departureMap['batch-b'] : BATCH_B_DATES
 
   return (
     <>
@@ -596,7 +603,7 @@ export default async function BatchesPage() {
             price={batchA.price}
             status={batchA.status}
             accentColor={BATCH_META['batch-a'].accentColor}
-            dateOptions={BATCH_A_DATES}
+            dateOptions={batchADates}
             faqItems={BATCH_A_FAQ}
             tabs={buildBatchATabs()}
           />
@@ -620,7 +627,7 @@ export default async function BatchesPage() {
             price={batchB.price}
             status={batchB.status}
             accentColor={BATCH_META['batch-b'].accentColor}
-            dateOptions={BATCH_B_DATES}
+            dateOptions={batchBDates}
             faqItems={BATCH_B_FAQ}
             tabs={buildBatchBTabs()}
           />

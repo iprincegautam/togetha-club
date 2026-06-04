@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { userHasAdminAccess } from '@/lib/auth/roles'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -28,24 +29,69 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession()
 
   const { pathname } = request.nextUrl
-  const isLogin = pathname === '/admin/login'
+
+  // ── Admin routes ──
+  const isAdminLogin = pathname === '/admin/login'
   const isAdmin = pathname.startsWith('/admin')
 
-  if (isAdmin && !isLogin && !session) {
+  if (isAdmin && !isAdminLogin && !session) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/admin/login'
     return NextResponse.redirect(loginUrl)
   }
 
-  if (isLogin && session) {
-    const adminUrl = request.nextUrl.clone()
-    adminUrl.pathname = '/admin'
-    return NextResponse.redirect(adminUrl)
+  if (isAdmin && !isAdminLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (!userHasAdminAccess(profile, session.user.email)) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/admin/login'
+      loginUrl.searchParams.set('error', 'forbidden')
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  if (isAdminLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (userHasAdminAccess(profile, session.user.email)) {
+      const adminUrl = request.nextUrl.clone()
+      adminUrl.pathname = '/admin'
+      return NextResponse.redirect(adminUrl)
+    }
+  }
+
+  // ── Member account routes ──
+  const isAccountLogin = pathname === '/account/login'
+  const isAccountPublic =
+    isAccountLogin || pathname === '/account/forgot-password'
+  const isAccount = pathname.startsWith('/account')
+
+  if (isAccount && !isAccountPublic && !session) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/account/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (isAccountLogin && session) {
+    const accountUrl = request.nextUrl.clone()
+    accountUrl.pathname = '/account'
+    accountUrl.search = ''
+    return NextResponse.redirect(accountUrl)
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/account/:path*'],
 }

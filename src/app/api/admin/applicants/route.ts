@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { mapApplicantRow } from '@/lib/applicants'
-import { getAdminSession } from '@/lib/supabase/server'
 
 export async function GET() {
   try {
-    const { supabase, session } = await getAdminSession()
-
-    if (!supabase || !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const auth = await requireAdminApiAccess()
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await auth.service
       .from('applicants')
       .select(
         `
