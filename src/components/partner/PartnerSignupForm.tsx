@@ -14,6 +14,7 @@ export default function PartnerSignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [step, setStep] = useState<Step>('details')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -42,6 +43,7 @@ export default function PartnerSignupForm() {
           purpose: 'signup',
           email,
           password,
+          name: name.trim() || undefined,
         }),
       })
       const json = await res.json()
@@ -62,7 +64,13 @@ export default function PartnerSignupForm() {
       const res = await fetch('/api/auth/otp/verify-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ portal: 'partner', email, password, code: otp }),
+        body: JSON.stringify({
+          portal: 'partner',
+          email,
+          password,
+          code: otp,
+          name: name.trim() || undefined,
+        }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Verification failed')
@@ -77,9 +85,10 @@ export default function PartnerSignupForm() {
   return (
     <div className="apply-shell" style={{ maxWidth: 420 }}>
       <p className="apply-eyebrow">✦ Partner signup ✦</p>
-      <h1 className="apply-title">Claim your portal</h1>
+      <h1 className="apply-title">Create your partner account</h1>
       <p className="apply-sub">
-        Use the email your Togetha contact added for you. We&apos;ll verify it with a one-time code.
+        Influencers can sign up on their own. Enter your details and we&apos;ll verify your email with a
+        one-time code.
       </p>
 
       {step === 'details' ? (
@@ -91,7 +100,21 @@ export default function PartnerSignupForm() {
           }}
         >
           <div className="apply-field">
-            <label className="apply-label" htmlFor="partner-signup-email">Partner email</label>
+            <label className="apply-label" htmlFor="partner-signup-name">Your name</label>
+            <input
+              id="partner-signup-name"
+              type="text"
+              required
+              autoComplete="name"
+              className="apply-input"
+              placeholder="As you want it on your portal"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+          <div className="apply-field">
+            <label className="apply-label" htmlFor="partner-signup-email">Email</label>
             <input
               id="partner-signup-email"
               type="email"
@@ -139,7 +162,7 @@ export default function PartnerSignupForm() {
           <OtpInput value={otp} onChange={setOtp} disabled={loading} />
           {error && <p className="apply-error">{error}</p>}
           <button type="submit" className="apply-submit" disabled={loading || otp.length !== 6}>
-            {loading ? 'Creating account…' : 'Verify & activate portal →'}
+            {loading ? 'Creating account…' : 'Verify & create account →'}
           </button>
           <button
             type="button"

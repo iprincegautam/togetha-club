@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const result =
     portal === 'member'
       ? await completeMemberSignup(service, { email, password, name })
-      : await completePartnerSignup(service, { email, password })
+      : await completePartnerSignup(service, { email, password, name })
 
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 })

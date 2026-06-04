@@ -1,5 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { OtpPortal } from '@/lib/auth/otp'
+import {
+  assertPartnerForPasswordReset,
+  ensureInfluencerForPartnerSignup,
+  partnerSignupPreflight,
+} from '@/lib/partner-signup'
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
@@ -16,31 +21,6 @@ async function findAuthUserIdByEmail(service: SupabaseClient, email: string): Pr
   return match?.id ?? null
 }
 
-export async function assertPartnerEligible(
-  service: SupabaseClient,
-  email: string
-): Promise<{ ok: true; influencerId: string; name: string } | { ok: false; error: string }> {
-  const normalized = normalizeEmail(email)
-  const { data: influencer } = await service
-    .from('influencers')
-    .select('id, name, email, status')
-    .ilike('email', normalized)
-    .maybeSingle()
-
-  if (!influencer) {
-    return {
-      ok: false,
-      error: 'No partner account found for this email. Ask the Togetha team to add you first.',
-    }
-  }
-
-  if (influencer.status && influencer.status !== 'active') {
-    return { ok: false, error: 'Your partner account is not active yet.' }
-  }
-
-  return { ok: true, influencerId: influencer.id, name: influencer.name }
-}
-
 export async function assertResetEligible(
   service: SupabaseClient,
   email: string,
@@ -54,8 +34,8 @@ export async function assertResetEligible(
   }
 
   if (portal === 'partner') {
-    const check = await assertPartnerEligible(service, normalized)
-    if (!check.ok) return check
+    await assertPartnerForPasswordReset(service, normalized)
+    // Always generic success from OTP send — do not leak whether email exists
   }
 
   return { ok: true }
@@ -136,14 +116,20 @@ export async function completeMemberSignup(
 
 export async function completePartnerSignup(
   service: SupabaseClient,
-  input: { email: string; password: string }
+  input: { email: string; password: string; name?: string | null }
 ): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
   const email = normalizeEmail(input.email)
   const passwordError = validatePassword(input.password)
   if (passwordError) return { ok: false, error: passwordError }
 
-  const eligible = await assertPartnerEligible(service, email)
-  if (!eligible.ok) return eligible
+  const preflight = await partnerSignupPreflight(service, email, input.name)
+  if (!preflight.ok) return preflight
+
+  const influencer = await ensureInfluencerForPartnerSignup(service, {
+    email,
+    name: input.name ?? preflight.displayName,
+  })
+  if (!influencer.ok) return influencer
 
   let userId = await findAuthUserIdByEmail(service, email)
   const isNew = !userId
@@ -153,11 +139,27 @@ export async function completePartnerSignup(
       email,
       password: input.password,
       email_confirm: true,
-      user_metadata: { full_name: eligible.name },
+      user_metadata: { full_name: influencer.name },
     })
     if (error) return { ok: false, error: error.message }
     userId = created.user.id
   } else if (userId) {
+    const { data: existingProfile } = await service
+      .from('profiles')
+      .select('role, influencer_id')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (
+      existingProfile?.role === 'member' &&
+      !existingProfile.influencer_id
+    ) {
+      return {
+        ok: false,
+        error: 'This email is already used for a member account. Use a different email.',
+      }
+    }
+
     const { error } = await service.auth.admin.updateUserById(userId, {
       password: input.password,
       email_confirm: true,
@@ -173,8 +175,8 @@ export async function completePartnerSignup(
     {
       id: userId,
       email,
-      full_name: eligible.name,
-      influencer_id: eligible.influencerId,
+      full_name: influencer.name,
+      influencer_id: influencer.influencerId,
       role: 'influencer',
     },
     { onConflict: 'id' }
@@ -202,7 +204,7 @@ export async function resetPortalPassword(
   }
 
   if (input.portal === 'partner') {
-    const check = await assertPartnerEligible(service, email)
+    const check = await assertPartnerForPasswordReset(service, email)
     if (!check.ok) return check
   }
 

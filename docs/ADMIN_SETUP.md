@@ -74,7 +74,7 @@ Payment still auto-provisions accounts and sends welcome email. Signup also link
 
 | Route | Purpose |
 |-------|---------|
-| `/partner/signup` | Claim portal (email must exist in `influencers`) |
+| `/partner/signup` | Self-register or claim portal (creates `influencers` row + default promo if new) |
 | `/partner/login` | Sign in |
 | `/partner/forgot-password` | Request reset code |
 | `/partner/reset-password` | Enter OTP + new password |

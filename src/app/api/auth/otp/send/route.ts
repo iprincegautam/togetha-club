@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import { sendEmailOtp, type OtpPortal, type OtpPurpose } from '@/lib/auth/otp'
-import {
-  assertPartnerEligible,
-  assertResetEligible,
-  validatePassword,
-} from '@/lib/auth/signup'
+import { assertResetEligible, validatePassword } from '@/lib/auth/signup'
+import { partnerSignupPreflight } from '@/lib/partner-signup'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 import { isResendConfigured } from '@/lib/resend'
 
@@ -46,9 +43,10 @@ export async function POST(request: Request) {
     }
 
     if (portal === 'partner') {
-      const eligible = await assertPartnerEligible(service, email)
-      if (!eligible.ok) {
-        return NextResponse.json({ error: eligible.error }, { status: 403 })
+      const name = body.name != null ? String(body.name).trim() : undefined
+      const preflight = await partnerSignupPreflight(service, email, name)
+      if (!preflight.ok) {
+        return NextResponse.json({ error: preflight.error }, { status: 403 })
       }
     }
   }

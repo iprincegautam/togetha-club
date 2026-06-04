@@ -89,7 +89,7 @@ export default function PartnerLoginForm() {
 
       <div className="auth-links">
         <Link href={ROUTES.partnerForgotPassword}>Forgot password?</Link>
-        <Link href={ROUTES.partnerSignup}>Claim partner account</Link>
+        <Link href={ROUTES.partnerSignup}>Create partner account</Link>
       </div>
     </div>
   )
