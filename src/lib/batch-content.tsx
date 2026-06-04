@@ -1,5 +1,4 @@
 import {
-  FAQTab,
   IncludesTab,
   ItineraryTab,
   PolicyTab,
@@ -418,13 +417,6 @@ function buildBatchATabs() {
         <PolicyTab label="The fine print" title="Clear, fair, no surprises." policies={BATCH_A_POLICIES} />
       ),
     },
-    {
-      id: 'faq',
-      label: 'FAQ',
-      content: (
-        <FAQTab label="Common questions" title="Everything you're wondering." items={BATCH_A_FAQ} />
-      ),
-    },
   ]
 }
 
@@ -480,13 +472,6 @@ function buildBatchBTabs() {
       label: 'Policies',
       content: (
         <PolicyTab label="The fine print" title="Same fairness. Same clarity." policies={BATCH_B_POLICIES} />
-      ),
-    },
-    {
-      id: 'faq',
-      label: 'FAQ',
-      content: (
-        <FAQTab label="Questions" title="The ones everyone asks." items={BATCH_B_FAQ} />
       ),
     },
   ]

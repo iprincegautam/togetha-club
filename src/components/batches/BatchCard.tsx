@@ -17,7 +17,6 @@ interface BatchCardProps {
   status: BatchStatus
   accentColor: string
   dateOptions: { label: string; sublabel: string; soldOut?: boolean }[]
-  faqItems: { question: string; answer: string }[]
   tabs: { id: string; label: string; content: React.ReactNode }[]
 }
 
@@ -119,7 +118,6 @@ export default function BatchCard({
   status,
   accentColor,
   dateOptions,
-  faqItems: _faqItems,
   tabs,
 }: BatchCardProps) {
   const router = useRouter()

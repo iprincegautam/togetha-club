@@ -3,8 +3,11 @@ import BatchCard from '@/components/batches/BatchCard'
 import BatchCSection from '@/components/batches/BatchCSection'
 import BatchBreadcrumb from '@/components/batches/BatchBreadcrumb'
 import BatchSwitcher from '@/components/batches/BatchSwitcher'
+import BatchVideoTestimonials from '@/components/batches/BatchVideoTestimonials'
+import BatchProductFaq from '@/components/batches/BatchProductFaq'
 import Reveal from '@/components/ui/Reveal'
 import { BATCH_META } from '@/constants/batches'
+import { getBatchVideoTestimonials } from '@/constants/batch-testimonials'
 import {
   BATCH_A_DATES,
   BATCH_B_DATES,
@@ -57,6 +60,9 @@ export default async function BatchProductPage({ params }: PageProps) {
 
   const meta = BATCH_META[slug]
   const breadcrumbLabel = `${meta.label} — ${slug === 'batch-c' ? 'Mystery' : `Love Trail ${slug.slice(-1).toUpperCase()}`}`
+  const videoTestimonials = getBatchVideoTestimonials(slug)
+  const faqItems = buildBatchFaq(slug)
+  const roseAccent = slug === 'batch-b'
 
   if (slug === 'batch-c') {
     return (
@@ -65,6 +71,14 @@ export default async function BatchProductPage({ params }: PageProps) {
           <BatchBreadcrumb label="Batch C — Mystery" />
           <BatchSwitcher batches={batches} currentSlug={slug} />
           <BatchCSection />
+          <Reveal>
+            <BatchVideoTestimonials items={videoTestimonials} accentColor={meta.accentColor} />
+          </Reveal>
+          {faqItems.length > 0 && (
+            <Reveal>
+              <BatchProductFaq items={faqItems} roseAccent={roseAccent} />
+            </Reveal>
+          )}
         </div>
       </div>
     )
@@ -92,9 +106,14 @@ export default async function BatchProductPage({ params }: PageProps) {
             status={batch.status}
             accentColor={BATCH_META[slug].accentColor}
             dateOptions={dateOptions}
-            faqItems={buildBatchFaq(slug)}
             tabs={buildBatchTabs(slug)}
           />
+        </Reveal>
+        <Reveal>
+          <BatchVideoTestimonials items={videoTestimonials} accentColor={meta.accentColor} />
+        </Reveal>
+        <Reveal>
+          <BatchProductFaq items={faqItems} roseAccent={roseAccent} />
         </Reveal>
       </div>
     </div>
