@@ -72,7 +72,7 @@ export default async function ApplyPage({
   }
 
   if (batch.status === 'sold_out') {
-    redirect(`${ROUTES.batches}#${batchSlug}`)
+    redirect(ROUTES.batchDetail(batchSlug))
   }
 
   const meta = BATCH_META[batchSlug]

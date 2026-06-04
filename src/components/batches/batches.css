@@ -1159,6 +1159,305 @@
   border-color: var(--lavender);
 }
 
+/* ── Catalog grid (/batches) ── */
+.batches-catalog {
+  padding: 0 0 48px;
+}
+
+.batches-catalog-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.batches-catalog-item {
+  min-width: 0;
+}
+
+.batches-catalog-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 320px;
+  padding: 28px 24px;
+  background: var(--warm-white);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 5px 5px 0 var(--ink);
+  border-top: 4px solid var(--batch-accent, var(--teal-stamp));
+}
+
+.batches-catalog-card-title {
+  font-family: var(--font-playfair);
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 900;
+  color: var(--ink);
+  margin: 12px 0 8px;
+  line-height: 1.15;
+}
+
+.batches-catalog-tagline {
+  font-family: var(--font-baskerville);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-mid);
+  margin: 0 0 8px;
+  flex: 1;
+}
+
+.batches-catalog-ages {
+  font-family: var(--font-family-caveat);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink-mid);
+  margin: 0 0 8px;
+}
+
+.batches-catalog-price {
+  font-family: var(--font-dm);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+}
+
+.batches-catalog-price strong {
+  font-family: var(--font-playfair);
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+
+.batches-catalog-per {
+  color: var(--ink-mid);
+  font-size: 0.85rem;
+}
+
+.batches-catalog-status {
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  margin: 0 0 16px;
+}
+
+.batches-catalog-cta {
+  display: inline-block;
+  margin-top: auto;
+  font-family: var(--font-family-caveat);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cream);
+  background: var(--batch-accent, var(--teal-stamp));
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 10px 18px;
+  text-decoration: none;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 0.15s ease;
+}
+
+.batches-catalog-cta:hover {
+  transform: translate(-1px, -1px);
+}
+
+.batches-catalog-foot {
+  text-align: center;
+  font-family: var(--font-baskerville);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-mid);
+  margin: 32px 24px 0;
+}
+
+.batches-catalog-foot-link {
+  font-family: var(--font-family-caveat);
+  font-weight: 700;
+  color: var(--teal-stamp);
+  text-decoration: none;
+}
+
+.batches-catalog-foot-link:hover {
+  text-decoration: underline;
+}
+
+.batches-cta--catalog {
+  margin-top: 0;
+}
+
+/* ── Product page (PDP) ── */
+.batch-product-page {
+  background: var(--cream);
+}
+
+.product-page--pdp {
+  padding-top: 24px;
+  padding-bottom: 80px;
+}
+
+.batch-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.batch-breadcrumb a {
+  color: var(--teal-stamp);
+  text-decoration: none;
+}
+
+.batch-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.batch-breadcrumb-sep {
+  color: var(--ink-mid);
+}
+
+.batch-breadcrumb-current {
+  color: var(--ink-mid);
+}
+
+/* Horizontal scrollable batch rail on product pages */
+.batch-switcher {
+  position: sticky;
+  top: 56px;
+  z-index: 40;
+  margin: 0 -24px 20px;
+  padding: 12px 0 16px;
+  background: linear-gradient(
+    to bottom,
+    var(--cream) 0%,
+    var(--cream) 88%,
+    rgba(245, 237, 216, 0) 100%
+  );
+}
+
+.batch-switcher-label {
+  font-family: var(--font-dm);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  margin: 0 0 10px;
+  padding: 0 24px;
+}
+
+.batch-switcher-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(44, 24, 16, 0.25) transparent;
+  padding: 4px 24px 8px;
+}
+
+.batch-switcher-track::-webkit-scrollbar {
+  height: 6px;
+}
+
+.batch-switcher-track::-webkit-scrollbar-thumb {
+  background: rgba(44, 24, 16, 0.2);
+  border-radius: 99px;
+}
+
+.batch-switcher-card {
+  flex: 0 0 min(240px, 72vw);
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: white;
+  border: 2px solid rgba(44, 24, 16, 0.15);
+  border-radius: 4px;
+  text-decoration: none;
+  box-shadow: 2px 2px 0 rgba(44, 24, 16, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.batch-switcher-card:hover {
+  border-color: var(--batch-accent, var(--teal-stamp));
+}
+
+.batch-switcher-card.active {
+  border-color: var(--ink);
+  border-left: 4px solid var(--batch-accent, var(--teal-stamp));
+  box-shadow: 4px 4px 0 var(--ink);
+  background: var(--warm-white);
+}
+
+.batch-switcher-edition {
+  font-family: var(--font-family-caveat);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--batch-accent, var(--teal-stamp));
+}
+
+.batch-switcher-name {
+  font-family: var(--font-playfair);
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.batch-switcher-meta {
+  font-family: var(--font-dm);
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+}
+
+.product-tabs {
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(44, 24, 16, 0.2) transparent;
+}
+
+.product-tab {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+@media (min-width: 901px) {
+  .batch-switcher-card {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .batch-switcher-track {
+    scroll-snap-type: none;
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 900px) {
+  .batches-catalog-track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 20px 8px;
+    max-width: none;
+  }
+
+  .batches-catalog-item {
+    flex: 0 0 min(300px, 86vw);
+    scroll-snap-align: center;
+  }
+
+  .batches-catalog-card {
+    min-height: 300px;
+  }
+}
+
 @media (max-width: 768px) {
   .product-hero {
     grid-template-columns: 1fr;
@@ -1202,7 +1501,34 @@
   }
 
   .product-tabs {
-    padding: 0 20px;
+    padding: 0 12px;
+    gap: 0;
+    mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
+  }
+
+  .product-tab {
+    padding: 12px 14px;
+    font-size: 0.92rem;
+  }
+
+  .batch-switcher {
+    top: 52px;
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
+  .batch-switcher-label,
+  .batch-switcher-track {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .batch-switcher-card {
+    flex: 0 0 min(220px, 78vw);
+  }
+
+  .batch-breadcrumb {
+    font-size: 0.88rem;
   }
 
   .page-hero .pc-1,

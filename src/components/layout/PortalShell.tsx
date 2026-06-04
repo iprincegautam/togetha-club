@@ -111,6 +111,12 @@ export default function PortalShell({
         </div>
 
         <main className={`portal-content portal-content--${variant}`}>{children}</main>
+
+        <div className="portal-mobile-signout-wrap">
+          <button type="button" className="portal-signout portal-mobile-signout" onClick={signOut}>
+            Sign out
+          </button>
+        </div>
       </div>
     </div>
   )

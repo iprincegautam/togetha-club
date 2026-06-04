@@ -213,7 +213,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
           })}
         </div>
         <div className="batch-waitlist-wrap">
-          <Link href={`${ROUTES.batches}#batch-c`} className="batch-waitlist-link">
+          <Link href={ROUTES.batchDetail('batch-c')} className="batch-waitlist-link">
             ✦ + August Mystery Batch — Join Waitlist →
           </Link>
         </div>

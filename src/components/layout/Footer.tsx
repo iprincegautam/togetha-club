@@ -22,10 +22,10 @@ export default function Footer() {
           <Link href={`${ROUTES.home}#ai`}>Our AI</Link>
         </li>
         <li>
-          <Link href={`${ROUTES.batches}#batch-a`}>Batch A</Link>
+          <Link href={ROUTES.batchDetail('batch-a')}>Batch A</Link>
         </li>
         <li>
-          <Link href={`${ROUTES.batches}#batch-b`}>Batch B</Link>
+          <Link href={ROUTES.batchDetail('batch-b')}>Batch B</Link>
         </li>
         <li>
           <Link href={`${ROUTES.home}#quiz`}>Take the Quiz</Link>

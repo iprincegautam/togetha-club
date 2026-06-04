@@ -185,7 +185,7 @@ export default function BatchCard({
             >
               ✦ Apply & Reserve My Spot →
             </button>
-            <a href={`${ROUTES.batches}#batch-c`} className="btn-waitlist">
+            <a href={ROUTES.batchDetail('batch-c')} className="btn-waitlist">
               ♡ Join the Waitlist Instead
             </a>
           </div>
