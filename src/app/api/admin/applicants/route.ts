@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
-import { mapApplicantRow } from '@/lib/applicants'
+import { mapApplicantRow, type ApplicantDbRow } from '@/lib/applicants'
 
 export async function GET() {
   try {
@@ -23,12 +23,15 @@ export async function GET() {
         promo_codes ( code )
       `
 
-    let { data, error } = await auth.service
+    const full = await auth.service
       .from('applicants')
       .select(fullSelect)
       .order('created_at', { ascending: false })
 
-    if (error) {
+    let rows: ApplicantDbRow[] | null = (full.data ?? null) as ApplicantDbRow[] | null
+    let fetchError = full.error
+
+    if (fetchError) {
       const fallback = await auth.service
         .from('applicants')
         .select(
@@ -45,19 +48,13 @@ export async function GET() {
         `
         )
         .order('created_at', { ascending: false })
-      data = fallback.data
-      error = fallback.error
+      rows = (fallback.data ?? null) as ApplicantDbRow[] | null
+      fetchError = fallback.error
     }
 
-    if (error) throw error
+    if (fetchError) throw fetchError
 
-    const applicants = (data ?? []).map((row) =>
-      mapApplicantRow({
-        ...row,
-        priority_review: 'priority_review' in row ? row.priority_review : false,
-        promo_codes: 'promo_codes' in row ? row.promo_codes : null,
-      })
-    )
+    const applicants = (rows ?? []).map((row) => mapApplicantRow(row))
 
     return NextResponse.json({ applicants })
   } catch (err) {
