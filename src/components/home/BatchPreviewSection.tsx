@@ -182,7 +182,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
             return (
               <Link
                 key={batch.slug}
-                href={ROUTES.batchDetail(batch.slug)}
+                href={ROUTES.batches}
                 className="tpc"
               >
                 <div className="tpc-vis">
@@ -213,7 +213,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
           })}
         </div>
         <div className="batch-waitlist-wrap">
-          <Link href={ROUTES.batchDetail('batch-c')} className="batch-waitlist-link">
+          <Link href={ROUTES.batches} className="batch-waitlist-link">
             ✦ + August Mystery Batch — Join Waitlist →
           </Link>
         </div>
