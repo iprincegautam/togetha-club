@@ -6,6 +6,8 @@ import { ROUTES } from '@/constants/routes'
 
 interface ProfileFormState {
   fullName: string
+  displayName: string
+  avatarUrl: string
   phone: string
   city: string
   bio: string
@@ -17,6 +19,8 @@ interface ProfileFormState {
 export default function AccountProfileForm() {
   const [form, setForm] = useState<ProfileFormState>({
     fullName: '',
+    displayName: '',
+    avatarUrl: '',
     phone: '',
     city: '',
     bio: '',
@@ -26,6 +30,7 @@ export default function AccountProfileForm() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -36,6 +41,8 @@ export default function AccountProfileForm() {
         if (p) {
           setForm({
             fullName: p.fullName ?? '',
+            displayName: p.displayName ?? '',
+            avatarUrl: p.avatarUrl ?? '',
             phone: p.phone ?? '',
             city: p.city ?? '',
             bio: p.bio ?? '',
@@ -65,6 +72,22 @@ export default function AccountProfileForm() {
     setSaving(false)
   }
 
+  const uploadPhoto = async (file: File) => {
+    setUploading(true)
+    setMessage(null)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/account/avatar', { method: 'POST', body: fd })
+    const json = await res.json()
+    if (!res.ok) {
+      setMessage(json.error ?? 'Upload failed')
+    } else {
+      setForm((f) => ({ ...f, avatarUrl: json.avatarUrl }))
+      setMessage('Photo updated')
+    }
+    setUploading(false)
+  }
+
   if (loading) return <p className="account-muted">Loading profile…</p>
 
   return (
@@ -72,7 +95,10 @@ export default function AccountProfileForm() {
       <div className="account-panel">
         <h1 className="account-title">Your profile</h1>
         <p className="account-sub">
-          Help us prepare for your trip. This is for logistics — not a dating profile.
+          Help us prepare for your trip. Nickname and photo are optional.
+        </p>
+        <p className="account-muted">
+          <Link href={ROUTES.accountSettings}>Account settings</Link> (email, password, sign out)
         </p>
       </div>
 
@@ -83,8 +109,37 @@ export default function AccountProfileForm() {
           save(true)
         }}
       >
+        <div className="account-avatar-row">
+          {form.avatarUrl ? (
+            <img src={form.avatarUrl} alt="" className="account-avatar-preview" />
+          ) : (
+            <div className="account-avatar-placeholder">♡</div>
+          )}
+          <label className="admin-field" style={{ flex: 1 }}>
+            <span>Profile photo</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="apply-input"
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                if (f) uploadPhoto(f)
+              }}
+            />
+          </label>
+        </div>
         <label className="admin-field">
-          <span>Full name</span>
+          <span>Nickname</span>
+          <input
+            className="apply-input"
+            value={form.displayName}
+            onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+            placeholder="What should we call you?"
+          />
+        </label>
+        <label className="admin-field">
+          <span>Full name (legal)</span>
           <input
             className="apply-input"
             value={form.fullName}

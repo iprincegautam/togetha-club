@@ -23,6 +23,8 @@ export async function GET() {
       id: auth.profile!.id,
       email: auth.profile!.email,
       fullName: auth.profile!.full_name,
+      displayName: auth.profile!.display_name ?? null,
+      avatarUrl: auth.profile!.avatar_url ?? null,
       phone: auth.profile!.phone ?? null,
       city: auth.profile!.city ?? null,
       bio: auth.profile!.bio ?? null,

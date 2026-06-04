@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ROUTES } from '@/constants/routes'
 import { formatPaise } from '@/lib/utils'
 
 interface PartnerData {
@@ -35,32 +37,14 @@ interface PartnerData {
 export default function PartnerDashboard() {
   const [data, setData] = useState<PartnerData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [payoutUpi, setPayoutUpi] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
 
-  const load = () => {
+  useEffect(() => {
     fetch('/api/partner/me')
       .then((r) => r.json())
-      .then((json) => {
-        setData(json)
-        setPayoutUpi(json.influencer?.payoutUpi ?? '')
-      })
+      .then((json) => setData(json))
       .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    load()
   }, [])
-
-  const saveUpi = async () => {
-    const res = await fetch('/api/partner/me', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payoutUpi }),
-    })
-    if (res.ok) setMsg('Payout UPI saved')
-    else setMsg('Could not save UPI')
-  }
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url)
@@ -76,6 +60,12 @@ export default function PartnerDashboard() {
         <p className="apply-eyebrow">✦ Partner ✦</p>
         <h1 className="account-title">{data.influencer.name}</h1>
         <p className="account-sub">{data.influencer.email}</p>
+        <p className="account-muted" style={{ marginTop: 8 }}>
+          <Link href={ROUTES.partnerProfile}>Profile & payout</Link>
+          {' · '}
+          <Link href={ROUTES.partnerSettings}>Settings</Link>
+        </p>
+        {msg && <p className="account-msg">{msg}</p>}
       </div>
 
       <div className="admin-stat-grid">
@@ -95,22 +85,6 @@ export default function PartnerDashboard() {
           <div className="admin-stat-num">{formatPaise(data.stats.paidOutCommissionPaise)}</div>
           <div className="admin-stat-label">Paid out</div>
         </div>
-      </div>
-
-      <div className="account-panel">
-        <h2 className="account-panel-title">Payout UPI</h2>
-        <div className="admin-inline-inputs">
-          <input
-            className="apply-input"
-            value={payoutUpi}
-            onChange={(e) => setPayoutUpi(e.target.value)}
-            placeholder="yourname@upi"
-          />
-          <button type="button" className="admin-btn" onClick={saveUpi}>
-            Save
-          </button>
-        </div>
-        {msg && <p className="account-msg">{msg}</p>}
       </div>
 
       <div className="account-panel">

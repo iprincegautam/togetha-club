@@ -9,6 +9,7 @@ import PortalBackLink from '@/components/layout/PortalBackLink'
 const NAV = [
   { href: ROUTES.account, label: 'My booking' },
   { href: ROUTES.accountProfile, label: 'Profile' },
+  { href: ROUTES.accountSettings, label: 'Settings' },
 ] as const
 
 export default function AccountNav() {

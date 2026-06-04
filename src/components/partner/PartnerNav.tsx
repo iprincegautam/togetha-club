@@ -29,6 +29,18 @@ export default function PartnerNav() {
         <Link href={ROUTES.partner} className={pathname === ROUTES.partner ? 'active' : undefined}>
           Dashboard
         </Link>
+        <Link
+          href={ROUTES.partnerProfile}
+          className={pathname === ROUTES.partnerProfile ? 'active' : undefined}
+        >
+          Profile
+        </Link>
+        <Link
+          href={ROUTES.partnerSettings}
+          className={pathname === ROUTES.partnerSettings ? 'active' : undefined}
+        >
+          Settings
+        </Link>
       </nav>
       <button type="button" className="account-nav-signout" onClick={signOut}>
         Sign out

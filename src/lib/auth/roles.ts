@@ -6,6 +6,7 @@ export interface ProfileRow {
   id: string
   email: string
   full_name: string | null
+  display_name?: string | null
   role: UserRole
   applicant_id: string | null
   influencer_id: string | null

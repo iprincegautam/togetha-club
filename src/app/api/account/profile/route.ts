@@ -11,6 +11,12 @@ export async function PATCH(request: Request) {
   const updates: Record<string, unknown> = {}
 
   if (body.fullName !== undefined) updates.full_name = body.fullName ? String(body.fullName).trim() : null
+  if (body.displayName !== undefined) {
+    updates.display_name = body.displayName ? String(body.displayName).trim() : null
+  }
+  if (body.avatarUrl !== undefined) {
+    updates.avatar_url = body.avatarUrl ? String(body.avatarUrl).trim() : null
+  }
   if (body.phone !== undefined) updates.phone = body.phone ? String(body.phone).trim() : null
   if (body.city !== undefined) updates.city = body.city ? String(body.city).trim() : null
   if (body.bio !== undefined) updates.bio = body.bio ? String(body.bio).trim() : null

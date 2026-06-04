@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendOtpEmail } from '@/lib/resend'
 
 export type OtpPortal = 'member' | 'partner'
-export type OtpPurpose = 'signup' | 'reset_password'
+export type OtpPurpose = 'signup' | 'reset_password' | 'email_change'
 
 const OTP_TTL_MS = 10 * 60 * 1000
 const OTP_COOLDOWN_MS = 60 * 1000
@@ -91,7 +91,12 @@ export async function sendEmailOtp(
   }
 
   const portalLabel = input.portal === 'member' ? 'Member' : 'Partner'
-  const purposeLabel = input.purpose === 'signup' ? 'account setup' : 'password reset'
+  const purposeLabel =
+    input.purpose === 'signup'
+      ? 'account setup'
+      : input.purpose === 'email_change'
+        ? 'email change'
+        : 'password reset'
 
   await sendOtpEmail({
     to: email,
