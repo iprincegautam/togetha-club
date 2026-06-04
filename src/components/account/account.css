@@ -92,6 +92,25 @@
   background: white;
 }
 
+.account-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-card-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px dashed rgba(44, 24, 16, 0.12);
+}
+
+.account-card-list-item:last-child {
+  border-bottom: none;
+}
+
 .account-panel {
   border: 2px solid var(--ink);
   border-radius: 3px;

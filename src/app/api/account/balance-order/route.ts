@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
 import { requireMemberApiAccess } from '@/lib/auth/member'
+import { getOrCreateRazorpayCustomer } from '@/lib/razorpay-customer'
 import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
 
 export async function POST() {
@@ -36,11 +37,22 @@ export async function POST() {
     return NextResponse.json({ error: 'Payment not configured' }, { status: 503 })
   }
 
+  const { customerId } = await getOrCreateRazorpayCustomer(auth.service, {
+    userId: auth.session.user.id,
+    email: auth.profile!.email,
+    name: auth.profile!.full_name || auth.profile!.email,
+    phone: auth.profile!.phone,
+  })
+
   const order = await razorpay.orders.create({
     amount: balanceDue,
     currency: 'INR',
     receipt: `${applicant.id}-balance`,
-    notes: { payment_plan: 'balance', applicant_id: applicant.id },
+    notes: {
+      payment_plan: 'balance',
+      applicant_id: applicant.id,
+      ...(customerId ? { customer_id: customerId } : {}),
+    },
   })
 
   await auth.service
@@ -53,5 +65,6 @@ export async function POST() {
     amount: balanceDue,
     currency: 'INR',
     keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    customerId: customerId ?? undefined,
   })
 }

@@ -8,9 +8,24 @@ interface InfluencerStat {
   id: string
   name: string
   email: string | null
+  phone: string | null
   status: string
   paidBookings: number
   totalCommissionPaise: number
+  payoutUpi: string | null
+  payoutBankName: string | null
+  payoutAccountHolder: string | null
+  payoutAccountNumber: string | null
+  payoutIfsc: string | null
+}
+
+function payoutSummary(inf: InfluencerStat): string {
+  if (inf.payoutUpi) return `UPI: ${inf.payoutUpi}`
+  if (inf.payoutAccountNumber) {
+    const bank = inf.payoutBankName ? `${inf.payoutBankName} · ` : ''
+    return `${bank}${inf.payoutAccountHolder ?? 'Account'} · ${inf.payoutAccountNumber}`
+  }
+  return '—'
 }
 
 interface PromoRow {
@@ -133,12 +148,13 @@ export default function AdminAffiliatesDashboard() {
                 <th>Status</th>
                 <th>Paid bookings</th>
                 <th>Commission owed</th>
+                <th>Payout (summary)</th>
               </tr>
             </thead>
             <tbody>
               {influencers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="admin-empty">
+                  <td colSpan={6} className="admin-empty">
                     No influencers yet — create one above.
                   </td>
                 </tr>
@@ -150,6 +166,56 @@ export default function AdminAffiliatesDashboard() {
                     <td>{inf.status}</td>
                     <td>{inf.paidBookings}</td>
                     <td>{formatPrice(inf.totalCommissionPaise / 100)}</td>
+                    <td className="admin-payout-cell">{payoutSummary(inf)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="admin-section">
+        <h2 className="admin-section-title">Payout details (for ops)</h2>
+        <p className="admin-muted" style={{ marginBottom: 12 }}>
+          Full bank/UPI info partners entered in their portal. Use when marking redemptions paid.
+        </p>
+        <div className="admin-table-wrap">
+          <table className="admin-table admin-table-payout">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>UPI</th>
+                <th>Account holder</th>
+                <th>Bank</th>
+                <th>Account number</th>
+                <th>IFSC</th>
+              </tr>
+            </thead>
+            <tbody>
+              {influencers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="admin-empty">
+                    No payout data yet.
+                  </td>
+                </tr>
+              ) : (
+                influencers.map((inf) => (
+                  <tr key={inf.id}>
+                    <td>{inf.name}</td>
+                    <td>{inf.phone ?? '—'}</td>
+                    <td>{inf.payoutUpi ?? '—'}</td>
+                    <td>{inf.payoutAccountHolder ?? '—'}</td>
+                    <td>{inf.payoutBankName ?? '—'}</td>
+                    <td>
+                      {inf.payoutAccountNumber ? (
+                        <code className="admin-code">{inf.payoutAccountNumber}</code>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td>{inf.payoutIfsc ?? '—'}</td>
                   </tr>
                 ))
               )}

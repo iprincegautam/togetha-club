@@ -17,6 +17,7 @@ export interface ProfileRow {
   emergency_contact?: string | null
   dietary_notes?: string | null
   instagram_handle?: string | null
+  razorpay_customer_id?: string | null
 }
 
 export function parseAdminEmails(): string[] {

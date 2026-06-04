@@ -71,7 +71,7 @@ export default function BalancePayButton({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not start payment')
 
-      const { orderId, amount, keyId } = json
+      const { orderId, amount, keyId, customerId } = json
       const isDev = orderId.startsWith('dev_balance_')
 
       if (isDev) {
@@ -95,6 +95,7 @@ export default function BalancePayButton({
         name: 'Togetha.Club',
         description: `${batchName} — balance`,
         prefill: { name, email },
+        ...(customerId ? { customer_id: customerId, save: 1 } : {}),
         handler: async (response: RazorpayResponse) => {
           try {
             await verifyPayment(

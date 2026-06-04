@@ -16,7 +16,9 @@ export async function GET() {
 
     const { data: influencers, error: infError } = await auth.service
       .from('influencers')
-      .select('id, name, email, status')
+      .select(
+        'id, name, email, phone, status, payout_upi, payout_bank_name, payout_account_holder, payout_account_number, payout_ifsc'
+      )
       .order('name')
 
     if (infError) throw infError
@@ -76,9 +78,15 @@ export async function GET() {
         id: inf.id,
         name: inf.name,
         email: inf.email,
+        phone: inf.phone,
         status: inf.status,
         paidBookings: stats.count,
         totalCommissionPaise: stats.total,
+        payoutUpi: inf.payout_upi,
+        payoutBankName: inf.payout_bank_name,
+        payoutAccountHolder: inf.payout_account_holder,
+        payoutAccountNumber: inf.payout_account_number,
+        payoutIfsc: inf.payout_ifsc,
       }
     })
 

@@ -15,7 +15,7 @@
 | Dashboard | `/account` | ✅ Live | Booking pipeline, batch info, pay balance |
 | Profile | `/account/profile` | ✅ + Phase 1 | Full name, **nickname**, **photo**, phone, city, bio, Instagram, emergency contact, dietary notes, KYC submit |
 | Settings | `/account/settings` | Phase 1 | Current email, **change email (OTP)**, **change password**, sign out |
-| Payments | `/account/payments` | Phase 2 | Saved cards via Razorpay Customer; pay balance without re-entering card |
+| Payments | `/account/payments` | ✅ Live | Saved cards via Razorpay Customer; pay balance with save option |
 | Notifications | — | Phase 3 | Email/SMS prefs for trip updates |
 
 ### Member profile fields
@@ -26,11 +26,11 @@
 | Nickname | `profiles.display_name` | Display name; legal name stays on applicant |
 | Trip / KYC | existing profile + `applicants.kyc_status` | Unchanged |
 
-### Member payments (Phase 2)
+### Member payments (live)
 
-- Razorpay saved instruments for **balance payments only**
-- No raw card numbers in Supabase
-- Requires Razorpay Customer ID on applicant or profile
+- Razorpay Customer on `profiles.razorpay_customer_id` (migration **010**)
+- Checkout uses `customer_id` + `save: 1` for balance pay
+- `/account/payments` lists and removes saved cards
 
 ---
 
@@ -61,7 +61,7 @@
 ## Admin visibility
 
 - Member KYC: existing applicant detail in `/admin/applicants/[id]`
-- Partner payout: show UPI + bank on `/admin/affiliates` (Phase 1.5)
+- Partner payout: full UPI + bank table on `/admin/affiliates` (live)
 
 ---
 
