@@ -2,6 +2,11 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { userHasPartnerAccess } from '@/lib/auth/partner'
 import { userHasAdminAccess } from '@/lib/auth/roles'
+import {
+  ACCOUNT_AUTH_PATHS,
+  ADMIN_AUTH_PATHS,
+  PARTNER_AUTH_PATHS,
+} from '@/lib/portal-path'
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -30,6 +35,14 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession()
 
   const { pathname } = request.nextUrl
+
+  if (
+    ACCOUNT_AUTH_PATHS.has(pathname) ||
+    PARTNER_AUTH_PATHS.has(pathname) ||
+    ADMIN_AUTH_PATHS.has(pathname)
+  ) {
+    supabaseResponse.headers.set('x-portal-auth-page', '1')
+  }
 
   // ── Admin routes ──
   const isAdminLogin = pathname === '/admin/login'
@@ -71,14 +84,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Member account routes ──
-  const accountPublicPaths = new Set([
-    '/account/login',
-    '/account/signup',
-    '/account/forgot-password',
-    '/account/reset-password',
-  ])
   const isAccountLogin = pathname === '/account/login'
-  const isAccountPublic = accountPublicPaths.has(pathname)
+  const isAccountPublic = ACCOUNT_AUTH_PATHS.has(pathname)
   const isAccount = pathname.startsWith('/account')
 
   if (isAccount && !isAccountPublic && !session) {
@@ -96,14 +103,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Partner / influencer routes ──
-  const partnerPublicPaths = new Set([
-    '/partner/login',
-    '/partner/signup',
-    '/partner/forgot-password',
-    '/partner/reset-password',
-  ])
-  const isPartnerLogin = pathname === '/partner/login'
-  const isPartnerPublic = partnerPublicPaths.has(pathname)
+  const isPartnerPublic = PARTNER_AUTH_PATHS.has(pathname)
   const isPartner = pathname.startsWith('/partner')
 
   if (isPartner && !isPartnerPublic && !session) {
@@ -128,7 +128,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (isPartnerLogin && session) {
+  if (isPartnerPublic && session) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, influencer_id')

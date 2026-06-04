@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
 import { ROUTES } from '@/constants/routes'
@@ -12,8 +13,10 @@ export default async function PartnerLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headerList = await headers()
+  const isAuthPage = headerList.get('x-portal-auth-page') === '1'
   const ctx = await requirePartnerSession()
-  const showNav = Boolean(ctx?.session)
+  const showNav = Boolean(ctx?.session) && !isAuthPage
 
   if (!showNav) {
     return (

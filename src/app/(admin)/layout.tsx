@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
 import { ROUTES } from '@/constants/routes'
@@ -11,9 +12,11 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headerList = await headers()
+  const isAuthPage = headerList.get('x-portal-auth-page') === '1'
   const { session } = await getAdminSession()
 
-  if (!session) {
+  if (!session || isAuthPage) {
     return (
       <div className="admin-layout portal-guest-wrap">
         <div className="portal-back-bar portal-back-bar--light">
