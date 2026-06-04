@@ -9,10 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
-    const { data, error } = await auth.service
-      .from('applicants')
-      .select(
-        `
+    const fullSelect = `
         id,
         name,
         email,
@@ -25,12 +22,42 @@ export async function GET() {
         batches ( name, slug ),
         promo_codes ( code )
       `
-      )
+
+    let { data, error } = await auth.service
+      .from('applicants')
+      .select(fullSelect)
       .order('created_at', { ascending: false })
+
+    if (error) {
+      const fallback = await auth.service
+        .from('applicants')
+        .select(
+          `
+          id,
+          name,
+          email,
+          gender,
+          batch_slug,
+          quiz_score,
+          status,
+          created_at,
+          batches ( name, slug )
+        `
+        )
+        .order('created_at', { ascending: false })
+      data = fallback.data
+      error = fallback.error
+    }
 
     if (error) throw error
 
-    const applicants = (data ?? []).map(mapApplicantRow)
+    const applicants = (data ?? []).map((row) =>
+      mapApplicantRow({
+        ...row,
+        priority_review: 'priority_review' in row ? row.priority_review : false,
+        promo_codes: 'promo_codes' in row ? row.promo_codes : null,
+      })
+    )
 
     return NextResponse.json({ applicants })
   } catch (err) {

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import PortalSecuritySection from '@/components/shared/PortalSecuritySection'
 
@@ -20,11 +19,6 @@ export default function PartnerSettingsPage() {
 
   return (
     <>
-      <p className="account-foot" style={{ marginBottom: 16 }}>
-        <Link href={ROUTES.partnerProfile} className="admin-inline-link">
-          ← Profile & payout
-        </Link>
-      </p>
       <PortalSecuritySection
         portal="partner"
         currentEmail={email}

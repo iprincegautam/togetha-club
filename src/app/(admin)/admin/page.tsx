@@ -1,9 +1,6 @@
 import Link from 'next/link'
-import AdminApplicantsTable from '@/components/admin/AdminApplicantsTable'
-import { mapApplicantRow } from '@/lib/applicants'
-import { getAdminSession } from '@/lib/supabase/server'
+import AdminApplicantsView from '@/components/admin/AdminApplicantsView'
 import { buildMetadata } from '@/lib/metadata'
-import '@/components/admin/admin.css'
 
 export function generateMetadata() {
   return buildMetadata(
@@ -12,37 +9,7 @@ export function generateMetadata() {
   )
 }
 
-async function fetchApplicants() {
-  const { supabase, session } = await getAdminSession()
-  if (!supabase || !session) return []
-
-  const { data, error } = await supabase
-    .from('applicants')
-    .select(
-      `
-      id,
-      name,
-      email,
-      gender,
-      batch_slug,
-      quiz_score,
-      status,
-      created_at,
-      priority_review,
-      batches ( name, slug ),
-      promo_codes ( code )
-    `
-    )
-    .order('created_at', { ascending: false })
-
-  if (error || !data) return []
-
-  return data.map(mapApplicantRow)
-}
-
-export default async function AdminPage() {
-  const applicants = await fetchApplicants()
-
+export default function AdminPage() {
   return (
     <div className="admin-page">
       <div className="admin-card admin-card-wide">
@@ -53,12 +20,18 @@ export default async function AdminPage() {
         </p>
 
         <div className="admin-quick-links">
-          <Link href="/admin/batches" className="admin-quick-link">Batches & pricing</Link>
-          <Link href="/admin/waitlist" className="admin-quick-link">Waitlist</Link>
-          <Link href="/admin/affiliates" className="admin-quick-link">Affiliates</Link>
+          <Link href="/admin/batches" className="admin-quick-link">
+            Batches & pricing
+          </Link>
+          <Link href="/admin/waitlist" className="admin-quick-link">
+            Waitlist
+          </Link>
+          <Link href="/admin/affiliates" className="admin-quick-link">
+            Affiliates
+          </Link>
         </div>
 
-        <AdminApplicantsTable applicants={applicants} />
+        <AdminApplicantsView />
       </div>
     </div>
   )

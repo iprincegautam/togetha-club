@@ -91,7 +91,10 @@ export default function PortalSecuritySection({
           Current email: <strong>{currentEmail}</strong>
         </p>
         <p className="account-muted" style={{ marginBottom: 16 }}>
-          <Link href={forgotPasswordRoute}>Change password</Link> (email OTP or recovery link)
+          <Link href={forgotPasswordRoute} className="portal-link">
+            Change password
+          </Link>{' '}
+          (email OTP or recovery link)
         </p>
         <button type="button" className="account-btn-outline" onClick={signOut}>
           Sign out

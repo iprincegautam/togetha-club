@@ -4,6 +4,7 @@ import { ROUTES } from '@/constants/routes'
 import { requireMemberSession } from '@/lib/auth/member'
 import { MEMBER_PORTAL_NAV } from '@/lib/portal-nav'
 import '@/components/account/account.css'
+import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
 import '@/styles/portal-shell.css'
 

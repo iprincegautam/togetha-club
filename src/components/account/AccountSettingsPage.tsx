@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import PortalSecuritySection from '@/components/shared/PortalSecuritySection'
 
@@ -20,15 +19,6 @@ export default function AccountSettingsPage() {
 
   return (
     <>
-      <p className="account-foot" style={{ marginBottom: 16 }}>
-        <Link href={ROUTES.accountProfile} className="admin-inline-link">
-          ← Profile
-        </Link>
-        {' · '}
-        <Link href={ROUTES.accountPayments} className="admin-inline-link">
-          Payment methods
-        </Link>
-      </p>
       <PortalSecuritySection
         portal="member"
         currentEmail={email}

@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { ROUTES } from '@/constants/routes'
 import { GLYPH } from '@/constants/brand-glyphs'
 
 interface InfluencerProfile {
@@ -89,10 +87,8 @@ export default function PartnerProfilePage() {
         <p className="apply-eyebrow">{GLYPH.match} Partner profile {GLYPH.match}</p>
         <h1 className="account-title">Profile & payout</h1>
         <p className="account-sub">
-          Update how we reach you and where to send commission payouts.
-        </p>
-        <p className="account-muted">
-          <Link href={ROUTES.partnerSettings}>Account settings</Link> (email, password, sign out)
+          Update how we reach you and where to send commission payouts. Use Settings in the sidebar for
+          email and password.
         </p>
       </div>
 
@@ -204,11 +200,6 @@ export default function PartnerProfilePage() {
         </button>
       </form>
 
-      <p className="account-foot">
-        <Link href={ROUTES.partner} className="admin-inline-link">
-          ← Back to dashboard
-        </Link>
-      </p>
     </div>
   )
 }

@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { ROUTES } from '@/constants/routes'
 
 interface ProfileFormState {
   fullName: string
@@ -95,10 +93,8 @@ export default function AccountProfileForm() {
       <div className="account-panel">
         <h1 className="account-title">Your profile</h1>
         <p className="account-sub">
-          Help us prepare for your trip. Nickname and photo are optional.
-        </p>
-        <p className="account-muted">
-          <Link href={ROUTES.accountSettings}>Account settings</Link> (email, password, sign out)
+          Help us prepare for your trip. Nickname and photo are optional. Use Settings in the sidebar for
+          email and password.
         </p>
       </div>
 
@@ -212,11 +208,6 @@ export default function AccountProfileForm() {
         </div>
       </form>
 
-      <p className="account-foot">
-        <Link href={ROUTES.account} className="admin-inline-link">
-          ← Back to booking
-        </Link>
-      </p>
     </div>
   )
 }

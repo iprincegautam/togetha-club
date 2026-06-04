@@ -60,9 +60,9 @@ export default function AccountPaymentsPage() {
           Cards saved when you pay your trip balance appear here for faster checkout next time.
         </p>
         <p className="account-muted">
-          <Link href={ROUTES.account}>Pay balance from My booking</Link>
-          {' · '}
-          <Link href={ROUTES.accountSettings}>Account settings</Link>
+          <Link href={ROUTES.account} className="portal-link">
+            Pay balance from My booking
+          </Link>
         </p>
       </div>
 
@@ -113,12 +113,6 @@ export default function AccountPaymentsPage() {
       )}
 
       {msg && <p className="account-msg">{msg}</p>}
-
-      <p className="account-foot">
-        <Link href={ROUTES.accountSettings} className="admin-inline-link">
-          ← Account settings
-        </Link>
-      </p>
     </div>
   )
 }

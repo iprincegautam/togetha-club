@@ -4,6 +4,7 @@ import { ROUTES } from '@/constants/routes'
 import { requirePartnerSession } from '@/lib/auth/partner'
 import { PARTNER_PORTAL_NAV } from '@/lib/portal-nav'
 import '@/components/account/account.css'
+import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
 import '@/styles/portal-shell.css'
 

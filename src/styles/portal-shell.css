@@ -185,6 +185,41 @@
   overflow-x: auto;
 }
 
+/* Portal text links — teal brand (not default browser blue) */
+.portal-content a.portal-link,
+.portal-content .portal-link,
+.portal-content .admin-inline-link {
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  text-decoration: none;
+}
+
+.portal-content a.portal-link:hover,
+.portal-content .portal-link:hover,
+.portal-content .admin-inline-link:hover {
+  color: var(--teal-light);
+  text-decoration: underline;
+}
+
+.portal-content .account-muted a,
+.portal-content .account-sub a,
+.portal-content .account-foot a {
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  text-decoration: none;
+}
+
+.portal-content .account-muted a:hover,
+.portal-content .account-sub a:hover,
+.portal-content .account-foot a:hover {
+  color: var(--teal-light);
+  text-decoration: underline;
+}
+
 .portal-content--member,
 .portal-content--partner {
   max-width: 100%;
