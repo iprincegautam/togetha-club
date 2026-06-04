@@ -101,7 +101,7 @@ export default function AdminAffiliateTools({ onCreated }: AdminAffiliateToolsPr
         {infLogin?.temporaryPassword && (
           <p className="admin-msg">Temp password: {infLogin.temporaryPassword}</p>
         )}
-        <button type="submit" className="admin-btn">Create + send login</button>
+        <button type="submit" className="admin-btn">Create + email login</button>
       </form>
 
       <form className="admin-panel" onSubmit={createPromo}>

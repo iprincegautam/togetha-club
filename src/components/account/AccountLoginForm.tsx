@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 import '@/components/apply/apply.css'
+import '@/components/auth/auth.css'
 
 export default function AccountLoginForm() {
   const router = useRouter()
@@ -13,17 +14,27 @@ export default function AccountLoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
-  const [resetSent, setResetSent] = useState(false)
 
   useEffect(() => {
     const prefill = searchParams.get('email')
     if (prefill) setEmail(prefill)
+    if (searchParams.get('created') === '1') {
+      setNotice('Account created — sign in with your new password.')
+    }
+    if (searchParams.get('reset') === '1') {
+      setNotice('Password updated — sign in with your new password.')
+    }
+    if (searchParams.get('error') === 'auth_callback') {
+      setError('Reset link expired or invalid. Request a new code.')
+    }
   }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setNotice('')
     setLoading(true)
     try {
       const supabase = createBrowserSupabaseClient()
@@ -39,30 +50,12 @@ export default function AccountLoginForm() {
     }
   }
 
-  const handleReset = async () => {
-    if (!email.includes('@')) {
-      setError('Enter your email first, then click reset password.')
-      return
-    }
-    setError('')
-    const supabase = createBrowserSupabaseClient()
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${siteUrl}/account/login`,
-    })
-    if (resetError) {
-      setError(resetError.message)
-      return
-    }
-    setResetSent(true)
-  }
-
   return (
     <div className="apply-shell" style={{ maxWidth: 420 }}>
       <p className="apply-eyebrow">✦ Member login ✦</p>
       <h1 className="apply-title">Track your booking</h1>
       <p className="apply-sub">
-        Use the email and password we sent after your payment was confirmed.
+        Sign in to view your trip, pay balance, and update your profile.
       </p>
 
       <form className="apply-card" onSubmit={handleSubmit}>
@@ -92,27 +85,18 @@ export default function AccountLoginForm() {
         </div>
 
         {error && <p className="apply-error">{error}</p>}
-        {resetSent && (
-          <p className="account-msg">Password reset email sent — check your inbox.</p>
-        )}
+        {notice && <p className="account-msg">{notice}</p>}
 
         <button type="submit" className="apply-submit" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in →'}
         </button>
-
-        <button
-          type="button"
-          className="account-btn-outline"
-          style={{ width: '100%', marginTop: 12 }}
-          onClick={handleReset}
-        >
-          Forgot password?
-        </button>
       </form>
 
-      <p className="apply-foot">
-        <Link href={ROUTES.home} style={{ color: 'var(--ink-mid)' }}>← Back to site</Link>
-      </p>
+      <div className="auth-links">
+        <Link href={ROUTES.accountForgotPassword}>Forgot password?</Link>
+        <Link href={ROUTES.accountSignup}>Create an account</Link>
+        <Link href={ROUTES.home}>← Back to site</Link>
+      </div>
     </div>
   )
 }

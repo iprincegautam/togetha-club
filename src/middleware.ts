@@ -71,9 +71,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Member account routes ──
+  const accountPublicPaths = new Set([
+    '/account/login',
+    '/account/signup',
+    '/account/forgot-password',
+    '/account/reset-password',
+  ])
   const isAccountLogin = pathname === '/account/login'
-  const isAccountPublic =
-    isAccountLogin || pathname === '/account/forgot-password'
+  const isAccountPublic = accountPublicPaths.has(pathname)
   const isAccount = pathname.startsWith('/account')
 
   if (isAccount && !isAccountPublic && !session) {
@@ -91,17 +96,24 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Partner / influencer routes ──
+  const partnerPublicPaths = new Set([
+    '/partner/login',
+    '/partner/signup',
+    '/partner/forgot-password',
+    '/partner/reset-password',
+  ])
   const isPartnerLogin = pathname === '/partner/login'
+  const isPartnerPublic = partnerPublicPaths.has(pathname)
   const isPartner = pathname.startsWith('/partner')
 
-  if (isPartner && !isPartnerLogin && !session) {
+  if (isPartner && !isPartnerPublic && !session) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/partner/login'
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  if (isPartner && !isPartnerLogin && session) {
+  if (isPartner && !isPartnerPublic && session) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, influencer_id')

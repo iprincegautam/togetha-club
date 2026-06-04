@@ -38,13 +38,56 @@ export async function sendMemberWelcomeEmail(opts: {
   if (!isResendConfigured() || !resend) return null
 
   const text = opts.existingAccount
-    ? `Hi ${opts.name},\n\nYour Togetha.Club payment is confirmed and linked to your account.\n\nLog in to track your booking and complete your profile:\n${opts.loginUrl}\n\nUse the password you already set. Forgot it? Use "Reset password" on the login page.\n\n— Togetha.Club`
-    : `Hi ${opts.name},\n\nYour Togetha.Club spot is confirmed. We created your member account so you can track your booking anytime.\n\nLog in here:\n${opts.loginUrl}\n\nEmail: ${opts.to}\nTemporary password: ${opts.temporaryPassword}\n\nPlease change your password after your first login.\n\n— Togetha.Club`
+    ? `Hi ${opts.name},\n\nYour Togetha.Club payment is confirmed and linked to your account.\n\nLog in to track your booking and complete your profile:\n${opts.loginUrl}\n\nUse the password you already set. Forgot it? Use "Forgot password" on the login page.\n\n— Togetha.Club`
+    : `Hi ${opts.name},\n\nYour Togetha.Club spot is confirmed. We created your member account so you can track your booking anytime.\n\nLog in here:\n${opts.loginUrl}\n\nEmail: ${opts.to}\nTemporary password: ${opts.temporaryPassword}\n\nYou can change your password anytime under Account → Forgot password.\n\n— Togetha.Club`
 
   return resend.emails.send({
     from: 'Togetha.Club <hello@togetha.club>',
     to: opts.to,
     subject: `✦ Your Togetha.Club member login`,
     text,
+  })
+}
+
+export async function sendPartnerWelcomeEmail(opts: {
+  to: string
+  name: string
+  loginUrl: string
+  signupUrl: string
+  temporaryPassword?: string
+  existingAccount?: boolean
+}) {
+  if (!isResendConfigured() || !resend) return null
+
+  const text = opts.existingAccount
+    ? `Hi ${opts.name},\n\nYour Togetha.Club partner portal is ready.\n\nLog in: ${opts.loginUrl}\n\nUse your existing password, or reset it from the login page.\n\n— Togetha.Club`
+    : opts.temporaryPassword
+      ? `Hi ${opts.name},\n\nWelcome to the Togetha.Club partner program.\n\nLog in: ${opts.loginUrl}\nEmail: ${opts.to}\nTemporary password: ${opts.temporaryPassword}\n\nChange your password after first login, or create your own at:\n${opts.signupUrl}\n\n— Togetha.Club`
+      : `Hi ${opts.name},\n\nYou've been added as a Togetha.Club partner.\n\nCreate your login (email OTP verification):\n${opts.signupUrl}\n\nThen track promo codes and earnings at:\n${opts.loginUrl}\n\n— Togetha.Club`
+
+  return resend.emails.send({
+    from: 'Togetha.Club <hello@togetha.club>',
+    to: opts.to,
+    subject: `✦ Your Togetha.Club partner portal`,
+    text,
+  })
+}
+
+export async function sendOtpEmail(opts: {
+  to: string
+  code: string
+  portalLabel: string
+  purposeLabel: string
+}) {
+  if (!isResendConfigured() || !resend) {
+    console.warn('[sendOtpEmail] RESEND_API_KEY not configured — OTP not emailed')
+    return null
+  }
+
+  return resend.emails.send({
+    from: 'Togetha.Club <hello@togetha.club>',
+    to: opts.to,
+    subject: `✦ ${opts.code} — your Togetha.Club verification code`,
+    text: `Your ${opts.portalLabel} portal verification code for ${opts.purposeLabel}:\n\n${opts.code}\n\nThis code expires in 10 minutes. If you didn't request this, ignore this email.\n\n— Togetha.Club`,
   })
 }

@@ -1,0 +1,36 @@
+.auth-otp-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+
+.auth-otp-cell {
+  width: 44px;
+  height: 48px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0;
+}
+
+.auth-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.auth-links a {
+  color: var(--ink-mid);
+  text-decoration: underline;
+}
+
+.auth-step-label {
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  color: var(--ink-mid);
+  margin-bottom: 8px;
+}

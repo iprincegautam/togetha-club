@@ -1,6 +1,9 @@
 import { randomBytes } from 'crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { generateTemporaryPassword } from '@/lib/member-account'
+import { sendPartnerWelcomeEmail } from '@/lib/resend'
+
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
 
 export async function provisionInfluencerAccount(
   service: SupabaseClient,
@@ -54,6 +57,16 @@ export async function provisionInfluencerAccount(
   }
 
   if (!userId) return null
+
+  const base = siteUrl()
+  await sendPartnerWelcomeEmail({
+    to: email,
+    name: input.name,
+    loginUrl: `${base}/partner/login`,
+    signupUrl: `${base}/partner/signup`,
+    temporaryPassword: isNewUser ? tempPassword : undefined,
+    existingAccount: !isNewUser,
+  })
 
   return {
     userId,

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import PartnerLoginForm from '@/components/partner/PartnerLoginForm'
 import { buildMetadata } from '@/lib/metadata'
 
@@ -6,5 +7,9 @@ export function generateMetadata() {
 }
 
 export default function PartnerLoginPage() {
-  return <PartnerLoginForm />
+  return (
+    <Suspense fallback={<p className="account-muted">Loading…</p>}>
+      <PartnerLoginForm />
+    </Suspense>
+  )
 }

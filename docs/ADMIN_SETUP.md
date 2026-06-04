@@ -53,3 +53,37 @@ After payment, the system automatically:
 
 Set `NEXT_PUBLIC_SITE_URL=https://togetha.club` on Vercel so login links in emails are correct.
 
+---
+
+## Auth — Member & Partner (migration 008)
+
+Run `008_auth_otp.sql` in Supabase SQL Editor (stores OTP codes for Resend email verification).
+
+### Member portal
+
+| Route | Purpose |
+|-------|---------|
+| `/account/signup` | Create account (email OTP via Resend) |
+| `/account/login` | Sign in |
+| `/account/forgot-password` | Request 6-digit reset code |
+| `/account/reset-password` | Enter OTP + new password |
+
+Payment still auto-provisions accounts and sends welcome email. Signup also links an existing `applicants` row when emails match.
+
+### Partner portal
+
+| Route | Purpose |
+|-------|---------|
+| `/partner/signup` | Claim portal (email must exist in `influencers`) |
+| `/partner/login` | Sign in |
+| `/partner/forgot-password` | Request reset code |
+| `/partner/reset-password` | Enter OTP + new password |
+
+Admin **Create + email login** on `/admin/affiliates` now sends a partner welcome email via Resend.
+
+### Email requirements
+
+- `RESEND_API_KEY` on Vercel (OTP + welcome emails)
+- `hello@togetha.club` domain verified in Resend
+- Supabase **Auth → URL Configuration** add redirect: `https://togetha.club/auth/callback` (for optional email-link password reset)
+
