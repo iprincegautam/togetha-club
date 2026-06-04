@@ -2,7 +2,6 @@ import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
 import { ROUTES } from '@/constants/routes'
 import { requireMemberSession } from '@/lib/auth/member'
-import { MEMBER_PORTAL_NAV } from '@/lib/portal-nav'
 import '@/components/account/account.css'
 import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
@@ -33,7 +32,6 @@ export default async function AccountLayout({
         variant="member"
         brand="✦ My Togetha.Club"
         homeHref={ROUTES.account}
-        nav={MEMBER_PORTAL_NAV}
         signOutHref={ROUTES.accountLogin}
       >
         {children}

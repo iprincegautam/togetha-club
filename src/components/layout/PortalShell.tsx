@@ -4,21 +4,13 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 import PortalBackLink from '@/components/layout/PortalBackLink'
+import { getPortalNav, type PortalNavItem } from '@/lib/portal-nav-config'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
-
-export type PortalNavItem = {
-  href: string
-  label: string
-  /** Default: exact path match */
-  match?: 'exact' | 'prefix'
-  isActive?: (pathname: string) => boolean
-}
 
 type PortalShellProps = {
   variant: 'member' | 'partner' | 'admin'
   brand: string
   homeHref: string
-  nav: readonly PortalNavItem[]
   signOutHref: string
   children: React.ReactNode
 }
@@ -35,12 +27,12 @@ export default function PortalShell({
   variant,
   brand,
   homeHref,
-  nav,
   signOutHref,
   children,
 }: PortalShellProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const nav = useMemo(() => getPortalNav(variant), [variant])
 
   const activeItem = useMemo(
     () => nav.find((item) => navItemActive(pathname, item)) ?? nav[0],
