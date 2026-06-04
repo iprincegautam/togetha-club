@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import { formatPaise } from '@/lib/utils'
 
@@ -60,11 +59,6 @@ export default function PartnerDashboard() {
         <p className="apply-eyebrow">✦ Partner ✦</p>
         <h1 className="account-title">{data.influencer.name}</h1>
         <p className="account-sub">{data.influencer.email}</p>
-        <p className="account-muted" style={{ marginTop: 8 }}>
-          <Link href={ROUTES.partnerProfile}>Profile & payout</Link>
-          {' · '}
-          <Link href={ROUTES.partnerSettings}>Settings</Link>
-        </p>
         {msg && <p className="account-msg">{msg}</p>}
       </div>
 

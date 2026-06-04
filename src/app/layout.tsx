@@ -6,8 +6,7 @@ import {
   Libre_Baskerville,
   DM_Sans,
 } from 'next/font/google'
-import Nav from '@/components/layout/Nav'
-import Footer from '@/components/layout/Footer'
+import SiteChrome from '@/components/layout/SiteChrome'
 import SiteMotion from '@/components/layout/SiteMotion'
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from '@/lib/metadata'
 import './globals.css'
@@ -76,11 +75,9 @@ export default function RootLayout({
       className={`${playfairDisplay.variable} ${caveat.variable} ${libreBaskerville.variable} ${dmSans.variable}`}
     >
       <body>
-        <Nav />
-        <main className="site-main">
+        <SiteChrome>
           <SiteMotion>{children}</SiteMotion>
-        </main>
-        <Footer />
+        </SiteChrome>
       </body>
     </html>
   )

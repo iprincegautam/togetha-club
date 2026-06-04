@@ -1354,6 +1354,12 @@ footer {
   min-height: 50vh;
 }
 
+.site-main--portal {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: 0;
+}
+
 /* ── Animations ── */
 @keyframes fadeUp {
   from {

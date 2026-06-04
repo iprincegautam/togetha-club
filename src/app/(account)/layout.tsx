@@ -1,8 +1,11 @@
-import AccountNav from '@/components/account/AccountNav'
+import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
+import { ROUTES } from '@/constants/routes'
 import { requireMemberSession } from '@/lib/auth/member'
+import { MEMBER_PORTAL_NAV } from '@/lib/portal-nav'
 import '@/components/account/account.css'
 import '@/styles/portal-nav.css'
+import '@/styles/portal-shell.css'
 
 export default async function AccountLayout({
   children,
@@ -12,16 +15,28 @@ export default async function AccountLayout({
   const ctx = await requireMemberSession()
   const showNav = Boolean(ctx?.session)
 
-  return (
-    <div className="account-layout">
-      {showNav ? (
-        <AccountNav />
-      ) : (
+  if (!showNav) {
+    return (
+      <div className="account-layout portal-guest-wrap">
         <div className="portal-back-bar portal-back-bar--light">
           <PortalBackLink variant="light" />
         </div>
-      )}
-      <div className="account-page">{children}</div>
+        <div className="account-page">{children}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="account-layout">
+      <PortalShell
+        variant="member"
+        brand="✦ My Togetha.Club"
+        homeHref={ROUTES.account}
+        nav={MEMBER_PORTAL_NAV}
+        signOutHref={ROUTES.accountLogin}
+      >
+        {children}
+      </PortalShell>
     </div>
   )
 }

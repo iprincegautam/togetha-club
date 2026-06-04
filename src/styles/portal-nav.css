@@ -1,4 +1,4 @@
-/* Shared portal navigation — back link + top bar */
+/* Shared portal navigation — back link + guest bar */
 
 .portal-back-link {
   display: inline-flex;
@@ -64,11 +64,6 @@
   flex-shrink: 0;
 }
 
-.account-nav,
-.admin-nav {
-  flex-wrap: wrap;
-}
-
 @media (max-width: 720px) {
   .portal-back-bar {
     padding: 10px 18px;
@@ -79,20 +74,6 @@
   }
 
   .portal-nav-start {
-    gap: 10px;
-  }
-
-  .account-nav,
-  .admin-nav {
-    padding: 12px 18px;
-    gap: 10px;
-  }
-
-  .account-nav-links,
-  .admin-nav-links-bar {
-    order: 3;
-    width: 100%;
-    flex-wrap: wrap;
     gap: 10px;
   }
 }

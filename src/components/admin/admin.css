@@ -3,43 +3,12 @@
   background: var(--cream);
 }
 
+.admin-layout.portal-layout {
+  min-height: 0;
+}
+
 .admin-layout-body {
   padding-top: 0;
-}
-
-.admin-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 40px;
-  background: var(--ink);
-  border-bottom: 2px solid rgba(245, 237, 216, 0.15);
-}
-
-.admin-nav-logo {
-  font-family: var(--font-family-caveat);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--cream);
-  text-decoration: none;
-  letter-spacing: 0.04em;
-}
-
-.admin-nav-signout {
-  font-family: var(--font-family-caveat);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--cream);
-  background: transparent;
-  border: 2px solid rgba(245, 237, 216, 0.35);
-  border-radius: 3px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.admin-nav-signout:hover {
-  background: rgba(245, 237, 216, 0.1);
 }
 
 .admin-card-wide {
@@ -78,9 +47,14 @@
 
 .admin-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 2px solid var(--ink);
   border-radius: 3px;
   box-shadow: 3px 3px 0 var(--ink);
+}
+
+.portal-content--admin .admin-table-wrap {
+  max-width: 100%;
 }
 
 .admin-table {
@@ -158,24 +132,6 @@
 
 .confirm-whatsapp:hover {
   background: #1ebe57;
-}
-
-.admin-nav-links-bar {
-  display: flex;
-  gap: 20px;
-}
-
-.admin-nav-links-bar a {
-  font-family: var(--font-family-caveat);
-  font-size: 1rem;
-  font-weight: 700;
-  color: rgba(245, 237, 216, 0.7);
-  text-decoration: none;
-}
-
-.admin-nav-links-bar a.active,
-.admin-nav-links-bar a:hover {
-  color: var(--cream);
 }
 
 .admin-nav-links {
@@ -399,18 +355,6 @@
 }
 
 @media (max-width: 768px) {
-  .admin-nav {
-    padding: 14px 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .admin-nav-links-bar {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
   .admin-table th,
   .admin-table td {
     padding: 10px 12px;
