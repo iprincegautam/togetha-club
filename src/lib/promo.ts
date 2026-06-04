@@ -257,10 +257,19 @@ export async function recordPromoRedemption(
     influencer_id: applicant.influencer_id,
     discount_amount: applicant.discount_amount ?? 0,
     commission_amount: promo.commission_amount,
-    status: 'paid',
+    status: 'pending',
   })
 
-  if (insertError) {
+  if (insertError?.code === '23514') {
+    await supabase.from('promo_redemptions').insert({
+      promo_code_id: applicant.promo_code_id,
+      applicant_id: applicantId,
+      influencer_id: applicant.influencer_id,
+      discount_amount: applicant.discount_amount ?? 0,
+      commission_amount: promo.commission_amount,
+      status: 'paid',
+    })
+  } else if (insertError) {
     console.error('[recordPromoRedemption] insert', insertError)
     return
   }

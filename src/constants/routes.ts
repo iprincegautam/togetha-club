@@ -20,4 +20,6 @@ export const ROUTES = {
   account: '/account',
   accountLogin: '/account/login',
   accountProfile: '/account/profile',
+  partner: '/partner',
+  partnerLogin: '/partner/login',
 } as const

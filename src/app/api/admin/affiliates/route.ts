@@ -49,13 +49,15 @@ export async function GET() {
         influencer_id,
         discount_amount,
         commission_amount,
+        status,
         paid_at,
+        created_at,
         applicants ( name, email, batch_slug ),
         promo_codes ( code ),
         influencers ( name )
       `
       )
-      .order('paid_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50)
 
     if (redError) throw redError
@@ -112,6 +114,7 @@ export async function GET() {
         influencerName: inf?.name ?? '—',
         discountAmount: r.discount_amount,
         commissionAmount: r.commission_amount,
+        status: r.status ?? 'pending',
         paidAt: r.paid_at,
       }
     })

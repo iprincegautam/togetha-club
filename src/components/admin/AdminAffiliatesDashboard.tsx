@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatPrice } from '@/lib/utils'
+import AdminAffiliateTools from '@/components/admin/AdminAffiliateTools'
 
 interface InfluencerStat {
   id: string
@@ -33,6 +34,7 @@ interface RedemptionRow {
   influencerName: string
   discountAmount: number
   commissionAmount: number
+  status: string
   paidAt: string
 }
 
@@ -47,8 +49,11 @@ export default function AdminAffiliatesDashboard() {
   const [redemptions, setRedemptions] = useState<RedemptionRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [actionMsg, setActionMsg] = useState<string | null>(null)
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true)
     fetch('/api/admin/affiliates')
       .then((res) => res.json())
       .then((data) => {
@@ -61,6 +66,28 @@ export default function AdminAffiliatesDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    load()
+  }, [load])
+
+  const updateRedemption = async (id: string, status: string) => {
+    setUpdatingId(id)
+    try {
+      const res = await fetch(`/api/admin/redemptions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error('Update failed')
+      setActionMsg('Redemption updated')
+      load()
+    } catch {
+      setActionMsg('Could not update redemption status')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   if (loading) {
     return <p className="admin-loading">Loading affiliate data...</p>
   }
@@ -69,8 +96,13 @@ export default function AdminAffiliatesDashboard() {
     return <p className="apply-error">{error}</p>
   }
 
+  const pendingCount = redemptions.filter((r) => r.status === 'pending').length
+
   return (
     <div className="admin-affiliates">
+      <AdminAffiliateTools onCreated={load} />
+      {actionMsg && <p className="admin-msg">{actionMsg}</p>}
+
       <div className="admin-stat-grid">
         <div className="admin-stat">
           <div className="admin-stat-num">{influencers.length}</div>
@@ -82,15 +114,11 @@ export default function AdminAffiliatesDashboard() {
         </div>
         <div className="admin-stat">
           <div className="admin-stat-num">{redemptions.length}</div>
-          <div className="admin-stat-label">Paid redemptions</div>
+          <div className="admin-stat-label">Redemptions</div>
         </div>
         <div className="admin-stat">
-          <div className="admin-stat-num">
-            {formatPrice(
-              influencers.reduce((s, i) => s + i.totalCommissionPaise, 0) / 100
-            )}
-          </div>
-          <div className="admin-stat-label">Total commission owed</div>
+          <div className="admin-stat-num">{pendingCount}</div>
+          <div className="admin-stat-label">Pending payout</div>
         </div>
       </div>
 
@@ -111,7 +139,7 @@ export default function AdminAffiliatesDashboard() {
               {influencers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="admin-empty">
-                    No influencers yet. Run migration 002 or add via Supabase.
+                    No influencers yet — create one above.
                   </td>
                 </tr>
               ) : (
@@ -187,14 +215,16 @@ export default function AdminAffiliatesDashboard() {
                 <th>Influencer</th>
                 <th>Discount</th>
                 <th>Commission</th>
+                <th>Status</th>
                 <th>Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {redemptions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="admin-empty">
-                    No paid redemptions yet.
+                  <td colSpan={9} className="admin-empty">
+                    No redemptions yet.
                   </td>
                 </tr>
               ) : (
@@ -208,12 +238,37 @@ export default function AdminAffiliatesDashboard() {
                     <td>{r.influencerName}</td>
                     <td>{formatPrice(r.discountAmount / 100)}</td>
                     <td>{formatPrice(r.commissionAmount / 100)}</td>
+                    <td>{r.status}</td>
                     <td>
-                      {new Date(r.paidAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
+                      {r.paidAt
+                        ? new Date(r.paidAt).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : '—'}
+                    </td>
+                    <td>
+                      {r.status === 'pending' && (
+                        <button
+                          type="button"
+                          className="admin-link-btn"
+                          disabled={updatingId === r.id}
+                          onClick={() => updateRedemption(r.id, 'approved')}
+                        >
+                          Approve
+                        </button>
+                      )}
+                      {(r.status === 'pending' || r.status === 'approved') && (
+                        <button
+                          type="button"
+                          className="admin-link-btn"
+                          disabled={updatingId === r.id}
+                          onClick={() => updateRedemption(r.id, 'paid_out')}
+                        >
+                          Mark paid
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { userHasPartnerAccess } from '@/lib/auth/partner'
 import { userHasAdminAccess } from '@/lib/auth/roles'
 
 export async function middleware(request: NextRequest) {
@@ -89,9 +90,50 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(accountUrl)
   }
 
+  // ── Partner / influencer routes ──
+  const isPartnerLogin = pathname === '/partner/login'
+  const isPartner = pathname.startsWith('/partner')
+
+  if (isPartner && !isPartnerLogin && !session) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/partner/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (isPartner && !isPartnerLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, influencer_id')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (!userHasPartnerAccess(profile)) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/partner/login'
+      loginUrl.searchParams.set('error', 'forbidden')
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  if (isPartnerLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, influencer_id')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (userHasPartnerAccess(profile)) {
+      const partnerUrl = request.nextUrl.clone()
+      partnerUrl.pathname = '/partner'
+      partnerUrl.search = ''
+      return NextResponse.redirect(partnerUrl)
+    }
+  }
+
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*'],
+  matcher: ['/admin/:path*', '/account/:path*', '/partner/:path*'],
 }
