@@ -2,7 +2,6 @@ import { headers } from 'next/headers'
 import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
 import { ROUTES } from '@/constants/routes'
-import { requireMemberSession } from '@/lib/auth/member'
 import '@/components/account/account.css'
 import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
@@ -15,8 +14,8 @@ export default async function AccountLayout({
 }) {
   const headerList = await headers()
   const isAuthPage = headerList.get('x-portal-auth-page') === '1'
-  const ctx = await requireMemberSession()
-  const showNav = Boolean(ctx?.session) && !isAuthPage
+  // Middleware already guards /account/* — don't re-gate sidebar on server session timing.
+  const showNav = !isAuthPage
 
   if (!showNav) {
     return (
