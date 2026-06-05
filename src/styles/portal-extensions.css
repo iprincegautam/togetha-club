@@ -322,3 +322,47 @@
   gap: 12px;
   margin-bottom: 20px;
 }
+
+.portal-share-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.portal-copy-btn {
+  font-family: var(--font-dm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--cream);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.portal-copy-btn:hover {
+  background: var(--paper);
+}
+
+.portal-copy-btn.copied {
+  background: var(--teal-stamp);
+  color: #fff;
+  border-color: var(--teal-stamp);
+  box-shadow: 2px 2px 0 rgba(44, 24, 16, 0.35);
+}
+
+.portal-share-url {
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  word-break: break-all;
+  line-height: 1.35;
+  max-width: 280px;
+}
+
+.portal-share-url:hover {
+  color: var(--teal-stamp);
+}

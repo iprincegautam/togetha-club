@@ -4,6 +4,7 @@ import {
   monthKey,
   monthLabel,
 } from '@/lib/partner-portal'
+import { buildPartnerShareUrl } from '@/lib/partner-share'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
 
@@ -138,7 +139,7 @@ export async function buildPartnerMePayload(
       usesCount: p.uses_count,
       maxUses: p.max_uses,
       active: p.active,
-      shareUrl: `${SITE_URL}/apply/batch-a?promo=${encodeURIComponent(p.code)}`,
+      shareUrl: buildPartnerShareUrl(p.code, SITE_URL),
     })),
     recentRedemptions: rows.slice(0, 5).map((r) => mapRedemption(r)),
     monthlyCommissions,

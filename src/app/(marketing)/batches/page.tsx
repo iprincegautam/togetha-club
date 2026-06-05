@@ -3,6 +3,7 @@ import BatchesCatalog from '@/components/batches/BatchesCatalog'
 import StampCircle from '@/components/ui/StampCircle'
 import { fetchBatchesCatalog } from '@/lib/batch-catalog'
 import { ROUTES } from '@/constants/routes'
+import { withPromoQuery } from '@/lib/promo'
 import { buildMetadata } from '@/lib/metadata'
 
 export function generateMetadata() {
@@ -12,7 +13,10 @@ export function generateMetadata() {
   )
 }
 
-export default async function BatchesPage() {
+type PageProps = { searchParams: Promise<{ promo?: string }> }
+
+export default async function BatchesPage({ searchParams }: PageProps) {
+  const { promo } = await searchParams
   const batches = await fetchBatchesCatalog()
 
   return (
@@ -43,7 +47,7 @@ export default async function BatchesPage() {
         <div className="doodle-divider">~ ~ ♡ ~ ~</div>
       </div>
 
-      <BatchesCatalog batches={batches} />
+      <BatchesCatalog batches={batches} promoCode={promo} />
 
       <div className="batches-cta batches-cta--catalog">
         <div className="batches-cta-inner">
@@ -57,10 +61,10 @@ export default async function BatchesPage() {
             Applications take 5 minutes. We reply within 48 hours.
           </p>
           <div className="batches-cta-btns">
-            <Link href={ROUTES.batchDetail('batch-a')} className="batches-cta-btn teal">
+            <Link href={withPromoQuery(ROUTES.batchDetail('batch-a'), promo)} className="batches-cta-btn teal">
               ✦ Batch A (GenZ)
             </Link>
-            <Link href={ROUTES.batchDetail('batch-b')} className="batches-cta-btn rose">
+            <Link href={withPromoQuery(ROUTES.batchDetail('batch-b'), promo)} className="batches-cta-btn rose">
               ♡ Batch B (Millennial)
             </Link>
           </div>

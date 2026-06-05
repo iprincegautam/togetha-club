@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
+import { withPromoQuery } from '@/lib/promo'
 import { formatPrice } from '@/lib/utils'
 import type { BatchCatalogRow } from '@/lib/batch-catalog'
 
 type BatchSwitcherProps = {
   batches: BatchCatalogRow[]
   currentSlug: string
+  promoCode?: string
 }
 
 function statusLabel(status: BatchCatalogRow['status']): string {
@@ -27,7 +29,7 @@ function statusLabel(status: BatchCatalogRow['status']): string {
   }
 }
 
-export default function BatchSwitcher({ batches, currentSlug }: BatchSwitcherProps) {
+export default function BatchSwitcher({ batches, currentSlug, promoCode }: BatchSwitcherProps) {
   const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export default function BatchSwitcher({ batches, currentSlug }: BatchSwitcherPro
           return (
             <Link
               key={batch.slug}
-              href={ROUTES.batchDetail(batch.slug)}
+              href={withPromoQuery(ROUTES.batchDetail(batch.slug), promoCode)}
               role="listitem"
               className={`batch-switcher-card${active ? ' active' : ''}`}
               style={{ '--batch-accent': accent } as React.CSSProperties}

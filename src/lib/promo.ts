@@ -134,6 +134,14 @@ export function normalizePromoCode(code: string): string {
   return code.trim().toUpperCase()
 }
 
+/** Preserve partner promo through catalog → PDP → apply navigation. */
+export function withPromoQuery(path: string, promo?: string | null): string {
+  const code = promo?.trim()
+  if (!code) return path
+  const sep = path.includes('?') ? '&' : '?'
+  return `${path}${sep}promo=${encodeURIComponent(code)}`
+}
+
 export function calculateDiscount(
   originalAmountPaise: number,
   discountType: DiscountType,

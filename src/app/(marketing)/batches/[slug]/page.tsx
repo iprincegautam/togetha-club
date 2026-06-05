@@ -23,7 +23,10 @@ const VALID_SLUGS = ['batch-a', 'batch-b', 'batch-c'] as const
 
 type BatchSlug = (typeof VALID_SLUGS)[number]
 
-type PageProps = { params: Promise<{ slug: string }> }
+type PageProps = {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ promo?: string }>
+}
 
 function isBatchSlug(slug: string): slug is BatchSlug {
   return (VALID_SLUGS as readonly string[]).includes(slug)
@@ -45,8 +48,9 @@ export async function generateStaticParams() {
   return VALID_SLUGS.map((slug) => ({ slug }))
 }
 
-export default async function BatchProductPage({ params }: PageProps) {
+export default async function BatchProductPage({ params, searchParams }: PageProps) {
   const { slug } = await params
+  const { promo } = await searchParams
   if (!isBatchSlug(slug)) notFound()
 
   const supabase = tryCreateServerSupabaseClient()
@@ -69,7 +73,7 @@ export default async function BatchProductPage({ params }: PageProps) {
       <div className="batch-product-page">
         <div className="product-page product-page--pdp">
           <BatchBreadcrumb label="Batch C — Mystery" />
-          <BatchSwitcher batches={batches} currentSlug={slug} />
+          <BatchSwitcher batches={batches} currentSlug={slug} promoCode={promo} />
           <BatchCSection />
           <Reveal>
             <BatchVideoTestimonials items={videoTestimonials} accentColor={meta.accentColor} />
@@ -97,7 +101,7 @@ export default async function BatchProductPage({ params }: PageProps) {
     <div className="batch-product-page">
       <div className="product-page product-page--pdp">
         <BatchBreadcrumb label={breadcrumbLabel} />
-        <BatchSwitcher batches={batches} currentSlug={slug} />
+        <BatchSwitcher batches={batches} currentSlug={slug} promoCode={promo} />
         <Reveal>
           <BatchCard
             slug={batch.slug}
@@ -107,6 +111,7 @@ export default async function BatchProductPage({ params }: PageProps) {
             accentColor={BATCH_META[slug].accentColor}
             dateOptions={dateOptions}
             tabs={buildBatchTabs(slug)}
+            promoCode={promo}
           />
         </Reveal>
         <Reveal>

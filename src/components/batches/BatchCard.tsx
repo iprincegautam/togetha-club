@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
+import { withPromoQuery } from '@/lib/promo'
 import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
 import BatchTabs from '@/components/batches/BatchTabs'
@@ -18,6 +19,7 @@ interface BatchCardProps {
   accentColor: string
   dateOptions: { label: string; sublabel: string; soldOut?: boolean }[]
   tabs: { id: string; label: string; content: React.ReactNode }[]
+  promoCode?: string
 }
 
 const BATCH_CONFIG: Record<
@@ -119,6 +121,7 @@ export default function BatchCard({
   accentColor,
   dateOptions,
   tabs,
+  promoCode,
 }: BatchCardProps) {
   const router = useRouter()
   const config = BATCH_CONFIG[slug] ?? BATCH_CONFIG['batch-a']
@@ -179,7 +182,7 @@ export default function BatchCard({
             <button
               type="button"
               className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
-              onClick={() => router.push(ROUTES.apply(slug))}
+              onClick={() => router.push(withPromoQuery(ROUTES.apply(slug), promoCode))}
             >
               ✦ Apply & Reserve My Spot →
             </button>

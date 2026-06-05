@@ -1,28 +1,36 @@
 import Link from 'next/link'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
+import { withPromoQuery } from '@/lib/promo'
 import { formatPrice } from '@/lib/utils'
 import type { BatchCatalogRow } from '@/lib/batch-catalog'
 import Reveal from '@/components/ui/Reveal'
 
 type BatchesCatalogProps = {
   batches: BatchCatalogRow[]
+  promoCode?: string
 }
 
-function catalogCta(batch: BatchCatalogRow): { href: string; label: string } {
+function catalogCta(batch: BatchCatalogRow, promoCode?: string): { href: string; label: string } {
   if (batch.slug === 'batch-c' || batch.status === 'coming_soon') {
-    return { href: ROUTES.batchDetail('batch-c'), label: 'See mystery batch →' }
+    return {
+      href: withPromoQuery(ROUTES.batchDetail('batch-c'), promoCode),
+      label: 'See mystery batch →',
+    }
   }
-  return { href: ROUTES.batchDetail(batch.slug), label: 'View batch →' }
+  return {
+    href: withPromoQuery(ROUTES.batchDetail(batch.slug), promoCode),
+    label: 'View batch →',
+  }
 }
 
-export default function BatchesCatalog({ batches }: BatchesCatalogProps) {
+export default function BatchesCatalog({ batches, promoCode }: BatchesCatalogProps) {
   return (
     <section className="batches-catalog">
       <div className="batches-catalog-track">
         {batches.map((batch) => {
           const meta = BATCH_META[batch.slug as keyof typeof BATCH_META]
-          const cta = catalogCta(batch)
+          const cta = catalogCta(batch, promoCode)
           const pillClass =
             batch.slug === 'batch-b'
               ? 'rose-pill'

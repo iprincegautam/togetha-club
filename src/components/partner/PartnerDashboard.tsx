@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
-import { formatPaise } from '@/lib/utils'
+import { buildPartnerShareUrl } from '@/lib/partner-share'
+import { copyTextToClipboard, formatPaise } from '@/lib/utils'
 import PartnerOnboardingBanners from '@/components/partner/PartnerOnboardingBanners'
 import PartnerCommissionChart from '@/components/partner/PartnerCommissionChart'
 
@@ -57,7 +58,8 @@ interface PartnerData {
 export default function PartnerDashboard() {
   const [data, setData] = useState<PartnerData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [msg, setMsg] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [copyError, setCopyError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/partner/me')
@@ -66,9 +68,25 @@ export default function PartnerDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  const copyLink = (url: string) => {
-    navigator.clipboard.writeText(url)
-    setMsg('Link copied!')
+  useEffect(() => {
+    if (!copiedId) return
+    const timer = window.setTimeout(() => setCopiedId(null), 2500)
+    return () => window.clearTimeout(timer)
+  }, [copiedId])
+
+  const shareUrlFor = (code: string) =>
+    typeof window !== 'undefined'
+      ? buildPartnerShareUrl(code, window.location.origin)
+      : buildPartnerShareUrl(code)
+
+  const copyLink = async (code: string, id: string) => {
+    setCopyError(null)
+    try {
+      await copyTextToClipboard(shareUrlFor(code))
+      setCopiedId(id)
+    } catch {
+      setCopyError('Could not copy automatically — tap the link below to select it.')
+    }
   }
 
   if (loading) return <p className="account-muted">Loading…</p>
@@ -90,7 +108,6 @@ export default function PartnerDashboard() {
         <p className="apply-eyebrow">✦ Partner ✦</p>
         <h1 className="account-title">{data.influencer.name}</h1>
         <p className="account-sub">{data.influencer.email}</p>
-        {msg && <p className="account-msg">{msg}</p>}
       </div>
 
       <div className="admin-stat-grid">
@@ -154,6 +171,7 @@ export default function PartnerDashboard() {
 
       <div className="account-panel">
         <h2 className="account-panel-title">Your promo codes</h2>
+        {copyError && <p className="apply-error">{copyError}</p>}
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
@@ -161,27 +179,41 @@ export default function PartnerDashboard() {
                 <th>Code</th>
                 <th>Uses</th>
                 <th>Commission</th>
-                <th>Share</th>
+                <th>Share link</th>
               </tr>
             </thead>
             <tbody>
-              {data.promoCodes.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <code className="admin-code">{p.code}</code>
-                  </td>
-                  <td>
-                    {p.usesCount}
-                    {p.maxUses ? ` / ${p.maxUses}` : ''}
-                  </td>
-                  <td>{formatPaise(p.commissionAmount)}</td>
-                  <td>
-                    <button type="button" className="admin-link-btn" onClick={() => copyLink(p.shareUrl)}>
-                      Copy link
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {data.promoCodes.map((p) => {
+                const shareUrl = shareUrlFor(p.code)
+                const copied = copiedId === p.id
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <code className="admin-code">{p.code}</code>
+                    </td>
+                    <td>
+                      {p.usesCount}
+                      {p.maxUses ? ` / ${p.maxUses}` : ''}
+                    </td>
+                    <td>{formatPaise(p.commissionAmount)}</td>
+                    <td>
+                      <div className="portal-share-cell">
+                        <button
+                          type="button"
+                          className={`portal-copy-btn${copied ? ' copied' : ''}`}
+                          onClick={() => copyLink(p.code, p.id)}
+                          aria-live="polite"
+                        >
+                          {copied ? '✓ Link copied!' : 'Copy link'}
+                        </button>
+                        <a href={shareUrl} className="portal-share-url" target="_blank" rel="noreferrer">
+                          {shareUrl}
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
