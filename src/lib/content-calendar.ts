@@ -30,17 +30,18 @@ export async function seedContentItemsForTrip(
     batch_slug: string
     departure_id: string
     type: 'pre_trip' | 'daily_story' | 'post_trip'
-    due_date: string
+    due_date: string | null
+    scheduled_upload_date?: string | null
   }> = []
 
-  const preDue = new Date(start)
-  preDue.setDate(preDue.getDate() - 4)
+  // Announcement video — influencer picks their own post date (often well before travel).
   items.push({
     influencer_id: input.influencerId,
     batch_slug: input.batchSlug,
     departure_id: input.departureId,
     type: 'pre_trip',
-    due_date: preDue.toISOString(),
+    due_date: null,
+    scheduled_upload_date: null,
   })
 
   const dayMs = 86400000

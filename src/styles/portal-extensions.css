@@ -366,3 +366,40 @@
 .portal-share-url:hover {
   color: var(--teal-stamp);
 }
+
+.portal-content-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.portal-content-action-btn {
+  font-family: var(--font-dm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--cream);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.portal-content-action-btn.preview {
+  background: var(--teal-stamp);
+  color: #fff;
+  border-color: var(--teal-stamp);
+}
+
+.portal-content-action-btn.danger {
+  border-color: var(--rose);
+  color: var(--rose);
+}
+
+.portal-content-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

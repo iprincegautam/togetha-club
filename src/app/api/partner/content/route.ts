@@ -30,7 +30,7 @@ export async function GET() {
       ? row.batch_departures[0]
       : row.batch_departures
     let status = row.status as string
-    if (status === 'pending' && new Date(row.due_date).getTime() < now) {
+    if (status === 'pending' && row.due_date && new Date(row.due_date).getTime() < now) {
       status = 'overdue'
     }
     return {
@@ -38,12 +38,14 @@ export async function GET() {
       type: row.type,
       status,
       dueDate: row.due_date,
+      scheduledUploadDate: row.scheduled_upload_date,
       submittedUrl: row.submitted_url,
       submittedAt: row.submitted_at,
       feedback: row.feedback,
       batchSlug: row.batch_slug,
       batchName: batch?.name ?? row.batch_slug,
       departureLabel: dep?.label ?? null,
+      tripDepartureDate: dep?.departure_date ?? null,
       asciChecked: row.asci_checked,
       disclosureConfirmed: row.disclosure_confirmed,
     }
