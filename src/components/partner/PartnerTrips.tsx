@@ -1,29 +1,52 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
 import { ROUTES } from '@/constants/routes'
+import { formatTripDateRange, parseDateOnly, validateCustomFridayStart } from '@/lib/partner-trip-dates'
 
 type Slot = {
   id: string
   batchName: string
   departureLabel: string | null
   departureDate: string | null
+  returnDate: string | null
+  status: string
+  bookingMode: string
   guestName: string | null
   type: string
 }
 
+type Eligibility = {
+  canBook: boolean
+  reason: string
+  warning: string | null
+  daysUntilLock: number | null
+  nextEligibleUntil: string | null
+  completedTrips: number
+  activeTrips: number
+  used: number
+  limit: number
+}
+
+type Batch = { slug: string; name: string; status: string }
+
 export default function PartnerTrips() {
   const [portalUnlocked, setPortalUnlocked] = useState(false)
+  const [eligibility, setEligibility] = useState<Eligibility | null>(null)
   const [used, setUsed] = useState(0)
   const [limit, setLimit] = useState(2)
   const [slots, setSlots] = useState<Slot[]>([])
+  const [batches, setBatches] = useState<Batch[]>([])
   const [departures, setDepartures] = useState<
     { id: string; batch_slug: string; label: string; spots_m: number; spots_taken_m: number; spots_f: number; spots_taken_f: number }[]
   >([])
+  const [upcomingFridays, setUpcomingFridays] = useState<string[]>([])
+  const [bookingMode, setBookingMode] = useState<'preset' | 'custom'>('preset')
   const [batchSlug, setBatchSlug] = useState('')
   const [departureId, setDepartureId] = useState('')
+  const [fridayStart, setFridayStart] = useState('')
   const [guestSlot, setGuestSlot] = useState<string | null>(null)
   const [guestName, setGuestName] = useState('')
   const [guestPhone, setGuestPhone] = useState('')
@@ -36,10 +59,13 @@ export default function PartnerTrips() {
       .then((r) => r.json())
       .then((json) => {
         setPortalUnlocked(Boolean(json.portalUnlocked))
+        setEligibility(json.eligibility ?? null)
         setUsed(json.entitlement?.used ?? 0)
         setLimit(json.entitlement?.limit ?? 2)
         setSlots(json.slots ?? [])
+        setBatches(json.availableBatches ?? [])
         setDepartures(json.departures ?? [])
+        setUpcomingFridays(json.upcomingFridays ?? [])
       })
       .finally(() => setLoading(false))
   }
@@ -48,15 +74,36 @@ export default function PartnerTrips() {
     load()
   }, [])
 
+  const customPreview = useMemo(() => {
+    if (!fridayStart) return null
+    try {
+      const { start, end } = validateCustomFridayStart(fridayStart)
+      return formatTripDateRange(start, end)
+    } catch {
+      return null
+    }
+  }, [fridayStart])
+
+  const depsForBatch = departures.filter((d) => d.batch_slug === batchSlug)
+
   const book = async () => {
+    const payload =
+      bookingMode === 'custom'
+        ? { bookingMode: 'custom', batchSlug, fridayStart }
+        : { bookingMode: 'preset', batchSlug, departureId }
+
     const res = await fetch('/api/partner/trips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ batchSlug, departureId }),
+      body: JSON.stringify(payload),
     })
     const json = await res.json()
     setMsg(res.ok ? 'Trip booked!' : (json.error ?? 'Failed'))
-    if (res.ok) load()
+    if (res.ok) {
+      setDepartureId('')
+      setFridayStart('')
+      load()
+    }
   }
 
   const saveGuest = async (slotId: string) => {
@@ -73,7 +120,10 @@ export default function PartnerTrips() {
     }
   }
 
-  const depsForBatch = departures.filter((d) => d.batch_slug === batchSlug)
+  const canSubmitBook =
+    eligibility?.canBook &&
+    batchSlug &&
+    (bookingMode === 'preset' ? departureId : fridayStart && customPreview)
 
   if (loading) return <p className="account-muted">Loading…</p>
 
@@ -84,10 +134,6 @@ export default function PartnerTrips() {
           <h1 className="account-title">My trips</h1>
           <p className="portal-lock-message" style={{ marginTop: 12 }}>
             🔒 Complimentary trips unlock after your <strong>Announcement</strong> is approved.
-          </p>
-          <p className="account-muted" style={{ marginTop: 8 }}>
-            Submit your announcement in Content — we review within ~30 minutes. Once approved, you can book your
-            complimentary trip here.
           </p>
           <Link href={ROUTES.partnerContent} className="apply-submit" style={{ display: 'inline-block', marginTop: 16 }}>
             Go to Content →
@@ -102,24 +148,39 @@ export default function PartnerTrips() {
       <div className="account-panel">
         <h1 className="account-title">My trips</h1>
         <div className="portal-entitlement-circles">
-          <div className={`portal-circle filled`}>{used}</div>
+          <div className="portal-circle filled">{used}</div>
           <div className="portal-circle empty">{Math.max(0, limit - used)}</div>
         </div>
         <p className="account-sub" style={{ textAlign: 'center' }}>
-          {used} of {limit} complimentary trips used in 2026 · Resets 1 January 2027
+          {used} of {limit} complimentary trips used · {eligibility?.completedTrips ?? 0} completed
         </p>
+        {eligibility && (
+          <p className={`account-muted${eligibility.canBook ? '' : ''}`} style={{ textAlign: 'center', marginTop: 8 }}>
+            {eligibility.reason}
+          </p>
+        )}
+        {eligibility?.warning && (
+          <p className="portal-lock-message" style={{ marginTop: 12, borderColor: 'var(--rose)' }}>
+            ⚠ {eligibility.warning}
+          </p>
+        )}
       </div>
 
       {slots.map((s) => (
         <div key={s.id} className="account-panel">
           <strong>{s.batchName}</strong>
           <p className="account-muted">{s.departureLabel}</p>
-          <Badge>{s.type}</Badge>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+            <Badge>{s.type}</Badge>
+            <Badge>{s.status}</Badge>
+            {s.bookingMode === 'custom' && <Badge>Custom dates</Badge>}
+          </div>
           {s.guestName ? (
-            <p>Plus-one: {s.guestName}</p>
+            <p style={{ marginTop: 8 }}>Plus-one: {s.guestName}</p>
           ) : (
+            s.status === 'confirmed' &&
             guestSlot !== s.id && (
-              <button type="button" className="admin-link-btn" onClick={() => setGuestSlot(s.id)}>
+              <button type="button" className="admin-link-btn" style={{ marginTop: 8 }} onClick={() => setGuestSlot(s.id)}>
                 Register plus one
               </button>
             )
@@ -140,38 +201,84 @@ export default function PartnerTrips() {
         </div>
       ))}
 
-      {used < limit && (
+      {eligibility?.canBook && (
         <div className="account-panel">
-          <h2 className="account-panel-title">Select your complimentary trip</h2>
+          <h2 className="account-panel-title">Book a complimentary trip</h2>
+          <div className="portal-tabs" style={{ marginBottom: 16 }}>
+            <button
+              type="button"
+              className={`portal-tab${bookingMode === 'preset' ? ' active' : ''}`}
+              onClick={() => setBookingMode('preset')}
+            >
+              Scheduled batch
+            </button>
+            <button
+              type="button"
+              className={`portal-tab${bookingMode === 'custom' ? ' active' : ''}`}
+              onClick={() => setBookingMode('custom')}
+            >
+              Pick my dates
+            </button>
+          </div>
+
           <select className="apply-input" value={batchSlug} onChange={(e) => setBatchSlug(e.target.value)}>
             <option value="">Choose batch</option>
-            {[...new Set(departures.map((d) => d.batch_slug))].map((slug) => (
-              <option key={slug} value={slug}>
-                {slug}
+            {batches.map((b) => (
+              <option key={b.slug} value={b.slug}>
+                {b.name}
               </option>
             ))}
           </select>
-          <select
-            className="apply-input"
-            style={{ marginTop: 8 }}
-            value={departureId}
-            onChange={(e) => setDepartureId(e.target.value)}
-          >
-            <option value="">Choose departure</option>
-            {depsForBatch.map((d) => {
-              const left = (d.spots_m - d.spots_taken_m) + (d.spots_f - d.spots_taken_f)
-              return (
-                <option key={d.id} value={d.id}>
-                  {d.label} ({left} spots left)
-                </option>
-              )
-            })}
-          </select>
-          <button type="button" className="apply-submit" style={{ marginTop: 12 }} disabled={!departureId} onClick={book}>
+
+          {bookingMode === 'preset' ? (
+            <select
+              className="apply-input"
+              style={{ marginTop: 8 }}
+              value={departureId}
+              onChange={(e) => setDepartureId(e.target.value)}
+            >
+              <option value="">Choose departure</option>
+              {depsForBatch.map((d) => {
+                const left = d.spots_m - d.spots_taken_m + (d.spots_f - d.spots_taken_f)
+                return (
+                  <option key={d.id} value={d.id}>
+                    {d.label} ({left} spots left)
+                  </option>
+                )
+              })}
+            </select>
+          ) : (
+            <div style={{ marginTop: 8 }}>
+              <label className="account-muted" style={{ display: 'block', marginBottom: 6, fontSize: '0.88rem' }}>
+                Start on a Friday (return is auto-set to the following Wednesday)
+              </label>
+              <select className="apply-input" value={fridayStart} onChange={(e) => setFridayStart(e.target.value)}>
+                <option value="">Choose a Friday</option>
+                {upcomingFridays.map((f) => (
+                  <option key={f} value={f}>
+                    {parseDateOnly(f).toLocaleDateString('en-IN', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </option>
+                ))}
+              </select>
+              {customPreview && (
+                <p className="account-muted" style={{ marginTop: 8 }}>
+                  Your trip: <strong>{customPreview}</strong>
+                </p>
+              )}
+            </div>
+          )}
+
+          <button type="button" className="apply-submit" style={{ marginTop: 12 }} disabled={!canSubmitBook} onClick={book}>
             Book this trip →
           </button>
         </div>
       )}
+
       {msg && <p className="account-msg">{msg}</p>}
     </div>
   )

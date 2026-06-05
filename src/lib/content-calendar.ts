@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { notifyInfluencer } from '@/lib/notifications'
+import { parseDateOnly } from '@/lib/partner-trip-dates'
 
 const PLACEHOLDER_BATCH = 'batch-a'
 const DAILY_STORY_COUNT = 5
@@ -73,15 +74,15 @@ export async function attachTripDatesToContentProgram(
     influencerId: string
     batchSlug: string
     batchName: string
-    departureId: string
+    departureId?: string | null
     departure: DepartureRow
   }
 ): Promise<void> {
   const start = input.departure.departure_date
-    ? new Date(input.departure.departure_date)
+    ? parseDateOnly(String(input.departure.departure_date).slice(0, 10))
     : new Date(Date.now() + 14 * 86400000)
   const end = input.departure.return_date
-    ? new Date(input.departure.return_date)
+    ? parseDateOnly(String(input.departure.return_date).slice(0, 10))
     : new Date(start.getTime() + 5 * 86400000)
 
   const { data: rows } = await service
@@ -152,7 +153,7 @@ export async function seedContentItemsForTrip(
     influencerName?: string
     batchSlug: string
     batchName: string
-    departureId: string
+    departureId?: string | null
     departure: DepartureRow
   }
 ): Promise<void> {

@@ -27,6 +27,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (body.tripFmvThisYear !== undefined) {
     updates.trip_fmv_this_year = Number(body.tripFmvThisYear)
   }
+  if (body.nextTripEligibleUntil !== undefined) {
+    updates.next_trip_eligible_until = body.nextTripEligibleUntil
+      ? new Date(String(body.nextTripEligibleUntil)).toISOString()
+      : null
+  }
 
   if (Object.keys(updates).length === 0 && !body.createLogin) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
