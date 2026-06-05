@@ -6,6 +6,7 @@ import { getAdminSession } from '@/lib/supabase/server'
 import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
 import '@/styles/portal-shell.css'
+import '@/styles/portal-extensions.css'
 
 export default async function AdminLayout({
   children,

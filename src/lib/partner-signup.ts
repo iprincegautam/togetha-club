@@ -24,7 +24,8 @@ export async function partnerSignupPreflight(
     .maybeSingle()
 
   if (influencer) {
-    if (influencer.status && influencer.status !== 'active') {
+    const blocked = influencer.status === 'inactive' || influencer.status === 'rejected'
+    if (blocked) {
       return { ok: false, error: 'Your partner account is not active yet. Contact Togetha support.' }
     }
     return {
@@ -110,7 +111,7 @@ export async function ensureInfluencerForPartnerSignup(
     .maybeSingle()
 
   if (existing) {
-    if (existing.status && existing.status !== 'active') {
+    if (existing.status === 'inactive' || existing.status === 'rejected') {
       return { ok: false, error: 'Your partner account is not active yet.' }
     }
     return { ok: true, influencerId: existing.id, name: existing.name }
@@ -122,7 +123,7 @@ export async function ensureInfluencerForPartnerSignup(
     .insert({
       name: displayName,
       email,
-      status: 'active',
+      status: 'applied',
       notes: 'Self-registered via partner portal',
     })
     .select('id, name')

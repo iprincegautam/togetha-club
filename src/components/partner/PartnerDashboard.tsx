@@ -1,11 +1,32 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
 import { formatPaise } from '@/lib/utils'
+import PartnerOnboardingBanners from '@/components/partner/PartnerOnboardingBanners'
+import PartnerCommissionChart from '@/components/partner/PartnerCommissionChart'
 
 interface PartnerData {
-  influencer: { name: string; email: string | null; payoutUpi: string | null }
+  influencer: {
+    name: string
+    email: string | null
+    payoutUpi: string | null
+    mouSigned?: boolean
+    panVerified?: boolean
+    panDocUrl?: string | null
+    cashPayoutsThisYear?: number
+    tripFmvThisYear?: number
+  }
+  monthlyCommissions?: { label: string; amountPaise: number }[]
+  recentRedemptions?: {
+    id: string
+    applicantName: string
+    batchSlug: string
+    commissionAmount: number
+    status: string
+    createdAt?: string
+  }[]
   stats: {
     totalCodes: number
     totalRedemptions: number
@@ -53,8 +74,18 @@ export default function PartnerDashboard() {
   if (loading) return <p className="account-muted">Loading…</p>
   if (!data?.influencer) return <p className="account-muted">Could not load partner data.</p>
 
+  const inf = data.influencer
+
   return (
     <div className="account-stack">
+      <PartnerOnboardingBanners
+        mouSigned={Boolean(inf.mouSigned)}
+        panVerified={Boolean(inf.panVerified)}
+        panDocUrl={inf.panDocUrl ?? null}
+        cashPayoutsThisYear={inf.cashPayoutsThisYear ?? 0}
+        tripFmvThisYear={inf.tripFmvThisYear ?? 0}
+      />
+
       <div className="account-panel">
         <p className="apply-eyebrow">✦ Partner ✦</p>
         <h1 className="account-title">{data.influencer.name}</h1>
@@ -80,6 +111,46 @@ export default function PartnerDashboard() {
           <div className="admin-stat-label">Paid out</div>
         </div>
       </div>
+
+      {data.monthlyCommissions && data.monthlyCommissions.length > 0 && (
+        <div className="account-panel">
+          <h2 className="account-panel-title">Commission trend</h2>
+          <PartnerCommissionChart months={data.monthlyCommissions} />
+        </div>
+      )}
+
+      {data.recentRedemptions && data.recentRedemptions.length > 0 && (
+        <div className="account-panel">
+          <h2 className="account-panel-title">
+            Recent bookings{' '}
+            <Link href={ROUTES.partnerBookings} className="admin-link-btn" style={{ fontSize: '0.85rem' }}>
+              View all →
+            </Link>
+          </h2>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Traveler</th>
+                  <th>Batch</th>
+                  <th>Commission</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.recentRedemptions.map((r) => (
+                  <tr key={r.id}>
+                    <td>{r.applicantName}</td>
+                    <td>{r.batchSlug}</td>
+                    <td>{formatPaise(r.commissionAmount)}</td>
+                    <td>{r.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="account-panel">
         <h2 className="account-panel-title">Your promo codes</h2>

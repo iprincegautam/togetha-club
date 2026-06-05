@@ -20,6 +20,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (body.status !== undefined) updates.status = body.status
   if (body.notes !== undefined) updates.notes = body.notes ? String(body.notes).trim() : null
   if (body.payoutUpi !== undefined) updates.payout_upi = body.payoutUpi ? String(body.payoutUpi).trim() : null
+  if (body.panVerified !== undefined) updates.pan_verified = Boolean(body.panVerified)
+  if (body.freeTripsUsedThisYear !== undefined) {
+    updates.free_trips_used_this_year = Number(body.freeTripsUsedThisYear)
+  }
+  if (body.tripFmvThisYear !== undefined) {
+    updates.trip_fmv_this_year = Number(body.tripFmvThisYear)
+  }
 
   if (Object.keys(updates).length === 0 && !body.createLogin) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
