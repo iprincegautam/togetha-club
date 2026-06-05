@@ -45,13 +45,13 @@ export default function PartnerOnboardingBanners({
       )}
       {mouSigned && !panVerified && !panDocUrl && (
         <div className="portal-banner portal-banner--amber">
-          Upload your PAN to enable payouts.{' '}
+          Upload your identity document to enable payouts.{' '}
           <Link href={ROUTES.partnerKyc}>Verify identity →</Link>
         </div>
       )}
       {mouSigned && panDocUrl && !panVerified && (
         <div className="portal-banner portal-banner--blue">
-          PAN verification in progress. We&apos;ll notify you when it&apos;s done.
+          Identity verification in progress. We&apos;ll notify you when it&apos;s done.
         </div>
       )}
       {mouSigned && panVerified && !hideSetup && (

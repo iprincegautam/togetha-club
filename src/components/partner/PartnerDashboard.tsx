@@ -16,6 +16,7 @@ interface PartnerData {
     mouSigned?: boolean
     panVerified?: boolean
     panDocUrl?: string | null
+    kycDocUrl?: string | null
     cashPayoutsThisYear?: number
     tripFmvThisYear?: number
   }
@@ -99,7 +100,7 @@ export default function PartnerDashboard() {
       <PartnerOnboardingBanners
         mouSigned={Boolean(inf.mouSigned)}
         panVerified={Boolean(inf.panVerified)}
-        panDocUrl={inf.panDocUrl ?? null}
+        panDocUrl={inf.kycDocUrl ?? inf.panDocUrl ?? null}
         cashPayoutsThisYear={inf.cashPayoutsThisYear ?? 0}
         tripFmvThisYear={inf.tripFmvThisYear ?? 0}
       />

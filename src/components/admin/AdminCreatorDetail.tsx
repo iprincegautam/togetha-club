@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { kycDocumentLabel } from '@/lib/partner-kyc'
 import { formatPaise } from '@/lib/utils'
 
 type Props = { id: string }
@@ -47,14 +48,29 @@ export default function AdminCreatorDetail({ id }: Props) {
         <div className="account-panel">
           <p>Status: {String(inf.status)}</p>
           <p>MOU: {inf.mou_signed ? 'Signed' : 'Pending'}</p>
-          <p>PAN: {inf.pan_verified ? 'Verified' : inf.pan_doc_url ? 'Submitted' : 'Missing'}</p>
-          {inf.pan_doc_url != null && !inf.pan_verified ? (
+          <p>
+            Identity ({kycDocumentLabel(String(inf.kyc_document_type ?? 'pan'))}):{' '}
+            {inf.pan_verified ? 'Verified' : inf.kyc_doc_url || inf.pan_doc_url ? 'Submitted' : 'Missing'}
+          </p>
+          {inf.kyc_document_number || inf.pan_number ? (
+            <p className="account-muted">Number on file: {String(inf.kyc_document_number ?? inf.pan_number)}</p>
+          ) : null}
+          {(inf.kyc_doc_url || inf.pan_doc_url) != null && !inf.pan_verified ? (
             <>
-              <a href={String(inf.pan_doc_url)} target="_blank" rel="noreferrer">
-                View PAN doc
+              <a
+                href={String(inf.kyc_doc_url ?? inf.pan_doc_url)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                View identity document
               </a>
-              <button type="button" className="apply-submit" style={{ marginTop: 8 }} onClick={() => patch({ panVerified: true })}>
-                Verify PAN
+              <button
+                type="button"
+                className="apply-submit"
+                style={{ marginTop: 8 }}
+                onClick={() => patch({ panVerified: true })}
+              >
+                Verify identity
               </button>
             </>
           ) : null}
