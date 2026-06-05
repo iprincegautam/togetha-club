@@ -72,7 +72,7 @@ export default function PortalShell({
       }
       const content = await fetch('/api/partner/content').then((r) => r.json())
       const overdue = (content.items ?? []).filter(
-        (i: { status: string }) => i.status === 'overdue' || i.status === 'pending'
+        (i: { status: string }) => i.status === 'overdue'
       ).length
       setBadges((b) => ({ ...b, 'content-overdue': overdue }))
       const n = await fetch('/api/partner/notifications?count=true').then((r) => r.json())

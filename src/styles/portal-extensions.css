@@ -403,3 +403,35 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.portal-content-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.portal-content-section-title {
+  font-family: var(--font-caveat);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-mid);
+  margin: 0 0 10px;
+}
+
+.portal-timeline-card.announcement {
+  border-color: var(--gold);
+  background: #fffbf0;
+}
+
+.portal-content-detail-head {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(44, 24, 16, 0.15);
+}
+
+.portal-content-detail .portal-content-actions {
+  margin-top: 12px;
+}

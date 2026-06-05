@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
+import { defaultContentSelection, sortContentItems } from '@/lib/content-calendar-sort'
 
 type Item = {
   id: string
@@ -21,6 +22,12 @@ const ASCI_LABELS = [
   'My caption starts with #Ad, #Collab, or #PaidPartnership',
   'I have tagged @togetha.club in the post',
   'I have not made unverified claims about destinations or experiences',
+]
+
+const SECTIONS: { key: string; title: string; types: string[] }[] = [
+  { key: 'announcement', title: 'Post first', types: ['pre_trip'] },
+  { key: 'during', title: 'During your trip', types: ['daily_story'] },
+  { key: 'after', title: 'After your trip', types: ['post_trip'] },
 ]
 
 function typeLabel(t: string) {
@@ -58,11 +65,15 @@ function cardScheduleText(item: Item) {
     if (item.scheduledUploadDate) {
       return `Post by ${formatDate(item.scheduledUploadDate)}`
     }
-    return 'Post ASAP — pick your date'
+    return 'Post ASAP — pick your date →'
   }
   if (!item.dueDate) return ''
   const label = dueLabel(item.dueDate, item.status)
   return `Due ${formatDate(item.dueDate)}${label ? ` · ${label}` : ''}`
+}
+
+function itemHasActions(item: Item) {
+  return Boolean(item.submittedUrl) || ['submitted', 'rejected', 'approved'].includes(item.status)
 }
 
 export default function PartnerContentCalendar() {
@@ -76,18 +87,33 @@ export default function PartnerContentCalendar() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  const grouped = useMemo(() => {
+    return SECTIONS.map((section) => ({
+      ...section,
+      items: items.filter((i) => section.types.includes(i.type)),
+    })).filter((s) => s.items.length > 0)
+  }, [items])
+
   const load = (keepSelectedId?: string) => {
     fetch('/api/partner/content')
       .then((r) => r.json())
       .then((json) => {
-        const next = json.items ?? []
+        const next = sortContentItems(json.items ?? []) as Item[]
         setItems(next)
         if (keepSelectedId) {
-          const found = next.find((i: Item) => i.id === keepSelectedId)
-          if (found) setSelected(found)
-        } else if (!selected && next[0]) {
-          setSelected(next[0])
+          const found = next.find((i) => i.id === keepSelectedId)
+          if (found) {
+            setSelected(found)
+            return
+          }
         }
+        setSelected((prev) => {
+          if (prev) {
+            const still = next.find((i) => i.id === prev.id)
+            if (still) return still
+          }
+          return defaultContentSelection(next)
+        })
       })
       .finally(() => setLoading(false))
   }
@@ -106,7 +132,11 @@ export default function PartnerContentCalendar() {
 
   const selectItem = (item: Item) => {
     setSelected(item)
-    resetForm()
+    setEditing(false)
+    setUrl('')
+    setScheduleDate(toDateInputValue(item.scheduledUploadDate))
+    setAsci([false, false, false])
+    setError('')
   }
 
   const startEdit = (item: Item) => {
@@ -188,9 +218,10 @@ export default function PartnerContentCalendar() {
 
   const renderActions = (item: Item) => {
     const hasUrl = Boolean(item.submittedUrl)
-    const canEdit =
-      item.status === 'submitted' || item.status === 'rejected' || item.status === 'approved'
+    const canEdit = item.status === 'submitted' || item.status === 'rejected'
     const canDelete = hasUrl && item.status !== 'approved'
+
+    if (!hasUrl && item.status !== 'approved') return null
 
     return (
       <div className="portal-content-actions">
@@ -204,7 +235,7 @@ export default function PartnerContentCalendar() {
             Preview
           </a>
         )}
-        {canEdit && item.status !== 'approved' && (
+        {canEdit && (
           <button type="button" className="portal-content-action-btn" onClick={() => startEdit(item)} disabled={saving}>
             Edit
           </button>
@@ -222,6 +253,32 @@ export default function PartnerContentCalendar() {
       </div>
     )
   }
+
+  const renderCard = (item: Item) => (
+    <div
+      key={item.id}
+      className={`portal-timeline-card${selected?.id === item.id ? ' selected' : ''}${item.status === 'overdue' ? ' overdue' : ''}${item.type === 'pre_trip' ? ' announcement' : ''}`}
+      onClick={() => selectItem(item)}
+      onKeyDown={(e) => e.key === 'Enter' && selectItem(item)}
+      role="button"
+      tabIndex={0}
+    >
+      <Badge>{typeLabel(item.type)}</Badge>
+      <strong style={{ display: 'block', marginTop: 8 }}>{item.batchName}</strong>
+      <span className="account-muted">{item.departureLabel ?? ''}</span>
+      <div style={{ marginTop: 8 }} className="account-muted">
+        {cardScheduleText(item)}
+      </div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8, flexWrap: 'wrap' }}>
+        <Badge>{item.status}</Badge>
+        {itemHasActions(item) && item.submittedUrl && (
+          <span className="account-muted" style={{ fontSize: '0.75rem' }}>
+            Submitted · use Preview / Edit / Delete →
+          </span>
+        )}
+      </div>
+    </div>
+  )
 
   const renderSubmitForm = () => {
     if (!selected) return null
@@ -242,7 +299,7 @@ export default function PartnerContentCalendar() {
               value={scheduleDate}
               onChange={(e) => {
                 setScheduleDate(e.target.value)
-                if (e.target.value && selected.status === 'pending' && !editing) {
+                if (e.target.value) {
                   saveScheduleOnly(selected, e.target.value)
                 }
               }}
@@ -309,69 +366,83 @@ export default function PartnerContentCalendar() {
   return (
     <div className="account-stack">
       <h1 className="account-title">Content calendar</h1>
+      <p className="account-muted" style={{ marginTop: -8 }}>
+        Start with your <strong>Announcement</strong> at the top, then daily stories during the trip, then post-trip.
+      </p>
       <div className="portal-two-col">
-        <div>
+        <div className="portal-content-list">
           {items.length === 0 ? (
             <p className="account-muted">No content deadlines yet. Book a complimentary trip to get your calendar.</p>
           ) : (
-            items.map((item) => (
-              <div
-                key={item.id}
-                className={`portal-timeline-card${selected?.id === item.id ? ' selected' : ''}${item.status === 'overdue' ? ' overdue' : ''}`}
-                onClick={() => selectItem(item)}
-                onKeyDown={(e) => e.key === 'Enter' && selectItem(item)}
-                role="button"
-                tabIndex={0}
-              >
-                <Badge>{typeLabel(item.type)}</Badge>
-                <strong style={{ display: 'block', marginTop: 8 }}>{item.batchName}</strong>
-                <span className="account-muted">{item.departureLabel ?? ''}</span>
-                <div style={{ marginTop: 8 }} className="account-muted">
-                  {cardScheduleText(item)}
-                </div>
-                <Badge>{item.status}</Badge>
+            grouped.map((section) => (
+              <div key={section.key} className="portal-content-section">
+                <h2 className="portal-content-section-title">{section.title}</h2>
+                {section.items.map(renderCard)}
               </div>
             ))
           )}
         </div>
 
-        <div className="account-panel">
+        <div className="account-panel portal-content-detail">
           {!cur ? (
             <p className="account-muted">Select an item</p>
-          ) : cur.status === 'approved' ? (
-            <>
-              <p className="account-msg" style={{ color: 'var(--teal-stamp)' }}>
-                ✓ Approved
-              </p>
-              {cur.submittedAt && (
-                <p className="account-muted" style={{ marginTop: 8 }}>
-                  Submitted {new Date(cur.submittedAt).toLocaleString('en-IN')}
-                </p>
-              )}
-              {renderActions(cur)}
-            </>
-          ) : cur.status === 'submitted' && !editing ? (
-            <>
-              <p>
-                Submitted {cur.submittedAt ? new Date(cur.submittedAt).toLocaleString('en-IN') : ''} — waiting for
-                review.
-              </p>
-              {cur.type === 'pre_trip' && cur.scheduledUploadDate && (
-                <p className="account-muted" style={{ marginTop: 8 }}>
-                  Planned post date: {formatDate(cur.scheduledUploadDate)}
-                </p>
-              )}
-              {renderActions(cur)}
-            </>
-          ) : cur.status === 'rejected' && !editing ? (
-            <>
-              <p className="apply-error">{cur.feedback ?? 'Changes requested'}</p>
-              {renderActions(cur)}
-            </>
-          ) : showSubmitForm ? (
-            renderSubmitForm()
           ) : (
-            renderActions(cur)
+            <>
+              <div className="portal-content-detail-head">
+                <Badge>{typeLabel(cur.type)}</Badge>
+                <strong style={{ display: 'block', marginTop: 8 }}>{cur.batchName}</strong>
+                <p className="account-muted" style={{ marginTop: 4 }}>{cardScheduleText(cur)}</p>
+              </div>
+
+              {cur.status === 'approved' ? (
+                <>
+                  <p className="account-msg" style={{ color: 'var(--teal-stamp)' }}>
+                    ✓ Approved
+                  </p>
+                  {cur.submittedAt && (
+                    <p className="account-muted">
+                      Submitted {new Date(cur.submittedAt).toLocaleString('en-IN')}
+                    </p>
+                  )}
+                  {renderActions(cur)}
+                </>
+              ) : cur.status === 'submitted' && !editing ? (
+                <>
+                  <p>
+                    Submitted {cur.submittedAt ? new Date(cur.submittedAt).toLocaleString('en-IN') : ''} — waiting for
+                    review.
+                  </p>
+                  {cur.type === 'pre_trip' && cur.scheduledUploadDate && (
+                    <p className="account-muted">Planned post date: {formatDate(cur.scheduledUploadDate)}</p>
+                  )}
+                  {renderActions(cur)}
+                </>
+              ) : cur.status === 'rejected' && !editing ? (
+                <>
+                  <p className="apply-error">{cur.feedback ?? 'Changes requested'}</p>
+                  {renderActions(cur)}
+                  <button
+                    type="button"
+                    className="apply-submit"
+                    style={{ marginTop: 12 }}
+                    onClick={() => startEdit(cur)}
+                  >
+                    Revise and resubmit →
+                  </button>
+                </>
+              ) : showSubmitForm ? (
+                renderSubmitForm()
+              ) : (
+                renderActions(cur)
+              )}
+
+              {!itemHasActions(cur) && (cur.status === 'pending' || cur.status === 'overdue') && (
+                <p className="account-muted" style={{ marginTop: 16, fontSize: '0.85rem' }}>
+                  After you submit, you&apos;ll get <strong>Preview</strong>, <strong>Edit</strong>, and{' '}
+                  <strong>Delete</strong> options here.
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>

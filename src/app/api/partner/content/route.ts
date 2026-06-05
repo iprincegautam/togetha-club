@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requirePartnerApiAccess } from '@/lib/auth/partner'
+import { sortContentItems } from '@/lib/content-calendar-sort'
 
 export async function GET() {
   const auth = await requirePartnerApiAccess()
@@ -17,14 +18,14 @@ export async function GET() {
     `
     )
     .eq('influencer_id', auth.influencer.id)
-    .order('due_date', { ascending: true })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
   const now = Date.now()
-  const items = (data ?? []).map((row) => {
+  const items = sortContentItems(
+    (data ?? []).map((row) => {
     const batch = Array.isArray(row.batches) ? row.batches[0] : row.batches
     const dep = Array.isArray(row.batch_departures)
       ? row.batch_departures[0]
@@ -49,7 +50,8 @@ export async function GET() {
       asciChecked: row.asci_checked,
       disclosureConfirmed: row.disclosure_confirmed,
     }
-  })
+    })
+  )
 
   return NextResponse.json({ items })
 }
