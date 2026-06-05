@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { notifyInfluencer } from '@/lib/notifications'
+import { unlockPartnerPortal } from '@/lib/partner-portal-unlock'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -31,12 +32,16 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .update({ status: 'approved', reviewed_at: new Date().toISOString(), reviewed_by: reviewer })
       .eq('id', id)
 
-    await notifyInfluencer(auth.service, {
-      influencerId: item.influencer_id,
-      type: 'content_approved',
-      title: 'Content approved',
-      body: `Your ${item.type} for ${batch?.name ?? item.batch_slug} has been approved.`,
-    })
+    if (item.type === 'pre_trip') {
+      await unlockPartnerPortal(auth.service, item.influencer_id)
+    } else {
+      await notifyInfluencer(auth.service, {
+        influencerId: item.influencer_id,
+        type: 'content_approved',
+        title: 'Content approved',
+        body: `Your ${item.type} for ${batch?.name ?? item.batch_slug} has been approved.`,
+      })
+    }
     return NextResponse.json({ success: true })
   }
 

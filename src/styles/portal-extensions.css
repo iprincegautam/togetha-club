@@ -435,3 +435,61 @@
 .portal-content-detail .portal-content-actions {
   margin-top: 12px;
 }
+
+.portal-locked-card {
+  opacity: 0.72;
+  border-style: dashed !important;
+  background: #f5f3ef;
+}
+
+.portal-locked-card.selected {
+  opacity: 0.9;
+}
+
+.portal-lock-message {
+  font-family: var(--font-dm);
+  font-size: 0.95rem;
+  padding: 12px 14px;
+  border: 2px dashed var(--gold);
+  border-radius: 4px;
+  background: #fffbf0;
+}
+
+.portal-lock-panel {
+  border-color: var(--gold);
+}
+
+.portal-progress-wrap {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--cream);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.portal-progress-wrap.unlocked {
+  border-color: var(--teal-stamp);
+  background: #e8f5ee;
+}
+
+.portal-progress-label {
+  font-family: var(--font-caveat);
+  font-weight: 700;
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+}
+
+.portal-progress-track {
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.portal-progress-fill {
+  height: 100%;
+  background: var(--teal-stamp);
+  transition: width 0.4s ease;
+}

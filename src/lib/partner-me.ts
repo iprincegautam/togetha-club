@@ -122,6 +122,8 @@ export async function buildPartnerMePayload(
       tripFmvThisYear: Number(influencer.trip_fmv_this_year ?? 0),
       freeTripsUsedThisYear: influencer.free_trips_used_this_year ?? 0,
       freeTripsResetYear: influencer.free_trips_reset_year ?? 2026,
+      portalUnlocked: Boolean(influencer.portal_unlocked),
+      portalUnlockedAt: influencer.portal_unlocked_at ?? null,
     },
     stats: {
       totalCodes: promos?.length ?? 0,

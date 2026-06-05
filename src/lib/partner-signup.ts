@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { generatePromoCode } from '@/lib/influencer-account'
+import { ensureDefaultContentProgram } from '@/lib/content-calendar'
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase()
@@ -138,6 +139,7 @@ export async function ensureInfluencerForPartnerSignup(
   }
 
   await ensureDefaultPartnerPromoCode(service, created.id)
+  await ensureDefaultContentProgram(service, created.id)
 
   return { ok: true, influencerId: created.id, name: created.name }
 }

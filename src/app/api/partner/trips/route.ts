@@ -37,6 +37,7 @@ export async function GET() {
     .order('sort_order')
 
   return NextResponse.json({
+    portalUnlocked: Boolean(auth.influencer.portal_unlocked),
     entitlement: {
       used: auth.influencer.free_trips_used_this_year ?? 0,
       limit: FREE_TRIP_LIMIT,
@@ -109,6 +110,16 @@ export async function POST(request: Request) {
   const departureId = String(body.departureId ?? '')
   if (!batchSlug || !departureId) {
     return NextResponse.json({ error: 'batchSlug and departureId required' }, { status: 400 })
+  }
+
+  if (!auth.influencer.portal_unlocked) {
+    return NextResponse.json(
+      {
+        error:
+          'Book trips after your announcement is approved. Submit it in Content and we review within ~30 minutes.',
+      },
+      { status: 403 }
+    )
   }
 
   const used = auth.influencer.free_trips_used_this_year ?? 0

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requirePartnerApiAccess } from '@/lib/auth/partner'
 import { notifyAdmin } from '@/lib/notifications'
+import { isContentTypePortalLocked } from '@/lib/partner-portal-unlock'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -30,6 +31,14 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   if (!existing) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  const portalUnlocked = Boolean(auth.influencer.portal_unlocked)
+  if (action === 'submit' && isContentTypePortalLocked(existing.type, portalUnlocked)) {
+    return NextResponse.json(
+      { error: 'Post and get your announcement approved to unlock this content.' },
+      { status: 403 }
+    )
   }
 
   const batch = Array.isArray(existing.batches) ? existing.batches[0] : existing.batches

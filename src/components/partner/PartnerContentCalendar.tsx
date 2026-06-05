@@ -16,7 +16,10 @@ type Item = {
   submittedUrl: string | null
   submittedAt: string | null
   feedback: string | null
+  portalLocked?: boolean
 }
+
+type Progress = { step: number; total: number; label: string }
 
 const ASCI_LABELS = [
   'My caption starts with #Ad, #Collab, or #PaidPartnership',
@@ -61,13 +64,18 @@ function toDateInputValue(iso: string | null) {
 }
 
 function cardScheduleText(item: Item) {
+  if (item.portalLocked) {
+    return '🔒 Unlocks when your announcement is approved'
+  }
   if (item.type === 'pre_trip') {
     if (item.scheduledUploadDate) {
       return `Post by ${formatDate(item.scheduledUploadDate)}`
     }
     return 'Post ASAP — pick your date →'
   }
-  if (!item.dueDate) return ''
+  if (!item.dueDate) {
+    return 'Dates appear when you book your trip'
+  }
   const label = dueLabel(item.dueDate, item.status)
   return `Due ${formatDate(item.dueDate)}${label ? ` · ${label}` : ''}`
 }
@@ -86,6 +94,9 @@ export default function PartnerContentCalendar() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [portalUnlocked, setPortalUnlocked] = useState(false)
+  const [progress, setProgress] = useState<Progress>({ step: 0, total: 2, label: '' })
+  const [justUnlocked, setJustUnlocked] = useState(false)
 
   const grouped = useMemo(() => {
     return SECTIONS.map((section) => ({
@@ -100,6 +111,14 @@ export default function PartnerContentCalendar() {
       .then((json) => {
         const next = sortContentItems(json.items ?? []) as Item[]
         setItems(next)
+        setPortalUnlocked((was) => {
+          if (json.portalUnlocked && !was) {
+            setJustUnlocked(true)
+            setTimeout(() => setJustUnlocked(false), 5000)
+          }
+          return Boolean(json.portalUnlocked)
+        })
+        if (json.progress) setProgress(json.progress)
         if (keepSelectedId) {
           const found = next.find((i) => i.id === keepSelectedId)
           if (found) {
@@ -214,6 +233,7 @@ export default function PartnerContentCalendar() {
 
   const showSubmitForm =
     selected &&
+    !selected.portalLocked &&
     (editing || selected.status === 'pending' || selected.status === 'overdue')
 
   const renderActions = (item: Item) => {
@@ -257,7 +277,7 @@ export default function PartnerContentCalendar() {
   const renderCard = (item: Item) => (
     <div
       key={item.id}
-      className={`portal-timeline-card${selected?.id === item.id ? ' selected' : ''}${item.status === 'overdue' ? ' overdue' : ''}${item.type === 'pre_trip' ? ' announcement' : ''}`}
+      className={`portal-timeline-card${selected?.id === item.id ? ' selected' : ''}${item.status === 'overdue' ? ' overdue' : ''}${item.type === 'pre_trip' ? ' announcement' : ''}${item.portalLocked ? ' portal-locked-card' : ''}`}
       onClick={() => selectItem(item)}
       onKeyDown={(e) => e.key === 'Enter' && selectItem(item)}
       role="button"
@@ -366,9 +386,22 @@ export default function PartnerContentCalendar() {
   return (
     <div className="account-stack">
       <h1 className="account-title">Content calendar</h1>
-      <p className="account-muted" style={{ marginTop: -8 }}>
-        Start with your <strong>Announcement</strong> at the top, then daily stories during the trip, then post-trip.
-      </p>
+      <div className={`portal-progress-wrap${justUnlocked ? ' unlocked' : ''}`}>
+        <div className="portal-progress-label">
+          {justUnlocked ? '🎉 Portal unlocked!' : progress.label}
+        </div>
+        <div className="portal-progress-track" aria-hidden>
+          <div
+            className="portal-progress-fill"
+            style={{ width: `${Math.round((progress.step / progress.total) * 100)}%` }}
+          />
+        </div>
+        <p className="account-muted" style={{ fontSize: '0.82rem', marginTop: 8 }}>
+          {portalUnlocked
+            ? 'My trips and all content deliverables are active.'
+            : 'Submit your announcement → we review within ~30 min → everything unlocks.'}
+        </p>
+      </div>
       <div className="portal-two-col">
         <div className="portal-content-list">
           {items.length === 0 ? (
@@ -376,7 +409,10 @@ export default function PartnerContentCalendar() {
           ) : (
             grouped.map((section) => (
               <div key={section.key} className="portal-content-section">
-                <h2 className="portal-content-section-title">{section.title}</h2>
+                <h2 className="portal-content-section-title">
+                  {section.title}
+                  {section.key !== 'announcement' && !portalUnlocked && ' 🔒'}
+                </h2>
                 {section.items.map(renderCard)}
               </div>
             ))
@@ -429,6 +465,15 @@ export default function PartnerContentCalendar() {
                   >
                     Revise and resubmit →
                   </button>
+                </>
+              ) : cur.portalLocked ? (
+                <>
+                  <p className="portal-lock-message">
+                    🔒 This unlocks when your <strong>Announcement</strong> is approved by Togetha.
+                  </p>
+                  <p className="account-muted" style={{ marginTop: 8 }}>
+                    Submit your announcement video first — we typically review within 30 minutes.
+                  </p>
                 </>
               ) : showSubmitForm ? (
                 renderSubmitForm()

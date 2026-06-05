@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
+import { ROUTES } from '@/constants/routes'
 
 type Slot = {
   id: string
@@ -13,6 +15,7 @@ type Slot = {
 }
 
 export default function PartnerTrips() {
+  const [portalUnlocked, setPortalUnlocked] = useState(false)
   const [used, setUsed] = useState(0)
   const [limit, setLimit] = useState(2)
   const [slots, setSlots] = useState<Slot[]>([])
@@ -32,6 +35,7 @@ export default function PartnerTrips() {
     fetch('/api/partner/trips')
       .then((r) => r.json())
       .then((json) => {
+        setPortalUnlocked(Boolean(json.portalUnlocked))
         setUsed(json.entitlement?.used ?? 0)
         setLimit(json.entitlement?.limit ?? 2)
         setSlots(json.slots ?? [])
@@ -72,6 +76,26 @@ export default function PartnerTrips() {
   const depsForBatch = departures.filter((d) => d.batch_slug === batchSlug)
 
   if (loading) return <p className="account-muted">Loading…</p>
+
+  if (!portalUnlocked) {
+    return (
+      <div className="account-stack">
+        <div className="account-panel portal-lock-panel">
+          <h1 className="account-title">My trips</h1>
+          <p className="portal-lock-message" style={{ marginTop: 12 }}>
+            🔒 Complimentary trips unlock after your <strong>Announcement</strong> is approved.
+          </p>
+          <p className="account-muted" style={{ marginTop: 8 }}>
+            Submit your announcement in Content — we review within ~30 minutes. Once approved, you can book your
+            complimentary trip here.
+          </p>
+          <Link href={ROUTES.partnerContent} className="apply-submit" style={{ display: 'inline-block', marginTop: 16 }}>
+            Go to Content →
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="account-stack">

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { generatePromoCode, provisionInfluencerAccount } from '@/lib/influencer-account'
+import { ensureDefaultContentProgram } from '@/lib/content-calendar'
 
 export async function GET() {
   const auth = await requireAdminApiAccess()
@@ -46,6 +47,8 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  await ensureDefaultContentProgram(auth.service, influencer.id)
 
   let login: { temporaryPassword?: string; isNewUser: boolean } | null = null
   if (body.createLogin && influencer.email) {
