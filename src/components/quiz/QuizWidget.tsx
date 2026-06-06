@@ -12,9 +12,11 @@ import type { QuizAnswers } from '@/types/quiz'
 
 type Props = {
   onComplete?: (answers: QuizAnswers) => void
+  /** When true, hand off to parent after scoring — do not render inline QuizResult. */
+  delegateResults?: boolean
 }
 
-export default function QuizWidget({ onComplete }: Props) {
+export default function QuizWidget({ onComplete, delegateResults = false }: Props) {
   const router = useRouter()
   const {
     cur,
@@ -33,6 +35,7 @@ export default function QuizWidget({ onComplete }: Props) {
   const [fadeIn, setFadeIn] = useState(true)
   const [quizError, setQuizError] = useState('')
   const resultRef = useRef<HTMLDivElement>(null)
+  const completionNotifiedRef = useRef(false)
 
   const question = QUIZ_QUESTIONS[cur]
   const pct = Math.round(((cur + 1) / totalQuestions) * 100)
@@ -45,11 +48,18 @@ export default function QuizWidget({ onComplete }: Props) {
   }, [cur])
 
   useEffect(() => {
-    if (phase === 'result') {
-      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (phase !== 'result' || !result || completionNotifiedRef.current) return
+
+    completionNotifiedRef.current = true
+
+    if (delegateResults) {
       onComplete?.(ans)
+      return
     }
-  }, [phase, ans, onComplete])
+
+    resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    onComplete?.(ans)
+  }, [phase, result, ans, onComplete, delegateResults])
 
   const handleNext = () => {
     setQuizError('')
@@ -204,8 +214,12 @@ export default function QuizWidget({ onComplete }: Props) {
         </>
       )}
 
-      {phase === 'result' && result && (
+      {phase === 'result' && result && !delegateResults && (
         <QuizResult result={result} answers={ans} onSubmit={handleSubmit} />
+      )}
+
+      {phase === 'result' && delegateResults && (
+        <p className="match-live-loading">Calculating your match preview…</p>
       )}
     </div>
   )

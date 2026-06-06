@@ -643,6 +643,31 @@
   background: var(--paper);
 }
 
+.home-faq-sec {
+  background: var(--warm);
+  border-top: 1px dashed rgba(44, 24, 16, 0.12);
+}
+
+.home-faq-panel {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 24px 4px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.home-faq-inline-link {
+  color: var(--teal-stamp);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.home-faq-inline-link:hover {
+  color: var(--teal);
+}
+
 .reviews-grid {
   display: grid;
   grid-template-columns: 1fr 1.15fr 1fr;

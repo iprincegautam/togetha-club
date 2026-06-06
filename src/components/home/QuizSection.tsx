@@ -4,9 +4,11 @@ import type { QuizAnswers } from '@/types/quiz'
 
 type Props = {
   onComplete?: (answers: QuizAnswers) => void
+  delegateResults?: boolean
+  quizKey?: number
 }
 
-export default function QuizSection({ onComplete }: Props) {
+export default function QuizSection({ onComplete, delegateResults, quizKey }: Props) {
   return (
     <Reveal>
       <section className="quiz-sec" id="quiz">
@@ -20,7 +22,11 @@ export default function QuizSection({ onComplete }: Props) {
               11 questions. 4 minutes. Age first, then our AI reads the real you between the lines.
             </p>
           </div>
-          <QuizWidget onComplete={onComplete} />
+          <QuizWidget
+            key={quizKey}
+            onComplete={onComplete}
+            delegateResults={delegateResults}
+          />
         </div>
       </section>
     </Reveal>

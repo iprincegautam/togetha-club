@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import QuizSection from '@/components/home/QuizSection'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
@@ -14,43 +15,94 @@ type Props = {
   initialBatch?: MatchableBatchSlug
 }
 
+type MatchLabMode = 'quiz' | 'results'
+
 export default function MatchLabClient({ initialBatch }: Props) {
+  const searchParams = useSearchParams()
+  const [booted, setBooted] = useState(false)
+  const [mode, setMode] = useState<MatchLabMode>('quiz')
+  const [quizKey, setQuizKey] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers | null>(null)
   const [analysis, setAnalysis] = useState<MatchAnalysis | null>(null)
 
   useEffect(() => {
-    setAnswers(loadQuizAnswers())
-  }, [])
+    const wantsRetake = searchParams.get('retake') === '1'
+
+    if (wantsRetake) {
+      clearQuizAnswers()
+      setAnswers(null)
+      setAnalysis(null)
+      setMode('quiz')
+      setQuizKey((key) => key + 1)
+      setBooted(true)
+      return
+    }
+
+    const stored = loadQuizAnswers()
+    if (stored) {
+      setAnswers(stored)
+      setMode('results')
+    } else {
+      setMode('quiz')
+    }
+
+    setBooted(true)
+  }, [searchParams])
 
   useEffect(() => {
-    if (!answers) {
+    if (mode !== 'results' || !answers) {
       setAnalysis(null)
       return
     }
+
+    const controller = new AbortController()
 
     fetch('/api/match/preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answers, includeNarrative: true }),
+      signal: controller.signal,
     })
       .then((r) => r.json())
       .then((json) => {
+        if (controller.signal.aborted) return
         if (json.analysis) {
           setAnalysis(json.analysis)
           return
         }
         setAnalysis(analyzeMatchProfile(answers))
       })
-      .catch(() => setAnalysis(analyzeMatchProfile(answers)))
-  }, [answers])
+      .catch((err) => {
+        if (controller.signal.aborted || err?.name === 'AbortError') return
+        setAnalysis(analyzeMatchProfile(answers))
+      })
 
-  const retakeQuiz = () => {
+    return () => controller.abort()
+  }, [answers, mode])
+
+  const retakeQuiz = useCallback(() => {
     clearQuizAnswers()
     setAnswers(null)
     setAnalysis(null)
+    setMode('quiz')
+    setQuizKey((key) => key + 1)
+  }, [])
+
+  const handleQuizComplete = useCallback((saved: QuizAnswers) => {
+    setAnswers(saved)
+    setAnalysis(null)
+    setMode('results')
+  }, [])
+
+  if (!booted) {
+    return (
+      <div className="match-lab">
+        <p className="match-live-loading">Loading your match lab…</p>
+      </div>
+    )
   }
 
-  if (!analysis || !answers) {
+  if (mode === 'quiz') {
     return (
       <div className="match-lab">
         {initialBatch && (
@@ -59,7 +111,19 @@ export default function MatchLabClient({ initialBatch }: Props) {
             pre-select that batch in your preview.
           </p>
         )}
-        <QuizSection onComplete={(saved) => setAnswers(saved)} />
+        <QuizSection
+          key={quizKey}
+          delegateResults
+          onComplete={handleQuizComplete}
+        />
+      </div>
+    )
+  }
+
+  if (!answers || !analysis) {
+    return (
+      <div className="match-lab">
+        <p className="match-live-loading">Calculating your match preview…</p>
       </div>
     )
   }

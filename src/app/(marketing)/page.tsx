@@ -5,6 +5,7 @@ import AISection from '@/components/home/AISection'
 import HowItWorksSection from '@/components/home/HowItWorksSection'
 import BatchPreviewSection from '@/components/home/BatchPreviewSection'
 import ReviewsSection from '@/components/home/ReviewsSection'
+import HomeFaqSection from '@/components/home/HomeFaqSection'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
 import type { Batch, BatchStatus } from '@/types/batch'
@@ -78,6 +79,7 @@ export default async function HomePage() {
       <HowItWorksSection />
       <BatchPreviewSection batches={batches} />
       <ReviewsSection />
+      <HomeFaqSection />
     </>
   )
 }

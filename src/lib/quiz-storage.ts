@@ -14,10 +14,16 @@ export function loadQuizAnswers(): Record<number, number | string> | null {
   try {
     const raw = window.sessionStorage.getItem(QUIZ_ANSWERS_STORAGE_KEY)
     if (!raw) return null
-    return JSON.parse(raw) as Record<number, number | string>
+    const parsed = JSON.parse(raw) as Record<number, number | string>
+    return hasQuizAnswers(parsed) ? parsed : null
   } catch {
     return null
   }
+}
+
+export function hasQuizAnswers(answers: Record<number, number | string> | null | undefined): boolean {
+  if (!answers) return false
+  return Object.keys(answers).length >= 3
 }
 
 export function clearQuizAnswers(): void {
