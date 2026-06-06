@@ -1,4 +1,4 @@
-export type QuestionType = 'opts' | 'range' | 'text'
+export type QuestionType = 'opts' | 'range' | 'text' | 'age'
 
 export interface QuizQuestion {
   id: number

@@ -1057,6 +1057,30 @@ footer {
   border-color: var(--teal);
 }
 
+.qage-wrap {
+  margin-top: 8px;
+}
+
+.qage-input {
+  resize: none;
+  text-align: center;
+  font-family: var(--font-playfair);
+  font-size: 2rem;
+  font-weight: 900;
+  max-width: 160px;
+  margin: 0 auto;
+  display: block;
+}
+
+.qage-hint {
+  margin-top: 10px;
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  text-align: center;
+  line-height: 1.5;
+}
+
 .qrange-val {
   text-align: center;
   font-family: var(--font-playfair);

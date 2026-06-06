@@ -45,7 +45,10 @@ export async function generateAiNarrative(
 
   const prompt = `You write warm, specific 2-sentence previews for Togetha.Club — a matchmaking travel club for singles in the Himalayas. No hype, no em dashes overload. Speak directly to the applicant.
 
-Batch: ${match.batchLabel} (${match.batchTagline})
+Batch: ${match.batchLabel} (${match.batchTagline}, ages ${match.ageRange})
+User age: ${match.userAge ?? 'unknown'}
+Age eligible for this batch: ${match.ageEligible ? 'yes' : 'no'}
+${match.ageNote ? `Age note: ${match.ageNote}` : ''}
 Compatibility: ${match.matchScore}%
 Placement likelihood: ${match.placementChance}%
 Top peer types: ${match.peerMix.slice(0, 3).map((p) => `${p.label} (${p.percent}%)`).join(', ')}

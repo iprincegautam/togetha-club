@@ -90,6 +90,13 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
           <div><dt>Date choice</dt><dd>{applicant.date_choice || '—'}</dd></div>
           <div><dt>Promo</dt><dd>{promoCode || '—'}</dd></div>
           <div><dt>Quiz score</dt><dd>{applicant.quiz_score ?? '—'}</dd></div>
+          {applicant.quiz_answers &&
+          (applicant.quiz_answers[0] != null || applicant.quiz_answers['0'] != null) ? (
+            <div>
+              <dt>Age (from quiz)</dt>
+              <dd>{String(applicant.quiz_answers[0] ?? applicant.quiz_answers['0'])}</dd>
+            </div>
+          ) : null}
           <div><dt>Payment plan</dt><dd>{applicant.payment_plan || '—'}</dd></div>
           <div><dt>Amount paid</dt><dd>{applicant.amount_paid != null ? `₹${(applicant.amount_paid / 100).toLocaleString('en-IN')}` : '—'}</dd></div>
           <div><dt>Balance due</dt><dd>{applicant.balance_due != null ? `₹${(applicant.balance_due / 100).toLocaleString('en-IN')}` : '—'}</dd></div>

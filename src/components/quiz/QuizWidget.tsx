@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BATCH_AGE_LIMITS, isValidQuizAge } from '@/lib/batch-age'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
 import { ROUTES } from '@/constants/routes'
 import { useQuiz } from '@/hooks/useQuiz'
@@ -24,11 +25,13 @@ export default function QuizWidget({ onComplete }: Props) {
     pick,
     setRange,
     setText,
+    setAge,
     goNext,
     goBack,
   } = useQuiz()
 
   const [fadeIn, setFadeIn] = useState(true)
+  const [quizError, setQuizError] = useState('')
   const resultRef = useRef<HTMLDivElement>(null)
 
   const question = QUIZ_QUESTIONS[cur]
@@ -47,6 +50,18 @@ export default function QuizWidget({ onComplete }: Props) {
       onComplete?.(ans)
     }
   }, [phase, ans, onComplete])
+
+  const handleNext = () => {
+    setQuizError('')
+    if (question.type === 'age') {
+      const age = parseInt(String(ans[question.id] ?? ''), 10)
+      if (!isValidQuizAge(age)) {
+        setQuizError('Enter your age (18 or above) to continue.')
+        return
+      }
+    }
+    goNext()
+  }
 
   const handleSubmit = async (name: string, email: string) => {
     if (!result) return
@@ -147,6 +162,30 @@ export default function QuizWidget({ onComplete }: Props) {
                 onChange={(e) => setText(question.id, e.target.value)}
               />
             )}
+
+            {question.type === 'age' && (
+              <div className="qage-wrap">
+                <input
+                  id="quiz-age"
+                  type="text"
+                  inputMode="numeric"
+                  className="qinput qage-input"
+                  placeholder={question.ph}
+                  value={String(ans[question.id] ?? '')}
+                  onChange={(e) => setAge(question.id, e.target.value)}
+                />
+                <p className="qage-hint">
+                  GenZ Edition · ages {BATCH_AGE_LIMITS['batch-a'].label} · Millennial Edition · ages{' '}
+                  {BATCH_AGE_LIMITS['batch-b'].label}
+                </p>
+              </div>
+            )}
+
+            {quizError && (
+              <p className="quiz-error" role="alert">
+                {quizError}
+              </p>
+            )}
           </div>
 
           <div className="qnav">
@@ -158,7 +197,7 @@ export default function QuizWidget({ onComplete }: Props) {
             >
               ← Back
             </button>
-            <button type="button" className="qnext" onClick={goNext}>
+            <button type="button" className="qnext" onClick={handleNext}>
               {isLast ? 'See My Result →' : 'Next →'}
             </button>
           </div>

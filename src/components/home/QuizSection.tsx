@@ -12,7 +12,7 @@ export default function QuizSection() {
             Find your <span className="t">perfect batch.</span>
           </h2>
           <p className="quiz-header-sub">
-            10 questions. 4 minutes. Our AI reads the real you between the lines.
+            11 questions. 4 minutes. Age first, then our AI reads the real you between the lines.
           </p>
         </div>
         <QuizWidget />

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import QuizWidget from '@/components/quiz/QuizWidget'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
+import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
 import { analyzeMatchProfile } from '@/lib/match-engine'
@@ -83,6 +84,11 @@ export default function MatchLabClient({ initialBatch }: Props) {
           Retake the quiz →
         </Link>
       </div>
+      <CohortTeaserPanel
+        answers={answers}
+        batchMatches={analysis.batches}
+        initialBatch={initialBatch}
+      />
       <MatchPreviewPanel
         answers={answers}
         batchMatches={analysis.batches}

@@ -4,14 +4,14 @@ export const BATCH_META = {
     accentColor: 'var(--teal-light)',
     label: 'GenZ Edition',
     tagline: 'Loud. Chaotic. Beautiful.',
-    ageRange: '21–26',
+    ageRange: '18–25',
   },
   'batch-b': {
     color: 'var(--rose)',
     accentColor: 'var(--rose-light)',
     label: 'Millennial Edition',
     tagline: 'Quieter. Deeper. Just as electric.',
-    ageRange: '27–35',
+    ageRange: '26–36',
   },
   'batch-c': {
     color: 'var(--lavender)',

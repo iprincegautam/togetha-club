@@ -45,6 +45,9 @@ export interface BatchMatchResult {
   peerMix: PeerArchetypeBreakdown[]
   connectionHighlights: string[]
   recommended: boolean
+  userAge?: number | null
+  ageEligible: boolean
+  ageNote?: string | null
   cohortMatchPercent?: number | null
   cohortStrongMatchPercent?: number | null
   cohortSampleSize?: number

@@ -130,6 +130,18 @@ export default function MatchPreviewPanel({
 
       {loadingLive && <p className="account-muted match-live-loading">Refreshing live cohort data…</p>}
 
+      {active.ageNote && (
+        <p className="match-age-note" role="status">
+          {active.ageNote}
+        </p>
+      )}
+
+      {active.ageEligible === false && (
+        <p className="match-age-warning">
+          Personality fit is shown for comparison, but placement is unlikely outside your age band.
+        </p>
+      )}
+
       {active.aiNarrative && (
         <div className="match-ai-narrative">
           <p className="match-preview-eyebrow">✦ AI read on you</p>

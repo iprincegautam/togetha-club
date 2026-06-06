@@ -26,6 +26,11 @@ export function useQuiz() {
     setAns((prev) => ({ ...prev, [questionId]: value }))
   }, [])
 
+  const setAge = useCallback((questionId: number, value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 2)
+    setAns((prev) => ({ ...prev, [questionId]: digits }))
+  }, [])
+
   const goNext = useCallback((): QuizResult | undefined => {
     const q = QUIZ_QUESTIONS[cur]
     const updatedAns: QuizAnswers = { ...ans }
@@ -38,6 +43,11 @@ export function useQuiz() {
     if (cur < totalQuestions - 1) {
       setCur((c) => c + 1)
       return undefined
+    }
+
+    if (QUIZ_QUESTIONS[0]?.type === 'age' && updatedAns[0] !== undefined) {
+      updatedAns[0] = parseInt(String(updatedAns[0]), 10)
+      setAns(updatedAns)
     }
 
     const computed = calculateQuizResult(updatedAns)
@@ -62,6 +72,7 @@ export function useQuiz() {
     pick,
     setRange,
     setText,
+    setAge,
     goNext,
     goBack,
   }

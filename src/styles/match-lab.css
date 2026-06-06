@@ -138,6 +138,24 @@
   margin-bottom: 12px;
 }
 
+.match-age-note {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  background: #fffbf0;
+  font-family: var(--font-dm);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.match-age-warning {
+  margin-bottom: 12px;
+  font-family: var(--font-dm);
+  font-size: 0.84rem;
+  color: var(--rose);
+}
+
 .apply-match-preview {
   margin-bottom: 20px;
   padding: 18px 16px;
@@ -371,12 +389,220 @@
   text-align: left;
 }
 
+/* ── Cohort teaser (post-quiz FOMO) ── */
+.cohort-teaser {
+  margin: 28px 0 24px;
+  padding: 24px 20px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f9f4ec 100%);
+  box-shadow: 4px 4px 0 var(--ink);
+  text-align: left;
+}
+
+.cohort-teaser-head {
+  margin-bottom: 8px;
+}
+
+.cohort-teaser-title {
+  font-family: var(--font-playfair);
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+
+.cohort-teaser-count-teal {
+  color: var(--teal-stamp);
+  font-style: italic;
+}
+
+.cohort-teaser-count-rose {
+  color: var(--rose);
+  font-style: italic;
+}
+
+.cohort-teaser-sub {
+  font-family: var(--font-dm);
+  font-size: 0.88rem;
+  color: var(--ink-mid);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.cohort-urgency {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 18px 0 16px;
+  padding: 14px 16px;
+  border: 2px solid var(--rose);
+  border-radius: 4px;
+  background: #fff5f5;
+}
+
+.cohort-urgency strong {
+  display: block;
+  font-family: var(--font-dm);
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.cohort-urgency p {
+  margin: 0;
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+.cohort-urgency-pill {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 99px;
+  background: var(--rose);
+  color: white;
+  font-family: var(--font-family-caveat);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cohort-people-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cohort-person-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid rgba(44, 24, 16, 0.14);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.72);
+  position: relative;
+}
+
+.cohort-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  filter: blur(0.6px);
+  opacity: 0.88;
+}
+
+.cohort-person-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cohort-person-name {
+  font-family: var(--font-dm);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.cohort-person-role {
+  font-family: var(--font-dm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.cohort-person-org {
+  font-family: var(--font-dm);
+  font-size: 0.74rem;
+  color: var(--ink-mid);
+  margin-bottom: 4px;
+}
+
+.cohort-person-vibe {
+  font-family: var(--font-family-caveat);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.cohort-teaser-blur {
+  filter: blur(3.5px);
+  user-select: none;
+}
+
+.cohort-lock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.72rem;
+  opacity: 0.45;
+}
+
+.cohort-more-muted {
+  margin: 12px 0 0;
+  font-family: var(--font-dm);
+  font-size: 0.8rem;
+  color: var(--ink-mid);
+  font-style: italic;
+}
+
+.cohort-teaser-actions {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.cohort-apply-btn {
+  display: inline-block;
+  width: 100%;
+  max-width: 360px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.cohort-apply-btn.rose {
+  background: var(--rose);
+}
+
+.cohort-apply-note {
+  margin: 10px auto 0;
+  max-width: 420px;
+  font-family: var(--font-dm);
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+.qresult .cohort-teaser {
+  margin-top: 24px;
+}
+
+.rfbtn-secondary {
+  background: transparent;
+  color: var(--ink);
+}
+
 @media (max-width: 720px) {
   .match-batch-tabs,
   .match-preview-grid,
   .match-preview-grid.three-up,
-  .apply-match-grid {
+  .apply-match-grid,
+  .cohort-people-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cohort-urgency {
+    flex-direction: column;
   }
 
   .match-batch-cta {

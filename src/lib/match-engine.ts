@@ -1,4 +1,10 @@
 import { BATCH_META } from '@/constants/batches'
+import {
+  ageNoteForBatch,
+  isAgeEligibleForBatch,
+  parseQuizAge,
+  primaryBatchForAge,
+} from '@/lib/batch-age'
 import type {
   ArchetypeId,
   BatchMatchResult,
@@ -334,14 +340,25 @@ export function analyzeBatchMatch(
   const user = answersToCompatibilityVector(answers)
   const profile = BATCH_PROFILES[batchSlug]
   const meta = BATCH_META[batchSlug]
+  const userAge = parseQuizAge(answers)
+  const ageEligible = userAge === null ? true : isAgeEligibleForBatch(userAge, batchSlug)
+  const ageNote = userAge === null ? null : ageNoteForBatch(userAge, batchSlug)
+
   const similarity = vectorSimilarity(user, profile.idealVector)
-  const matchScore = Math.min(97, Math.max(68, Math.round(similarity * 88 + user.authenticity * 9)))
+  let matchScore = Math.min(97, Math.max(68, Math.round(similarity * 88 + user.authenticity * 9)))
   const peerMix = computePeerMix(user, batchSlug)
-  const placementChance = computePlacementChance(
+  let placementChance = computePlacementChance(
     matchScore,
     user.emotionalAvailability,
     batchSlug
   )
+
+  let headline = buildHeadline(matchScore, batchSlug)
+  if (userAge !== null && !ageEligible) {
+    matchScore = Math.min(matchScore, 62)
+    placementChance = Math.min(placementChance, 28)
+    headline = `Outside the ${meta.ageRange} age band for ${meta.label}`
+  }
 
   return {
     batchSlug,
@@ -351,24 +368,42 @@ export function analyzeBatchMatch(
     matchScore,
     placementChance,
     confidence: matchScore >= 85 ? 'high' : matchScore >= 76 ? 'medium' : 'growing',
-    headline: buildHeadline(matchScore, batchSlug),
+    headline,
     summary: buildSummary(matchScore, batchSlug, peerMix),
     peerMix,
     connectionHighlights: buildHighlights(peerMix, batchSlug),
     recommended,
+    userAge,
+    ageEligible,
+    ageNote,
   }
 }
 
 export function analyzeMatchProfile(answers: QuizAnswers): MatchAnalysis {
+  const userAge = parseQuizAge(answers)
   const batches = (['batch-a', 'batch-b'] as const).map((slug) => analyzeBatchMatch(answers, slug))
-  const sorted = [...batches].sort((a, b) => b.matchScore - a.matchScore)
-  const primaryBatch = sorted[0]?.batchSlug ?? 'batch-a'
-  const primaryScore = sorted[0]?.matchScore ?? 72
+
+  let primaryBatch: MatchableBatchSlug = 'batch-a'
+  if (userAge !== null) {
+    const agePrimary = primaryBatchForAge(userAge)
+    if (agePrimary) {
+      primaryBatch = agePrimary
+    } else {
+      const sorted = [...batches].sort((a, b) => b.matchScore - a.matchScore)
+      primaryBatch = sorted[0]?.batchSlug ?? 'batch-a'
+    }
+  } else {
+    const sorted = [...batches].sort((a, b) => b.matchScore - a.matchScore)
+    primaryBatch = sorted[0]?.batchSlug ?? 'batch-a'
+  }
+
+  const primaryScore =
+    batches.find((batch) => batch.batchSlug === primaryBatch)?.matchScore ?? 72
 
   return {
     vector: answersToCompatibilityVector(answers),
     primaryBatch,
-    isHighMatch: primaryScore >= 82,
+    isHighMatch: primaryScore >= 82 && (userAge === null || isAgeEligibleForBatch(userAge, primaryBatch)),
     batches: batches.map((batch) => ({
       ...batch,
       recommended: batch.batchSlug === primaryBatch,

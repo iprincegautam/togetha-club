@@ -1,6 +1,16 @@
 import type { QuizQuestion } from '@/types/quiz'
+import { BATCH_AGE_LIMITS } from '@/lib/batch-age'
 
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
+  {
+    id: 0,
+    type: 'age',
+    q: 'How old are you?',
+    sub: `GenZ Edition is for ages ${BATCH_AGE_LIMITS['batch-a'].label}. Millennial Edition is for ages ${BATCH_AGE_LIMITS['batch-b'].label}. This decides which batch you belong in.`,
+    ph: 'e.g. 23',
+    min: '18',
+    max: '99',
+  },
   {
     id: 1,
     type: 'opts',
