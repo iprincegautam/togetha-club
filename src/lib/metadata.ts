@@ -8,7 +8,7 @@ export const SITE_URL =
 export const DEFAULT_TITLE = "Togetha.Club — India's First Matchmaking Travel Club"
 
 export const DEFAULT_DESCRIPTION =
-  'AI-matched singles. 6 days in the Himalayas. Real connection.'
+  'Book matchmaking travel batches for screened singles. Take the AI quiz, explore Himalayan editions, and join India\'s first matchmaking travel club.'
 
 export function buildMetadata(title: string, description: string): Metadata {
   return {

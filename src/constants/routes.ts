@@ -47,4 +47,6 @@ export const ROUTES = {
   authCallback: '/auth/callback',
   blog: '/blog',
   blogPost: (slug: string) => `/blog/${slug}`,
+  about: '/about',
+  siteMap: '/site-map',
 } as const

@@ -8,6 +8,7 @@ import {
 } from 'next/font/google'
 import SiteChrome from '@/components/layout/SiteChrome'
 import SiteMotion from '@/components/layout/SiteMotion'
+import SiteJsonLd from '@/components/seo/SiteJsonLd'
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from '@/lib/metadata'
 import './globals.css'
 import '@/styles/motion.css'
@@ -76,6 +77,7 @@ export default function RootLayout({
       className={`${playfairDisplay.variable} ${caveat.variable} ${libreBaskerville.variable} ${dmSans.variable}`}
     >
       <body>
+        <SiteJsonLd />
         <SiteChrome>
           <SiteMotion>{children}</SiteMotion>
         </SiteChrome>

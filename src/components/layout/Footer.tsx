@@ -16,22 +16,22 @@ export default function Footer() {
       </p>
       <ul className="flinks">
         <li>
-          <Link href={`${ROUTES.home}#how`}>How It Works</Link>
+          <Link href={ROUTES.batches}>Upcoming Batches</Link>
         </li>
         <li>
-          <Link href={ROUTES.match}>Our AI</Link>
+          <Link href={ROUTES.match}>Our AI Match Quiz</Link>
+        </li>
+        <li>
+          <Link href={ROUTES.about}>About</Link>
+        </li>
+        <li>
+          <Link href={ROUTES.contact}>Contact Us</Link>
         </li>
         <li>
           <Link href={ROUTES.blog}>Journal</Link>
         </li>
         <li>
-          <Link href={ROUTES.batchDetail('batch-a')}>Batch A</Link>
-        </li>
-        <li>
-          <Link href={ROUTES.batchDetail('batch-b')}>Batch B</Link>
-        </li>
-        <li>
-          <Link href={ROUTES.match}>Take the Quiz</Link>
+          <Link href={`${ROUTES.home}#how`}>How It Works</Link>
         </li>
         <li>
           <a href="https://instagram.com/togetha.club" target="_blank" rel="noopener noreferrer">
@@ -42,7 +42,7 @@ export default function Footer() {
           <Link href={ROUTES.accountLogin}>My booking</Link>
         </li>
         <li>
-          <Link href={ROUTES.contact}>Contact</Link>
+          <Link href={ROUTES.siteMap}>Site Map</Link>
         </li>
       </ul>
       <ul className="flinks flinks-legal">
