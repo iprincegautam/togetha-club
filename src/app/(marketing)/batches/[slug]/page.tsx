@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import BatchCard from '@/components/batches/BatchCard'
+import BatchMatchCTA from '@/components/match/BatchMatchCTA'
 import BatchCSection from '@/components/batches/BatchCSection'
 import BatchBreadcrumb from '@/components/batches/BatchBreadcrumb'
 import BatchSwitcher from '@/components/batches/BatchSwitcher'
@@ -114,6 +115,11 @@ export default async function BatchProductPage({ params, searchParams }: PagePro
             promoCode={promo}
           />
         </Reveal>
+        {(slug === 'batch-a' || slug === 'batch-b') && (
+          <Reveal>
+            <BatchMatchCTA batchSlug={slug} />
+          </Reveal>
+        )}
         <Reveal>
           <BatchVideoTestimonials items={videoTestimonials} accentColor={meta.accentColor} />
         </Reveal>

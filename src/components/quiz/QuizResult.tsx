@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
+import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import { ROUTES } from '@/constants/routes'
-import type { QuizResult as QuizResultType } from '@/types/quiz'
+import type { QuizAnswers, QuizResult as QuizResultType } from '@/types/quiz'
 
 interface QuizResultProps {
   result: QuizResultType
+  answers: QuizAnswers
   onSubmit: (name: string, email: string) => Promise<void>
 }
 
@@ -16,7 +18,7 @@ const BATCH_LABELS: Record<QuizResultType['batchRecommendation'], string> = {
   'batch-b': 'Batch B — Millennial Edition',
 }
 
-export default function QuizResult({ result, onSubmit }: QuizResultProps) {
+export default function QuizResult({ result, answers, onSubmit }: QuizResultProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,8 +32,8 @@ export default function QuizResult({ result, onSubmit }: QuizResultProps) {
     : "Good fit. A few curveballs that'll make you interesting."
 
   const description = result.isHighMatch
-    ? "Your answers suggest you're emotionally available, self-aware, and exactly the kind of person our algorithm places at the centre of a batch. You have a higher-than-average chance of meaningful connection. Fill in your details below — we'll be in touch within 48 hours."
-    : "Your answers show depth and originality — exactly what makes for genuine connection. Our AI would place you in a batch with people who'll appreciate the real you. Fill in your details and we'll reach out within 48 hours."
+    ? "Your answers suggest you're emotionally available, self-aware, and exactly the kind of person our algorithm places at the centre of a batch. Explore your fit on each trip below, then apply when you're ready."
+    : "Your answers show depth and originality — exactly what makes for genuine connection. Compare your fit across batches below, then apply when you're ready."
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,6 +100,15 @@ export default function QuizResult({ result, onSubmit }: QuizResultProps) {
       <div className="quiz-result-link">
         <Link href={ROUTES.batches}>View detailed batch pages →</Link>
       </div>
+
+      {result.batchMatches && result.batchMatches.length > 0 && (
+        <MatchPreviewPanel
+          answers={answers}
+          batchMatches={result.batchMatches}
+          initialBatch={result.batchRecommendation}
+          showApplyLink={false}
+        />
+      )}
     </div>
   )
 }

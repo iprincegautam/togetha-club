@@ -1,5 +1,6 @@
 export const ROUTES = {
   home: '/',
+  match: '/match',
   batches: '/batches',
   batchDetail: (slug: string) => `/batches/${slug}`,
   apply: (slug: string) => `/apply/${slug}`,

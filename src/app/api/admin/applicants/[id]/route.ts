@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
+import { buildApplicantMatchInsight } from '@/lib/match-analysis'
+import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import type { ApplicantStatus } from '@/types/applicant'
 
 type RouteParams = { params: Promise<{ id: string }> }
@@ -41,7 +43,28 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  return NextResponse.json({ applicant: data })
+  let matchInsight = data.match_insight ?? null
+  if (!matchInsight && hasQuizAnswers(data.quiz_answers) && data.batch_slug) {
+    const { match } = await buildApplicantMatchInsight(
+      auth.service,
+      normalizeQuizAnswers(data.quiz_answers),
+      data.batch_slug
+    )
+    if (match) {
+      matchInsight = {
+        matchScore: match.matchScore,
+        placementChance: match.placementChance,
+        cohortMatchPercent: match.cohortMatchPercent,
+        cohortStrongMatchPercent: match.cohortStrongMatchPercent,
+        cohortSampleSize: match.cohortSampleSize,
+        aiNarrative: match.aiNarrative,
+        peerMix: match.peerMix,
+        confidence: match.confidence,
+      }
+    }
+  }
+
+  return NextResponse.json({ applicant: data, matchInsight })
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {

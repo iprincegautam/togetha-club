@@ -19,7 +19,7 @@ export default function Footer() {
           <Link href={`${ROUTES.home}#how`}>How It Works</Link>
         </li>
         <li>
-          <Link href={`${ROUTES.home}#ai`}>Our AI</Link>
+          <Link href={ROUTES.match}>Our AI</Link>
         </li>
         <li>
           <Link href={ROUTES.batchDetail('batch-a')}>Batch A</Link>

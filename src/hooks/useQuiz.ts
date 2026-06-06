@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
+import { saveQuizAnswers } from '@/lib/quiz-storage'
 import { calculateQuizResult } from '@/lib/utils'
 import type { QuizAnswers, QuizResult } from '@/types/quiz'
 
@@ -40,6 +41,7 @@ export function useQuiz() {
     }
 
     const computed = calculateQuizResult(updatedAns)
+    saveQuizAnswers(updatedAns)
     setResult(computed)
     setPhase('result')
     return computed

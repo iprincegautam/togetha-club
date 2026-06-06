@@ -14,6 +14,7 @@ import '@/styles/motion.css'
 import '@/components/home/home.css'
 import '@/components/batches/batches.css'
 import '@/components/apply/apply.css'
+import '@/styles/match-lab.css'
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],

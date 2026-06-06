@@ -24,9 +24,11 @@ interface ApplicantDetailProps {
     admin_notes: string | null
     created_at: string
     razorpay_payment_id: string | null
+    match_insight?: Record<string, unknown> | null
     batches?: { name: string; slug: string } | { name: string; slug: string }[] | null
     promo_codes?: { code: string } | { code: string }[] | null
   }
+  matchInsight?: Record<string, unknown> | null
 }
 
 const STATUS_OPTIONS: ApplicantStatus[] = [
@@ -43,7 +45,7 @@ function relName<T extends { name?: string; code?: string }>(rel: T | T[] | null
   return row?.name ?? row?.code ?? null
 }
 
-export default function AdminApplicantDetail({ applicant }: ApplicantDetailProps) {
+export default function AdminApplicantDetail({ applicant, matchInsight }: ApplicantDetailProps) {
   const router = useRouter()
   const [status, setStatus] = useState(applicant.status)
   const [notes, setNotes] = useState(applicant.admin_notes ?? '')
@@ -70,6 +72,7 @@ export default function AdminApplicantDetail({ applicant }: ApplicantDetailProps
 
   const batchName = relName(applicant.batches)
   const promoCode = relName(applicant.promo_codes)
+  const insight = matchInsight ?? applicant.match_insight
 
   return (
     <div className="admin-stack">
@@ -94,6 +97,58 @@ export default function AdminApplicantDetail({ applicant }: ApplicantDetailProps
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
         </dl>
       </div>
+
+      {insight && (
+        <div className="admin-panel">
+          <h3 className="admin-panel-title">AI match review</h3>
+          <dl className="admin-dl">
+            <div>
+              <dt>Batch fit</dt>
+              <dd>{insight.matchScore != null ? `${insight.matchScore}%` : '—'}</dd>
+            </div>
+            <div>
+              <dt>Placement chance</dt>
+              <dd>{insight.placementChance != null ? `${insight.placementChance}%` : '—'}</dd>
+            </div>
+            <div>
+              <dt>Cohort overlap</dt>
+              <dd>
+                {insight.cohortMatchPercent != null
+                  ? `${insight.cohortMatchPercent}%${
+                      insight.cohortSampleSize ? ` · ${insight.cohortSampleSize} applicants` : ''
+                    }`
+                  : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt>Strong mutual fits</dt>
+              <dd>
+                {insight.cohortStrongMatchPercent != null
+                  ? `${insight.cohortStrongMatchPercent}%`
+                  : '—'}
+              </dd>
+            </div>
+            <div>
+              <dt>Confidence</dt>
+              <dd>{String(insight.confidence ?? '—')}</dd>
+            </div>
+          </dl>
+          {insight.aiNarrative ? (
+            <p className="admin-match-narrative">{String(insight.aiNarrative)}</p>
+          ) : null}
+          {Array.isArray(insight.peerMix) && insight.peerMix.length > 0 ? (
+            <div className="admin-match-peers">
+              <strong>Likely peer mix</strong>
+              {(insight.peerMix as { label: string; percent: number }[]).slice(0, 4).map((peer) => (
+                <div key={peer.label} className="admin-match-peer-row">
+                  <span>{peer.label}</span>
+                  <span>{peer.percent}%</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="admin-panel">
         <h3 className="admin-panel-title">Review</h3>

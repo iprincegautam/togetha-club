@@ -7,7 +7,13 @@ import { ROUTES } from '@/constants/routes'
 import { useQuiz } from '@/hooks/useQuiz'
 import QuizResult from '@/components/quiz/QuizResult'
 
-export default function QuizWidget() {
+import type { QuizAnswers } from '@/types/quiz'
+
+type Props = {
+  onComplete?: (answers: QuizAnswers) => void
+}
+
+export default function QuizWidget({ onComplete }: Props) {
   const router = useRouter()
   const {
     cur,
@@ -38,8 +44,9 @@ export default function QuizWidget() {
   useEffect(() => {
     if (phase === 'result') {
       resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      onComplete?.(ans)
     }
-  }, [phase])
+  }, [phase, ans, onComplete])
 
   const handleSubmit = async (name: string, email: string) => {
     if (!result) return
@@ -159,7 +166,7 @@ export default function QuizWidget() {
       )}
 
       {phase === 'result' && result && (
-        <QuizResult result={result} onSubmit={handleSubmit} />
+        <QuizResult result={result} answers={ans} onSubmit={handleSubmit} />
       )}
     </div>
   )

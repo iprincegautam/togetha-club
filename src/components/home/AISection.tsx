@@ -1,6 +1,7 @@
 'use client'
 
 import { useScrollReveal } from '@/hooks/useScrollReveal'
+import { ROUTES } from '@/constants/routes'
 
 import { TRAIT_GLYPH } from '@/constants/brand-glyphs'
 
@@ -40,6 +41,9 @@ export default function AISection() {
             <p className="ai-body">
               We don&apos;t just look at who you are. We look at who you need to be around.
             </p>
+            <a href={ROUTES.match} className="apply-submit" style={{ display: 'inline-block', marginTop: 8 }}>
+              Try the AI Match Lab →
+            </a>
             <div className="ai-traits">
               {TRAITS.map((trait) => (
                 <div key={trait.label} className="tp">

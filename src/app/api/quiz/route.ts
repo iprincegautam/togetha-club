@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { answersToCompatibilityVector } from '@/lib/match-engine'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
+import type { QuizAnswers } from '@/types/quiz'
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +21,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Service unavailable' }, { status: 503 })
     }
 
+    const vector = answersToCompatibilityVector((answers ?? {}) as QuizAnswers)
+
     const { data, error } = await supabase
       .from('applicants')
       .upsert(
@@ -28,7 +32,7 @@ export async function POST(req: NextRequest) {
           quiz_answers: answers,
           quiz_score: score,
           batch_slug: batchRecommendation,
-          compatibility_vector: answers,
+          compatibility_vector: vector,
         },
         { onConflict: 'email' }
       )

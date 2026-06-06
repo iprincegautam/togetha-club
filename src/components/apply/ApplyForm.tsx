@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import DatePicker from '@/components/batches/DatePicker'
 import GenderSelector from '@/components/batches/GenderSelector'
 import RazorpayButton from '@/components/apply/RazorpayButton'
+import ApplyMatchPreview from '@/components/match/ApplyMatchPreview'
 import { ROUTES } from '@/constants/routes'
 import {
   calculatePaymentAmounts,
@@ -427,6 +428,10 @@ export default function ApplyForm({
 
       {step === 3 && (
         <>
+          {(batchSlug === 'batch-a' || batchSlug === 'batch-b') && !isPreview && (
+            <ApplyMatchPreview batchSlug={batchSlug} />
+          )}
+
           <div className="apply-review">
             <div className="apply-review-row">
               <span>Name</span>

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
+import { buildApplicantMatchInsight, snapshotMatchInsight } from '@/lib/match-analysis'
 import {
   calculatePaymentAmounts,
   type PaymentPlan,
 } from '@/lib/payment-plan'
+import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import { isMissingColumnError, resolvePromoDiscount } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
@@ -134,6 +136,33 @@ export async function POST(req: NextRequest) {
       .eq('id', applicantId)
 
     if (baseError) throw baseError
+
+    const { data: applicantRow } = await supabase
+      .from('applicants')
+      .select('quiz_answers, batch_slug')
+      .eq('id', applicantId)
+      .maybeSingle()
+
+    if (
+      applicantRow &&
+      hasQuizAnswers(applicantRow.quiz_answers) &&
+      (batchSlug === 'batch-a' || batchSlug === 'batch-b')
+    ) {
+      const { match } = await buildApplicantMatchInsight(
+        supabase,
+        normalizeQuizAnswers(applicantRow.quiz_answers),
+        batchSlug
+      )
+      if (match) {
+        const { error: insightError } = await supabase
+          .from('applicants')
+          .update({ match_insight: snapshotMatchInsight(match) })
+          .eq('id', applicantId)
+        if (insightError && !isMissingColumnError(insightError)) {
+          console.warn('[POST /api/apply] match_insight not saved:', insightError.message)
+        }
+      }
+    }
 
     const { error: extendedError } = await supabase
       .from('applicants')
