@@ -92,10 +92,10 @@ export default function BatchesCatalog({ batches, promoCode }: BatchesCatalogPro
       </div>
       <p className="batches-catalog-foot">
         Not sure which fits?{' '}
-        <Link href={`${ROUTES.home}#quiz`} className="batches-catalog-foot-link">
+        <Link href={ROUTES.match} className="batches-catalog-foot-link">
           Take the quiz
         </Link>{' '}
-        on the homepage first.
+        in Our AI first.
       </p>
     </section>
   )

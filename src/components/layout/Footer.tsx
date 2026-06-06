@@ -28,7 +28,7 @@ export default function Footer() {
           <Link href={ROUTES.batchDetail('batch-b')}>Batch B</Link>
         </li>
         <li>
-          <Link href={`${ROUTES.home}#quiz`}>Take the Quiz</Link>
+          <Link href={ROUTES.match}>Take the Quiz</Link>
         </li>
         <li>
           <a href="https://instagram.com/togetha.club" target="_blank" rel="noopener noreferrer">

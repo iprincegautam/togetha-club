@@ -1,14 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import QuizWidget from '@/components/quiz/QuizWidget'
+import QuizSection from '@/components/home/QuizSection'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import { BATCH_META } from '@/constants/batches'
-import { ROUTES } from '@/constants/routes'
 import { analyzeMatchProfile } from '@/lib/match-engine'
-import { loadQuizAnswers } from '@/lib/quiz-storage'
+import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
 import type { MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -46,27 +44,22 @@ export default function MatchLabClient({ initialBatch }: Props) {
       .catch(() => setAnalysis(analyzeMatchProfile(answers)))
   }, [answers])
 
+  const retakeQuiz = () => {
+    clearQuizAnswers()
+    setAnswers(null)
+    setAnalysis(null)
+  }
+
   if (!analysis || !answers) {
     return (
       <div className="match-lab">
-        <div className="match-lab-intro">
-          <p className="match-preview-eyebrow">✦ AI Match Lab</p>
-          <h1 className="match-lab-title">
-            See your chances on <span className="t">any batch.</span>
-          </h1>
-          <p className="match-lab-sub">
-            Take the 10-question compatibility quiz, then switch between Batch A and Batch B to preview
-            your match score, placement likelihood, cohort overlap, and the personality mix you&apos;re
-            most likely to connect with.
+        {initialBatch && (
+          <p className="match-lab-note match-lab-note-top">
+            You opened this from {BATCH_META[initialBatch].label}. Complete the quiz and we&apos;ll
+            pre-select that batch in your preview.
           </p>
-          {initialBatch && (
-            <p className="match-lab-note">
-              You opened this from {BATCH_META[initialBatch].label}. Complete the quiz and we&apos;ll
-              pre-select that batch in your preview.
-            </p>
-          )}
-        </div>
-        <QuizWidget onComplete={(saved) => setAnswers(saved)} />
+        )}
+        <QuizSection onComplete={(saved) => setAnswers(saved)} />
       </div>
     )
   }
@@ -80,9 +73,9 @@ export default function MatchLabClient({ initialBatch }: Props) {
           Switch batches to compare fit. Scores blend your quiz profile with real applicant data already
           in each batch pipeline.
         </p>
-        <Link href={`${ROUTES.home}#quiz`} className="match-secondary-link">
+        <button type="button" className="match-secondary-link" onClick={retakeQuiz}>
           Retake the quiz →
-        </Link>
+        </button>
       </div>
       <CohortTeaserPanel
         answers={answers}

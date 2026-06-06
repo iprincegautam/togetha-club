@@ -1,8 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import SectionLabel from '@/components/ui/SectionLabel'
+import { ROUTES } from '@/constants/routes'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
-import { useSmoothScroll } from '@/hooks/useSmoothScroll'
 
 const STATS = [
   {
@@ -54,7 +55,6 @@ const STATS = [
 
 export default function ConceptSection() {
   const ref = useScrollReveal<HTMLElement>()
-  const scrollTo = useSmoothScroll()
 
   return (
     <section ref={ref} className="sec reveal" id="concept">
@@ -75,9 +75,9 @@ export default function ConceptSection() {
               for the same reason. If there&apos;s a spark, you&apos;ll know it — and
               it&apos;ll be real.
             </p>
-            <button type="button" className="btn-p" onClick={() => scrollTo('quiz')}>
+            <Link href={ROUTES.match} className="btn-p">
               ✦ Start the Quiz →
-            </button>
+            </Link>
           </div>
           <div className="stat-cards">
             {STATS.map((stat) => (

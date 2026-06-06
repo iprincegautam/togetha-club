@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation'
 import Reveal from '@/components/ui/Reveal'
 import SectionLabel from '@/components/ui/SectionLabel'
 import { ROUTES } from '@/constants/routes'
-import { useSmoothScroll } from '@/hooks/useSmoothScroll'
-
 import { HOW_IT_WORKS_GLYPH } from '@/constants/brand-glyphs'
 
 const STEPS = [
@@ -14,7 +12,7 @@ const STEPS = [
     icon: HOW_IT_WORKS_GLYPH.quiz,
     title: 'Take the quiz & apply',
     desc: '11 questions — age first, then personality. Our AI uses your answers to build your compatibility profile. Then we read your application personally.',
-    action: 'quiz' as const,
+    action: 'match' as const,
   },
   {
     num: '02',
@@ -40,11 +38,10 @@ const STEPS = [
 ] as const
 
 export default function HowItWorksSection() {
-  const scrollTo = useSmoothScroll()
   const router = useRouter()
 
-  const handleStepClick = (action: 'quiz' | 'batches' | null) => {
-    if (action === 'quiz') scrollTo('quiz')
+  const handleStepClick = (action: 'match' | 'batches' | null) => {
+    if (action === 'match') router.push(ROUTES.match)
     if (action === 'batches') router.push(ROUTES.batches)
   }
 

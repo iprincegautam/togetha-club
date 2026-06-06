@@ -3,11 +3,7 @@
 import Link from 'next/link'
 import StampCircle from '@/components/ui/StampCircle'
 import { ROUTES } from '@/constants/routes'
-import { useSmoothScroll } from '@/hooks/useSmoothScroll'
-
 export default function HeroSection() {
-  const scrollTo = useSmoothScroll()
-
   return (
     <section className="hero" id="top">
       <div className="hero-stamps hero-stamps--desktop" aria-hidden="true">
@@ -113,9 +109,9 @@ export default function HeroSection() {
           </span>
         </p>
         <div className="hero-btns">
-          <button type="button" className="btn-p" onClick={() => scrollTo('quiz')}>
+          <Link href={ROUTES.match} className="btn-p">
             ✦ Take the Compatibility Quiz →
-          </button>
+          </Link>
           <Link href={ROUTES.batches} className="btn-o">
             See All Batches ♡
           </Link>
