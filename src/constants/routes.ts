@@ -45,4 +45,6 @@ export const ROUTES = {
   partnerForgotPassword: '/partner/forgot-password',
   partnerResetPassword: '/partner/reset-password',
   authCallback: '/auth/callback',
+  blog: '/blog',
+  blogPost: (slug: string) => `/blog/${slug}`,
 } as const

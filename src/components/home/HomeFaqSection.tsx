@@ -21,8 +21,12 @@ export default function HomeFaqSection() {
           Still unsure?{' '}
           <Link href={ROUTES.match} className="home-faq-inline-link">
             Try the AI Match Lab
-          </Link>{' '}
-          or{' '}
+          </Link>
+          , read our{' '}
+          <Link href={ROUTES.blog} className="home-faq-inline-link">
+            journal
+          </Link>
+          , or{' '}
           <Link href={ROUTES.contact} className="home-faq-inline-link">
             write to us
           </Link>

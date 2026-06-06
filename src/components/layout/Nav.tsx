@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: `${ROUTES.home}#how`, label: 'How It Works' },
   { href: ROUTES.match, label: 'Our AI' },
   { href: ROUTES.batches, label: 'Our Batches' },
+  { href: ROUTES.blog, label: 'Journal' },
 ] as const
 
 const PORTAL_MOBILE_LINKS = [

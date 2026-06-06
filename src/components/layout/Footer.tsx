@@ -22,6 +22,9 @@ export default function Footer() {
           <Link href={ROUTES.match}>Our AI</Link>
         </li>
         <li>
+          <Link href={ROUTES.blog}>Journal</Link>
+        </li>
+        <li>
           <Link href={ROUTES.batchDetail('batch-a')}>Batch A</Link>
         </li>
         <li>
