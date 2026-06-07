@@ -2,7 +2,7 @@ import { BUSINESS } from '@/config/business'
 import { SITE_URL } from '@/lib/metadata'
 import { getFeaturedSiteMapSections } from '@/lib/sitemap-pages'
 
-const LOGO_URL = `${SITE_URL}/logo.png`
+const LOGO_URL = `${SITE_URL}/icon-512.png`
 
 export default function SiteJsonLd() {
   const navigation = getFeaturedSiteMapSections().map((entry, index) => ({
