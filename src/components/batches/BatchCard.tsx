@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { withPromoQuery } from '@/lib/promo'
+import { slotBookingInstallmentLabel } from '@/lib/payment-plan'
 import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
 import BatchTabs from '@/components/batches/BatchTabs'
@@ -28,7 +29,6 @@ const BATCH_CONFIG: Record<
     genBadge: string
     tagline: string
     ratingText: string
-    installment: string
     includes: string
     roseAccent: boolean
     infoClass?: string
@@ -43,7 +43,6 @@ const BATCH_CONFIG: Record<
     genBadge: 'GenZ · Ages 20–27',
     tagline: '"Manali. Kasol. Sissu. Five nights of chaos, connection, and maybe something more."',
     ratingText: "India's first matchmaking travel experience",
-    installment: '✦ Pay ₹9,499 now · rest 14 days before departure',
     includes: 'Includes accommodation, all meals, transport Delhi↔Manali, activities & experiences',
     roseAccent: false,
     trustItems: [
@@ -57,7 +56,6 @@ const BATCH_CONFIG: Record<
     genBadge: 'Millennial · Ages 28–38',
     tagline: '"For the ones who\'ve done the apps and know what they actually want. No games. Just mountains and real people."',
     ratingText: "India's most intentional travel experience",
-    installment: '✦ Pay ₹11,499 now · rest 14 days before departure',
     includes: 'Premium accommodation, all meals, private transport, guided activities, curated experiences',
     roseAccent: true,
     infoClass: 'rose-bg',
@@ -165,7 +163,7 @@ export default function BatchCard({
                 <span className="price-per">/ per person</span>
               </div>
               <div className="price-installment" style={config.installmentColor ? { color: config.installmentColor } : undefined}>
-                {config.installment}
+                {slotBookingInstallmentLabel(price)}
               </div>
               <div className="price-includes">{config.includes}</div>
             </div>

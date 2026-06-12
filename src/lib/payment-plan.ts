@@ -27,6 +27,14 @@ export function depositAmountForTotal(totalDuePaise: number): number {
   return calculatePaymentAmounts(totalDuePaise, 'deposit').chargeNow
 }
 
+/** Slot-booking copy for marketing pages — matches checkout deposit math. */
+export function slotBookingInstallmentLabel(totalRupees: number): string {
+  const depositPaise = depositAmountForTotal(totalRupees * 100)
+  const depositRupees = Math.round(depositPaise / 100)
+  const formatted = `₹${depositRupees.toLocaleString('en-IN')}`
+  return `✦ Pay ${formatted} now · rest 14 days before departure`
+}
+
 export function statusForPaymentPlan(plan: PaymentPlan): 'paid' | 'deposit_paid' {
   return plan === 'full' ? 'paid' : 'deposit_paid'
 }
