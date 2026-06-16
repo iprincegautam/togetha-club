@@ -605,6 +605,130 @@
   color: var(--ink);
 }
 
+/* ── Quiz lead capture (post-quiz) ── */
+.quiz-lead {
+  margin: 24px 0;
+  text-align: left;
+}
+
+.quiz-lead--gate {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.quiz-lead-teaser {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.quiz-lead-eyebrow {
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  margin: 0 0 8px;
+}
+
+.quiz-lead-score {
+  font-family: var(--font-playfair);
+  font-size: clamp(2.5rem, 8vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.quiz-lead-score-lbl {
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  margin: 6px 0 12px;
+}
+
+.quiz-lead-teaser-copy {
+  font-family: var(--font-dm);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--ink);
+  margin: 0;
+}
+
+.quiz-lead-card {
+  padding: 22px 20px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--warm-white);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.quiz-lead-title {
+  font-family: var(--font-playfair);
+  font-size: 1.35rem;
+  font-weight: 900;
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.quiz-lead-sub {
+  font-family: var(--font-dm);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink-mid);
+  margin: 0 0 16px;
+}
+
+.quiz-lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quiz-lead-fine {
+  margin: 4px 0 0;
+  font-family: var(--font-dm);
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  line-height: 1.45;
+  text-align: center;
+}
+
+.quiz-lead-skip {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  color: var(--ink-mid);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.quiz-lead-skip:hover {
+  color: var(--ink);
+}
+
+.quiz-lead--success,
+.quiz-lead-success {
+  padding: 14px 16px;
+  border: 1.5px dashed var(--teal-stamp);
+  border-radius: 4px;
+  background: rgba(45, 106, 98, 0.06);
+  font-family: var(--font-dm);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.quiz-result-sep {
+  color: var(--ink-mid);
+}
+
+.qresult .quiz-lead {
+  margin: 20px 0 28px;
+}
+
 @media (max-width: 720px) {
   .match-batch-tabs,
   .match-preview-grid,

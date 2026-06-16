@@ -14,6 +14,7 @@ import {
   type PaymentPlan,
 } from '@/lib/payment-plan'
 import { formatPaise } from '@/lib/utils'
+import { loadQuizLead } from '@/lib/quiz-lead-storage'
 import '@/components/batches/batches.css'
 
 interface PromoPreview {
@@ -91,6 +92,16 @@ export default function ApplyForm({
   const [promoError, setPromoError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (isPreview) return
+    const lead = loadQuizLead()
+    if (!lead) return
+    if (!initialName && lead.name) setName(lead.name)
+    if (!initialEmail && lead.email) setEmail(lead.email)
+    if (lead.phone) setPhone(lead.phone)
+    if (!initialApplicantId && lead.applicantId) setApplicantId(lead.applicantId)
+  }, [initialName, initialEmail, initialApplicantId, isPreview])
 
   const validatePromo = useCallback(
     async (code: string): Promise<PromoPreview | null> => {

@@ -19,6 +19,7 @@ export interface ApplicantDbRow {
   id: string
   name: string | null
   email: string
+  phone: string | null
   gender: string | null
   batch_slug: string | null
   quiz_score: number | null
@@ -35,6 +36,7 @@ export function mapApplicantRow(row: ApplicantDbRow) {
     id: row.id,
     name: row.name,
     email: row.email,
+    phone: row.phone ?? null,
     gender: row.gender as 'm' | 'f' | null,
     batchSlug: row.batch_slug,
     batchName: batch?.name ?? null,

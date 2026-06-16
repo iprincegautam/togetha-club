@@ -13,6 +13,7 @@ export async function GET() {
         id,
         name,
         email,
+        phone,
         gender,
         batch_slug,
         quiz_score,

@@ -1,13 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import QuizSection from '@/components/home/QuizSection'
+import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import { BATCH_META } from '@/constants/batches'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
+import { loadQuizLead } from '@/lib/quiz-lead-storage'
+import { calculateQuizResult } from '@/lib/utils'
 import type { MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -15,7 +18,7 @@ type Props = {
   initialBatch?: MatchableBatchSlug
 }
 
-type MatchLabMode = 'quiz' | 'results'
+type MatchLabMode = 'quiz' | 'lead' | 'results'
 
 export default function MatchLabClient({ initialBatch }: Props) {
   const searchParams = useSearchParams()
@@ -24,6 +27,11 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const [quizKey, setQuizKey] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers | null>(null)
   const [analysis, setAnalysis] = useState<MatchAnalysis | null>(null)
+
+  const quizResult = useMemo(
+    () => (answers ? calculateQuizResult(answers) : null),
+    [answers]
+  )
 
   useEffect(() => {
     const wantsRetake = searchParams.get('retake') === '1'
@@ -41,7 +49,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
     const stored = loadQuizAnswers()
     if (stored) {
       setAnswers(stored)
-      setMode('results')
+      setMode(loadQuizLead() ? 'results' : 'lead')
     } else {
       setMode('quiz')
     }
@@ -91,6 +99,10 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const handleQuizComplete = useCallback((saved: QuizAnswers) => {
     setAnswers(saved)
     setAnalysis(null)
+    setMode(loadQuizLead() ? 'results' : 'lead')
+  }, [])
+
+  const unlockResults = useCallback(() => {
     setMode('results')
   }, [])
 
@@ -111,10 +123,22 @@ export default function MatchLabClient({ initialBatch }: Props) {
             pre-select that batch in your preview.
           </p>
         )}
-        <QuizSection
-          key={quizKey}
-          delegateResults
-          onComplete={handleQuizComplete}
+        <QuizSection key={quizKey} delegateResults onComplete={handleQuizComplete} />
+      </div>
+    )
+  }
+
+  if (mode === 'lead' && answers && quizResult) {
+    return (
+      <div className="match-lab">
+        <QuizLeadCapture
+          answers={answers}
+          score={quizResult.score}
+          batchRecommendation={quizResult.batchRecommendation}
+          leadSource="quiz_match_lab"
+          mode="gate"
+          onSuccess={unlockResults}
+          onSkip={unlockResults}
         />
       </div>
     )

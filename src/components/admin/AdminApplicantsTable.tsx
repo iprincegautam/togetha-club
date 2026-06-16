@@ -10,6 +10,7 @@ export interface AdminApplicantRow {
   id: string
   name: string | null
   email: string
+  phone: string | null
   gender: 'm' | 'f' | null
   batchSlug: string | null
   batchName: string | null
@@ -120,6 +121,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
             <tr>
               <th>Name</th>
               <th>Email</th>
+              <th>Phone</th>
               <th>Gender</th>
               <th>Batch</th>
               <th>Promo</th>
@@ -133,7 +135,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={10} className="admin-table-empty">
+                <td colSpan={11} className="admin-table-empty">
                   No applicants found.
                 </td>
               </tr>
@@ -146,6 +148,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                     </Link>
                   </td>
                   <td>{row.email}</td>
+                  <td>{row.phone ?? '—'}</td>
                   <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
                   <td>{row.batchName || row.batchSlug || '—'}</td>
                   <td>{row.promoCode ? <code className="admin-code">{row.promoCode}</code> : '—'}</td>

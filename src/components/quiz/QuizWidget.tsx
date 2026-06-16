@@ -1,10 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { BATCH_AGE_LIMITS, isValidQuizAge } from '@/lib/batch-age'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
-import { ROUTES } from '@/constants/routes'
 import { useQuiz } from '@/hooks/useQuiz'
 import QuizResult from '@/components/quiz/QuizResult'
 
@@ -17,7 +15,6 @@ type Props = {
 }
 
 export default function QuizWidget({ onComplete, delegateResults = false }: Props) {
-  const router = useRouter()
   const {
     cur,
     ans,
@@ -71,30 +68,6 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
       }
     }
     goNext()
-  }
-
-  const handleSubmit = async (name: string, email: string) => {
-    if (!result) return
-
-    const res = await fetch('/api/quiz', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        email,
-        answers: ans,
-        score: result.score,
-        batchRecommendation: result.batchRecommendation,
-      }),
-    })
-
-    const data = await res.json()
-
-    if (!res.ok) {
-      throw new Error(data.error || 'Something went wrong. Please try again.')
-    }
-
-    router.push(ROUTES.apply(result.batchRecommendation))
   }
 
   return (
@@ -215,7 +188,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
       )}
 
       {phase === 'result' && result && !delegateResults && (
-        <QuizResult result={result} answers={ans} onSubmit={handleSubmit} />
+        <QuizResult result={result} answers={ans} />
       )}
 
       {phase === 'result' && delegateResults && (
