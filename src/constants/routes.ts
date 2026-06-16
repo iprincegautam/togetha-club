@@ -1,6 +1,9 @@
 export const ROUTES = {
   home: '/',
   match: '/match',
+  /** Route batch interest through Our AI quiz for lead capture. */
+  matchForBatch: (slug?: string) =>
+    slug === 'batch-a' || slug === 'batch-b' ? `/match?batch=${slug}` : '/match',
   batches: '/batches',
   batchDetail: (slug: string) => `/batches/${slug}`,
   apply: (slug: string) => `/apply/${slug}`,

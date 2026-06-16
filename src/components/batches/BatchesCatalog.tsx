@@ -12,15 +12,16 @@ type BatchesCatalogProps = {
 }
 
 function catalogCta(batch: BatchCatalogRow, promoCode?: string): { href: string; label: string } {
+  const matchUrl = withPromoQuery(ROUTES.matchForBatch(batch.slug), promoCode)
   if (batch.slug === 'batch-c' || batch.status === 'coming_soon') {
     return {
-      href: withPromoQuery(ROUTES.batchDetail('batch-c'), promoCode),
-      label: 'See mystery batch →',
+      href: matchUrl,
+      label: 'Check my fit →',
     }
   }
   return {
-    href: withPromoQuery(ROUTES.batchDetail(batch.slug), promoCode),
-    label: 'View batch →',
+    href: matchUrl,
+    label: 'Check my fit →',
   }
 }
 
@@ -91,11 +92,7 @@ export default function BatchesCatalog({ batches, promoCode }: BatchesCatalogPro
         })}
       </div>
       <p className="batches-catalog-foot">
-        Not sure which fits?{' '}
-        <Link href={ROUTES.match} className="batches-catalog-foot-link">
-          Take the quiz
-        </Link>{' '}
-        in Our AI first.
+        Every batch starts with the AI quiz — we&apos;ll capture your fit and reach out to help you book.
       </p>
     </section>
   )

@@ -42,7 +42,8 @@ export default async function BatchesPage({ searchParams }: PageProps) {
           <span className="rose">Meet your person.</span>
         </h1>
         <p className="page-hero-sub">
-          Three editions. One Himalayas. Tap a batch to see the full trip — dates, itinerary, and apply.
+          Three editions. One Himalayas. Pick a batch — we&apos;ll take you to Our AI quiz to check fit and
+          capture your details.
         </p>
         <div className="doodle-divider">~ ~ ♡ ~ ~</div>
       </div>
@@ -55,17 +56,17 @@ export default async function BatchesPage({ searchParams }: PageProps) {
           <h2 className="batches-cta-title">
             Found your edition?
             <br />
-            <span className="gold">Open the batch and apply.</span>
+            <span className="gold">Take the AI quiz first.</span>
           </h2>
           <p className="batches-cta-sub">
-            Applications take 5 minutes. We reply within 48 hours.
+            We&apos;ll match you to the right batch, save your details, and follow up within 24 hours.
           </p>
           <div className="batches-cta-btns">
-            <Link href={withPromoQuery(ROUTES.batchDetail('batch-a'), promo)} className="batches-cta-btn teal">
-              ✦ Batch A (GenZ)
+            <Link href={withPromoQuery(ROUTES.matchForBatch('batch-a'), promo)} className="batches-cta-btn teal">
+              ✦ Batch A — Check my fit
             </Link>
-            <Link href={withPromoQuery(ROUTES.batchDetail('batch-b'), promo)} className="batches-cta-btn rose">
-              ♡ Batch B (Millennial)
+            <Link href={withPromoQuery(ROUTES.matchForBatch('batch-b'), promo)} className="batches-cta-btn rose">
+              ♡ Batch B — Check my fit
             </Link>
           </div>
           <p className="batches-cta-foot">

@@ -182,7 +182,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
             return (
               <Link
                 key={batch.slug}
-                href={ROUTES.batches}
+                href={ROUTES.matchForBatch(batch.slug)}
                 className="tpc"
               >
                 <div className="tpc-vis">
@@ -205,7 +205,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
                   )}
                   <SpotsRow takenM={batch.spotsTakenM} takenF={batch.spotsTakenF} />
                   <div className={`tpc-cta ${display.ctaClass}`}>
-                    View details &amp; book your spot →
+                    Check my fit in Our AI →
                   </div>
                 </div>
               </Link>
