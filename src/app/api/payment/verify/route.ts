@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
 import { provisionMemberAccount } from '@/lib/member-account'
-import { statusForPaymentPlan, type PaymentPlan } from '@/lib/payment-plan'
+import { calculatePaymentAmounts, statusForPaymentPlan, type PaymentPlan } from '@/lib/payment-plan'
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay, verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
@@ -43,9 +43,12 @@ export async function POST(req: NextRequest) {
     }
 
     let paymentPlan: PaymentPlan = 'full'
+    let chargeAmountPaise = 0
+
     if (!isDevOrder && isRazorpayConfigured()) {
       try {
         const order = await razorpay.orders.fetch(razorpayOrderId)
+        chargeAmountPaise = Number(order.amount)
         if (order.notes?.payment_plan === 'deposit') {
           paymentPlan = 'deposit'
         }
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     const { data: applicantPlanRow } = await supabase
       .from('applicants')
-      .select('payment_plan')
+      .select('payment_plan, final_amount')
       .eq('id', applicantId)
       .maybeSingle()
 
@@ -66,6 +69,15 @@ export async function POST(req: NextRequest) {
       paymentPlan = 'full'
     }
 
+    const totalDuePaise = applicantPlanRow?.final_amount ?? chargeAmountPaise
+    if (isDevOrder && chargeAmountPaise <= 0 && totalDuePaise > 0) {
+      chargeAmountPaise = calculatePaymentAmounts(totalDuePaise, paymentPlan).chargeNow
+    }
+
+    const newAmountPaid = chargeAmountPaise
+    const newBalanceDue =
+      paymentPlan === 'full' ? 0 : Math.max(0, totalDuePaise - newAmountPaid)
+
     const newStatus = statusForPaymentPlan(paymentPlan)
 
     let { error: updateError } = await supabase
@@ -73,6 +85,8 @@ export async function POST(req: NextRequest) {
       .update({
         status: newStatus,
         razorpay_payment_id: razorpayPaymentId,
+        amount_paid: newAmountPaid,
+        balance_due: newBalanceDue,
       })
       .eq('id', applicantId)
 

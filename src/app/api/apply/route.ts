@@ -126,8 +126,8 @@ export async function POST(req: NextRequest) {
       final_amount: totalDue,
       priority_review: priorityReview,
       payment_plan: plan,
-      amount_paid: chargeNow,
-      balance_due: balanceDue,
+      amount_paid: 0,
+      balance_due: totalDue,
     }
 
     const { error: baseError } = await supabase

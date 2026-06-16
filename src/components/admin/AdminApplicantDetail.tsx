@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Badge from '@/components/ui/Badge'
+import {
+  applicantAmountPaidLabel,
+  applicantBalanceDueLabel,
+  hasVerifiedPayment,
+} from '@/lib/applicant-payment'
 import type { ApplicantStatus } from '@/types/applicant'
 
 interface ApplicantDetailProps {
@@ -73,6 +78,7 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
   const batchName = relName(applicant.batches)
   const promoCode = relName(applicant.promo_codes)
   const insight = matchInsight ?? applicant.match_insight
+  const paymentVerified = hasVerifiedPayment(applicant)
 
   return (
     <div className="admin-stack">
@@ -98,8 +104,12 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
             </div>
           ) : null}
           <div><dt>Payment plan</dt><dd>{applicant.payment_plan || '—'}</dd></div>
-          <div><dt>Amount paid</dt><dd>{applicant.amount_paid != null ? `₹${(applicant.amount_paid / 100).toLocaleString('en-IN')}` : '—'}</dd></div>
-          <div><dt>Balance due</dt><dd>{applicant.balance_due != null ? `₹${(applicant.balance_due / 100).toLocaleString('en-IN')}` : '—'}</dd></div>
+          <div>
+            <dt>Payment status</dt>
+            <dd>{paymentVerified ? 'Paid via Razorpay' : 'Checkout not completed'}</dd>
+          </div>
+          <div><dt>Amount paid</dt><dd>{applicantAmountPaidLabel(applicant)}</dd></div>
+          <div><dt>Balance due</dt><dd>{applicantBalanceDueLabel(applicant)}</dd></div>
           <div><dt>Razorpay payment</dt><dd>{applicant.razorpay_payment_id || '—'}</dd></div>
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
         </dl>
