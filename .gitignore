@@ -30,3 +30,6 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+
+# Local source uploads (copied into public/videos/)
+influencers video/
