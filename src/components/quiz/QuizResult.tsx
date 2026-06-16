@@ -89,9 +89,9 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
       )}
 
       <div className="quiz-result-link">
-        <Link href={ROUTES.apply(result.batchRecommendation)}>Apply for your batch →</Link>
+        <Link href={ROUTES.batchDetail(result.batchRecommendation)}>View batch &amp; book →</Link>
         <span className="quiz-result-sep"> · </span>
-        <Link href={ROUTES.batches}>View all batches →</Link>
+        <Link href={ROUTES.batches}>Compare all batches →</Link>
       </div>
     </div>
   )

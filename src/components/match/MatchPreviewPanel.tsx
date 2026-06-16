@@ -181,8 +181,8 @@ export default function MatchPreviewPanel({
 
       {showApplyLink && (
         <div className="match-preview-actions">
-          <Link href={ROUTES.apply(selectedBatch)} className="rfbtn">
-            Apply for {BATCH_META[selectedBatch].label} →
+          <Link href={ROUTES.batchDetail(selectedBatch)} className="rfbtn">
+            View {BATCH_META[selectedBatch].label} &amp; book →
           </Link>
           <Link href={ROUTES.match} className="match-secondary-link">
             Open full AI Match Lab →

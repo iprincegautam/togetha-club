@@ -112,14 +112,14 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
 
       <div className="cohort-teaser-actions">
         <Link
-          href={ROUTES.apply(selectedBatch)}
+          href={ROUTES.batchDetail(selectedBatch)}
           className={`rfbtn cohort-apply-btn${accent === 'rose' ? ' rose' : ''}`}
         >
           Apply for your slot →
         </Link>
         <p className="cohort-apply-note">
-          Choose the batch you actually want — {BATCH_META[selectedBatch].label} (
-          {BATCH_META[selectedBatch].ageRange}) — then lock in your application.
+          Opens {BATCH_META[selectedBatch].label} ({BATCH_META[selectedBatch].ageRange}) — pick your
+          departure date and complete booking there.
         </p>
       </div>
     </div>
