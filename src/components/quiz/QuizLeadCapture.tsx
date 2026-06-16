@@ -19,7 +19,6 @@ type Props = {
   leadSource: QuizLeadSource
   mode: 'gate' | 'inline'
   onSuccess: (applicantId: string) => void
-  onSkip?: () => void
 }
 
 export default function QuizLeadCapture({
@@ -29,7 +28,6 @@ export default function QuizLeadCapture({
   leadSource,
   mode,
   onSuccess,
-  onSkip,
 }: Props) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -49,11 +47,15 @@ export default function QuizLeadCapture({
       return
     }
     if (!email.trim() || !email.includes('@')) {
-      setError('Please enter a valid email.')
+      setError('Email is required — enter a valid address.')
+      return
+    }
+    if (!phone.trim()) {
+      setError('Mobile number is required for your match report and callback.')
       return
     }
     if (!isValidIndianPhone(phone)) {
-      setError('Enter a valid 10-digit Indian mobile number (for WhatsApp or a quick call).')
+      setError('Enter a valid 10-digit Indian mobile number.')
       return
     }
 
@@ -121,40 +123,59 @@ export default function QuizLeadCapture({
         </h3>
         <p className="quiz-lead-sub">
           {mode === 'gate'
-            ? 'Save your results and unlock cohort preview, batch fit breakdown, and a personal call to help you book.'
-            : 'Share your details — we’ll WhatsApp or call within 24h to help you pick dates and apply.'}
+            ? 'Email and mobile are required to unlock your cohort preview, batch fit breakdown, and a personal callback.'
+            : 'Email and mobile are required — we’ll WhatsApp or call within 24h to help you pick dates and apply.'}
         </p>
 
-        <form className="quiz-lead-form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            className="rfinput"
-            placeholder="First name"
-            autoComplete="given-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={loading}
-          />
-          <input
-            type="email"
-            className="rfinput"
-            placeholder="Email"
-            autoComplete="email"
-            inputMode="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={loading}
-          />
-          <input
-            type="tel"
-            className="rfinput"
-            placeholder="WhatsApp / mobile (10 digits)"
-            autoComplete="tel"
-            inputMode="numeric"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            disabled={loading}
-          />
+        <form className="quiz-lead-form" onSubmit={handleSubmit} noValidate={false}>
+          <label className="quiz-lead-field">
+            <span className="quiz-lead-label">
+              First name <span className="quiz-lead-req">*</span>
+            </span>
+            <input
+              type="text"
+              className="rfinput"
+              placeholder="First name"
+              autoComplete="given-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </label>
+          <label className="quiz-lead-field">
+            <span className="quiz-lead-label">
+              Email <span className="quiz-lead-req">*</span>
+            </span>
+            <input
+              type="email"
+              className="rfinput"
+              placeholder="you@email.com"
+              autoComplete="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </label>
+          <label className="quiz-lead-field">
+            <span className="quiz-lead-label">
+              WhatsApp / mobile <span className="quiz-lead-req">*</span>
+            </span>
+            <input
+              type="tel"
+              className="rfinput"
+              placeholder="10-digit mobile number"
+              autoComplete="tel"
+              inputMode="numeric"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={loading}
+              required
+              minLength={10}
+            />
+          </label>
 
           {error && (
             <p className="quiz-error" role="alert">
@@ -171,15 +192,9 @@ export default function QuizLeadCapture({
           </button>
 
           <p className="quiz-lead-fine">
-            No spam. One human from Togetha — to answer questions and help you apply.
+            Required fields. No spam — one human from Togetha to help you apply.
           </p>
         </form>
-
-        {mode === 'gate' && onSkip && (
-          <button type="button" className="quiz-lead-skip" onClick={onSkip} disabled={loading}>
-            Continue without saving
-          </button>
-        )}
       </div>
     </div>
   )

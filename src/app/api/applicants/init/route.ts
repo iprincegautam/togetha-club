@@ -64,6 +64,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, email, phone, batchSlug, answers, score, batchRecommendation } = body
 
+    if (!name?.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+
     if (!email || !String(email).includes('@')) {
       return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
     }

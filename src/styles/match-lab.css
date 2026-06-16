@@ -682,6 +682,23 @@
   gap: 10px;
 }
 
+.quiz-lead-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quiz-lead-label {
+  font-family: var(--font-dm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+}
+
+.quiz-lead-req {
+  color: var(--rose);
+}
+
 .quiz-lead-fine {
   margin: 4px 0 0;
   font-family: var(--font-dm);
@@ -689,20 +706,6 @@
   color: var(--ink-mid);
   line-height: 1.45;
   text-align: center;
-}
-
-.quiz-lead-skip {
-  display: block;
-  width: 100%;
-  margin-top: 14px;
-  padding: 8px;
-  border: none;
-  background: transparent;
-  font-family: var(--font-dm);
-  font-size: 0.82rem;
-  color: var(--ink-mid);
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .quiz-lead-skip:hover {

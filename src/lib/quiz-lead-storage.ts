@@ -23,11 +23,15 @@ export function loadQuizLead(): SavedQuizLead | null {
     const raw = window.localStorage.getItem(QUIZ_LEAD_STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as SavedQuizLead
-    if (!parsed?.applicantId || !parsed?.email) return null
+    if (!parsed?.applicantId || !parsed?.email || !parsed?.phone) return null
     return parsed
   } catch {
     return null
   }
+}
+
+export function hasCompletedQuizLead(): boolean {
+  return loadQuizLead() !== null
 }
 
 export function clearQuizLead(): void {

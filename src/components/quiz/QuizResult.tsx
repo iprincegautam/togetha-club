@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
 import { BATCH_AGE_LIMITS, parseQuizAge } from '@/lib/batch-age'
+import { hasCompletedQuizLead } from '@/lib/quiz-lead-storage'
 import { ROUTES } from '@/constants/routes'
 import type { QuizAnswers, QuizResult as QuizResultType } from '@/types/quiz'
 
@@ -20,6 +22,8 @@ const BATCH_LABELS: Record<QuizResultType['batchRecommendation'], string> = {
 }
 
 export default function QuizResult({ result, answers }: QuizResultProps) {
+  const [unlocked, setUnlocked] = useState(() => hasCompletedQuizLead())
+
   const badgeColor = result.batchRecommendation === 'batch-b' ? 'rose' : 'teal'
   const userAge = parseQuizAge(answers)
   const recommendedMatch = result.batchMatches?.find(
@@ -38,10 +42,25 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
           result.batchRecommendation === 'batch-a'
             ? BATCH_AGE_LIMITS['batch-a'].label
             : BATCH_AGE_LIMITS['batch-b'].label
-        }. Explore your fit on each trip below, then apply when you're ready.`
+        }.`
       : result.isHighMatch
-        ? "Your answers suggest you're emotionally available, self-aware, and exactly the kind of person our algorithm places at the centre of a batch. Explore your fit on each trip below, then apply when you're ready."
-        : "Your answers show depth and originality — exactly what makes for genuine connection. Compare your fit across batches below, then apply when you're ready."
+        ? "Your answers suggest you're emotionally available, self-aware, and exactly the kind of person our algorithm places at the centre of a batch."
+        : 'Your answers show depth and originality — exactly what makes for genuine connection.'
+
+  if (!unlocked) {
+    return (
+      <div className="qresult">
+        <QuizLeadCapture
+          answers={answers}
+          score={result.score}
+          batchRecommendation={result.batchRecommendation}
+          leadSource="quiz"
+          mode="gate"
+          onSuccess={() => setUnlocked(true)}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="qresult">
@@ -52,15 +71,6 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
       <div className="res-score-lbl">AI Compatibility Match Score</div>
       <h3 className="res-title">{title}</h3>
       <p className="res-desc">{description}</p>
-
-      <QuizLeadCapture
-        answers={answers}
-        score={result.score}
-        batchRecommendation={result.batchRecommendation}
-        leadSource="quiz"
-        mode="inline"
-        onSuccess={() => {}}
-      />
 
       {result.batchMatches && result.batchMatches.length > 0 && (
         <>
