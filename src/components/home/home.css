@@ -643,6 +643,18 @@
   background: var(--paper);
 }
 
+.home-video-sec {
+  background: var(--cream);
+  border-top: 1px dashed rgba(44, 24, 16, 0.1);
+  border-bottom: 1px dashed rgba(44, 24, 16, 0.1);
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.home-video-sec .batch-pdp-section {
+  margin-top: 0;
+}
+
 .home-faq-sec {
   background: var(--warm);
   border-top: 1px dashed rgba(44, 24, 16, 0.12);

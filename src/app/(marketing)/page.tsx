@@ -4,6 +4,7 @@ import ConceptSection from '@/components/home/ConceptSection'
 import AISection from '@/components/home/AISection'
 import HowItWorksSection from '@/components/home/HowItWorksSection'
 import BatchPreviewSection from '@/components/home/BatchPreviewSection'
+import HomeVideoTestimonialsSection from '@/components/home/HomeVideoTestimonialsSection'
 import ReviewsSection from '@/components/home/ReviewsSection'
 import HomeFaqSection from '@/components/home/HomeFaqSection'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
@@ -78,6 +79,7 @@ export default async function HomePage() {
       <AISection />
       <HowItWorksSection />
       <BatchPreviewSection batches={batches} />
+      <HomeVideoTestimonialsSection />
       <ReviewsSection />
       <HomeFaqSection />
     </>
