@@ -11,22 +11,22 @@ export const BATCH_VIDEO_TESTIMONIALS: Record<string, BatchVideoTestimonial[]> =
   'batch-a': [
     {
       id: 'a-1',
-      title: 'Aryan K.',
-      subtitle: 'Batch A · Delhi',
+      title: 'Ananya',
+      subtitle: 'Content dancer · Kolkata',
       src: '/videos/batch-a/01.mp4',
       poster: '/videos/batch-a/01-poster.jpg',
     },
     {
       id: 'a-2',
-      title: 'Sneha R.',
-      subtitle: 'Batch A · Mumbai',
+      title: 'Shrutika',
+      subtitle: 'Digital marketer · Delhi',
       src: '/videos/batch-a/02.mp4',
       poster: '/videos/batch-a/02-poster.jpg',
     },
     {
       id: 'a-3',
-      title: 'Varun K.',
-      subtitle: 'Batch A · Bangalore',
+      title: 'Bhumi',
+      subtitle: 'Software engineer · Bangalore',
       src: '/videos/batch-a/03.mp4',
       poster: '/videos/batch-a/03-poster.jpg',
     },
