@@ -11,7 +11,7 @@ const STEPS = [
     num: '01',
     icon: HOW_IT_WORKS_GLYPH.quiz,
     title: 'Take the quiz & apply',
-    desc: '11 questions — age first, then personality. Our AI uses your answers to build your compatibility profile. Then we read your application personally.',
+    desc: '12 questions — age first, then personality. Our AI uses your answers to build your compatibility profile. Then we read your application personally.',
     action: 'match' as const,
   },
   {

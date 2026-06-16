@@ -104,6 +104,9 @@ export function quizAnswerSummary(answers: QuizAnswers): { id: number; question:
     if (q.type === 'opts' && typeof raw === 'number' && q.opts?.[raw]) {
       answer = q.opts[raw]
     }
+    if (q.type === 'departure' && typeof raw === 'string' && raw.trim()) {
+      answer = raw.trim()
+    }
     return { id: q.id, question: q.q, answer }
   })
 }

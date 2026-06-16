@@ -1032,6 +1032,19 @@ footer {
   color: var(--rose);
 }
 
+.qopt-date-label {
+  display: block;
+}
+
+.qopt-date-sub {
+  display: block;
+  font-family: var(--font-family-dm-sans, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(44, 24, 16, 0.55);
+  margin-top: 2px;
+}
+
 .qopt.sel {
   border-color: var(--teal);
   background: rgba(26, 107, 90, 0.07);

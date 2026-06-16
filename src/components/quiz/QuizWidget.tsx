@@ -1,10 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { BATCH_AGE_LIMITS, isValidQuizAge } from '@/lib/batch-age'
+import {
+  BATCH_AGE_LIMITS,
+  isValidQuizAge,
+  parseQuizAge,
+  primaryBatchForAge,
+  QUIZ_DEPARTURE_QUESTION_ID,
+} from '@/lib/batch-age'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
 import { useQuiz } from '@/hooks/useQuiz'
 import QuizResult from '@/components/quiz/QuizResult'
+import type { DateOption } from '@/lib/batches'
+import type { MatchableBatchSlug } from '@/types/match'
 
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -31,18 +39,50 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
 
   const [fadeIn, setFadeIn] = useState(true)
   const [quizError, setQuizError] = useState('')
+  const [departureDates, setDepartureDates] = useState<DateOption[]>([])
+  const [departureLoading, setDepartureLoading] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
   const completionNotifiedRef = useRef(false)
 
   const question = QUIZ_QUESTIONS[cur]
   const pct = Math.round(((cur + 1) / totalQuestions) * 100)
   const isLast = cur === totalQuestions - 1
+  const ageForDepartures = parseQuizAge(ans)
 
   useEffect(() => {
     setFadeIn(false)
     const t = setTimeout(() => setFadeIn(true), 10)
     return () => clearTimeout(t)
   }, [cur])
+
+  useEffect(() => {
+    if (phase !== 'quiz' || question?.type !== 'departure') return
+
+    const batchSlug: MatchableBatchSlug =
+      ageForDepartures !== null && primaryBatchForAge(ageForDepartures)
+        ? primaryBatchForAge(ageForDepartures)!
+        : 'batch-a'
+
+    let cancelled = false
+    setDepartureLoading(true)
+
+    fetch(`/api/batches/${batchSlug}/departures`)
+      .then((r) => r.json())
+      .then((json: { dates?: DateOption[] }) => {
+        if (cancelled) return
+        setDepartureDates(json.dates ?? [])
+      })
+      .catch(() => {
+        if (!cancelled) setDepartureDates([])
+      })
+      .finally(() => {
+        if (!cancelled) setDepartureLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [phase, question?.type, ageForDepartures, cur])
 
   useEffect(() => {
     if (phase !== 'result' || !result || completionNotifiedRef.current) return
@@ -67,7 +107,18 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
         return
       }
     }
+    if (question.type === 'departure') {
+      const choice = ans[QUIZ_DEPARTURE_QUESTION_ID]
+      if (choice === undefined || choice === '') {
+        setQuizError('Pick a departure date to continue.')
+        return
+      }
+    }
     goNext()
+  }
+
+  const pickDeparture = (label: string) => {
+    setText(QUIZ_DEPARTURE_QUESTION_ID, label)
   }
 
   return (
@@ -144,6 +195,34 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
                 value={(ans[question.id] as string) ?? ''}
                 onChange={(e) => setText(question.id, e.target.value)}
               />
+            )}
+
+            {question.type === 'departure' && (
+              <div className="qopts">
+                {departureLoading && <p className="qsub">Loading departure dates…</p>}
+                {!departureLoading &&
+                  departureDates.map((opt) => {
+                    const selected = ans[question.id] === opt.label
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        className={`qopt${selected ? ' selected' : ''}`.trim()}
+                        onClick={() => pickDeparture(opt.label)}
+                        disabled={opt.soldOut}
+                      >
+                        {selected && <span className="qopt-star">✦ </span>}
+                        <span className="qopt-date-label">{opt.label}</span>
+                        {opt.sublabel && (
+                          <span className="qopt-date-sub">{opt.sublabel}</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                {!departureLoading && departureDates.length === 0 && (
+                  <p className="qsub">No departures in the next 6 weeks — check back soon.</p>
+                )}
+              </div>
             )}
 
             {question.type === 'age' && (

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { BATCH_DATE_OPTIONS } from '@/constants/batches'
+import { filterVisibleDepartures, getFallbackDateOptions } from '@/lib/batch-departure-dates'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import type { BatchStatus } from '@/types/batch'
 
@@ -49,12 +49,16 @@ export function mapDepartureToDateOption(row: BatchDepartureRow): DateOption {
   }
 }
 
+function fallbackDateOptions(batchSlug: string): DateOption[] {
+  return getFallbackDateOptions(batchSlug)
+}
+
 export async function fetchBatchDepartures(
   supabase: SupabaseClient | null,
   batchSlug: string
 ): Promise<DateOption[]> {
   if (!supabase) {
-    return BATCH_DATE_OPTIONS[batchSlug] ?? []
+    return fallbackDateOptions(batchSlug)
   }
 
   try {
@@ -66,12 +70,17 @@ export async function fetchBatchDepartures(
       .order('sort_order', { ascending: true })
 
     if (error || !data?.length) {
-      return BATCH_DATE_OPTIONS[batchSlug] ?? []
+      return fallbackDateOptions(batchSlug)
     }
 
-    return (data as BatchDepartureRow[]).map(mapDepartureToDateOption)
+    const visible = filterVisibleDepartures(data as BatchDepartureRow[])
+    if (!visible.length) {
+      return fallbackDateOptions(batchSlug)
+    }
+
+    return visible.map(mapDepartureToDateOption)
   } catch {
-    return BATCH_DATE_OPTIONS[batchSlug] ?? []
+    return fallbackDateOptions(batchSlug)
   }
 }
 

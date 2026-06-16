@@ -3,6 +3,8 @@ import type { QuizAnswers } from '@/types/quiz'
 
 export const QUIZ_AGE_QUESTION_ID = 0
 
+export const QUIZ_DEPARTURE_QUESTION_ID = 11
+
 export const BATCH_AGE_LIMITS: Record<
   MatchableBatchSlug,
   { min: number; max: number; label: string }

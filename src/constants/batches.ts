@@ -22,19 +22,9 @@ export const BATCH_META = {
   },
 } as const
 
-export const BATCH_DATE_OPTIONS: Record<
-  string,
-  { label: string; sublabel: string; soldOut?: boolean }[]
-> = {
-  'batch-a': [
-    { label: 'Friday, 13 June 2026', sublabel: 'Returns Wednesday, 18 June · 5N/6D' },
-    { label: 'Friday, 27 June 2026', sublabel: 'Returns Wednesday, 2 July · 5N/6D' },
-    { label: 'Friday, 11 July 2026', sublabel: 'Returns Wednesday, 16 July · 5N/6D' },
-    { label: 'Friday, 25 July 2026', sublabel: 'Returns Wednesday, 30 July · 5N/6D' },
-  ],
-  'batch-b': [
-    { label: 'Friday, 27 June 2026', sublabel: 'Returns Wednesday, 2 July · 5N/6D' },
-    { label: 'Friday, 25 July 2026', sublabel: 'Returns Wednesday, 30 July · 5N/6D' },
-    { label: 'Friday, 11 July 2026', sublabel: 'Returns Wednesday, 16 July · 5N/6D' },
-  ],
+import { getFallbackDateOptions } from '@/lib/batch-departure-dates'
+
+/** Visible Friday departures (next 6 weeks) for a batch slug. */
+export function getBatchDateOptions(batchSlug: string) {
+  return getFallbackDateOptions(batchSlug)
 }

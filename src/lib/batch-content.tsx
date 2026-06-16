@@ -350,18 +350,10 @@ const BATCH_B_FAQ = [
   },
 ]
 
-const BATCH_A_DATES = [
-  { label: 'Friday, 13 June 2026', sublabel: 'Returns Wednesday, 18 June · 5N/6D' },
-  { label: 'Friday, 27 June 2026', sublabel: 'Returns Wednesday, 2 July · 5N/6D' },
-  { label: 'Friday, 11 July 2026', sublabel: 'Returns Wednesday, 16 July · 5N/6D' },
-  { label: 'Friday, 25 July 2026', sublabel: 'Returns Wednesday, 30 July · 5N/6D' },
-]
+import { getFallbackDateOptions } from '@/lib/batch-departure-dates'
 
-const BATCH_B_DATES = [
-  { label: 'Friday, 27 June 2026', sublabel: 'Returns Wednesday, 2 July · 5N/6D' },
-  { label: 'Friday, 25 July 2026', sublabel: 'Returns Wednesday, 30 July · 5N/6D' },
-  { label: 'Friday, 11 July 2026', sublabel: 'Returns Wednesday, 16 July · 5N/6D' },
-]
+const BATCH_A_DATES = getFallbackDateOptions('batch-a')
+const BATCH_B_DATES = getFallbackDateOptions('batch-b')
 
 function buildBatchATabs() {
   return [

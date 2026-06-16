@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { activeStageIndex, bookingStageFromStatus, requireMemberApiAccess } from '@/lib/auth/member'
-import { BATCH_DATE_OPTIONS } from '@/constants/batches'
+import { getBatchDateOptions } from '@/constants/batches'
 
 export async function GET() {
   const auth = await requireMemberApiAccess()
@@ -12,7 +12,7 @@ export async function GET() {
   const batch = Array.isArray(a.batches) ? a.batches[0] : a.batches
   const dateIndex = a.date_choice ? Number(a.date_choice) : null
   const slug = a.batch_slug ?? ''
-  const dateOptions = BATCH_DATE_OPTIONS[slug] ?? []
+  const dateOptions = getBatchDateOptions(slug)
   const dateLabel =
     dateIndex !== null && !Number.isNaN(dateIndex)
       ? dateOptions[dateIndex]?.label ?? a.date_choice

@@ -117,4 +117,10 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     sub: 'This is the question our AI weights most. Take your time.',
     ph: 'Write whatever comes. There is no wrong answer here.',
   },
+  {
+    id: 11,
+    type: 'departure',
+    q: 'When are you planning to travel?',
+    sub: 'Pick the Friday departure that works for you. We run a new batch every week.',
+  },
 ]

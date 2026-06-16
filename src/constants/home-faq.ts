@@ -7,7 +7,7 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'How does the AI matching work?',
     answer:
-      'You take an 11-question compatibility quiz (age first, then personality). Your answers become a 12-dimension profile — communication style, values, emotional availability, and more. We use that to recommend your best batch and estimate fit with the kind of people already moving toward each departure. Full preview on Our AI before you apply.',
+      'You take a 12-question compatibility quiz (age first, then personality). Your answers become a 12-dimension profile — communication style, values, emotional availability, and more. We use that to recommend your best batch and estimate fit with the kind of people already moving toward each departure. Full preview on Our AI before you apply.',
   },
   {
     question: 'What are Batch A and Batch B?',

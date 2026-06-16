@@ -19,7 +19,7 @@ export default function QuizSection({ onComplete, delegateResults, quizKey }: Pr
               Find your <span className="t">perfect batch.</span>
             </h2>
             <p className="quiz-header-sub">
-              11 questions. 4 minutes. Age first, then our AI reads the real you between the lines.
+              12 questions. 4 minutes. Age first, then our AI reads the real you between the lines.
             </p>
           </div>
           <QuizWidget
