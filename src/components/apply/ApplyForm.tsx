@@ -13,8 +13,10 @@ import {
   DEPOSIT_PERCENT,
   type PaymentPlan,
 } from '@/lib/payment-plan'
-import { formatPaise } from '@/lib/utils'
+import { calculateQuizResult, formatPaise } from '@/lib/utils'
+import { normalizeIndianPhone } from '@/lib/phone'
 import { loadQuizLead } from '@/lib/quiz-lead-storage'
+import { loadQuizAnswers } from '@/lib/quiz-storage'
 import '@/components/batches/batches.css'
 
 interface PromoPreview {
@@ -152,15 +154,31 @@ export default function ApplyForm({
   const ensureApplicantId = async (): Promise<string | null> => {
     if (applicantId) return applicantId
 
-    const res = await fetch('/api/quiz', {
+    const normalizedEmail = email.trim().toLowerCase()
+    const savedLead = loadQuizLead()
+    if (savedLead?.applicantId && savedLead.email === normalizedEmail) {
+      setApplicantId(savedLead.applicantId)
+      return savedLead.applicantId
+    }
+
+    const storedAnswers = loadQuizAnswers()
+    const quizPayload: Record<string, unknown> = {}
+    if (storedAnswers) {
+      const result = calculateQuizResult(storedAnswers)
+      quizPayload.answers = storedAnswers
+      quizPayload.score = result.score
+      quizPayload.batchRecommendation = result.batchRecommendation
+    }
+
+    const res = await fetch('/api/applicants/init', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: name.trim(),
-        email: email.trim(),
-        answers: {},
-        score: 0,
-        batchRecommendation: batchSlug,
+        email: normalizedEmail,
+        phone: normalizeIndianPhone(phone),
+        batchSlug,
+        ...quizPayload,
       }),
     })
 

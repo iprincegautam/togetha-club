@@ -6,21 +6,24 @@ import { hasQuizAnswers } from '@/lib/quiz-storage'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 import type { QuizAnswers } from '@/types/quiz'
 
-const VALID_LEAD_SOURCES = new Set(['quiz', 'quiz_match_lab'])
-
 type ExistingApplicant = {
   quiz_score: number | null
   quiz_answers: Record<string, unknown> | null
   phone: string | null
 }
 
+function hasRichQuizAnswers(answers: unknown): answers is QuizAnswers {
+  return hasQuizAnswers(answers as QuizAnswers)
+}
+
+/** Drop quiz fields from payload when upsert would wipe richer existing data. */
 function protectExistingQuizFields(
   payload: Record<string, unknown>,
   existing: ExistingApplicant | null,
   incomingAnswers: unknown,
   incomingScore: unknown
 ): void {
-  const incomingHasQuiz = hasQuizAnswers(incomingAnswers as QuizAnswers)
+  const incomingHasQuiz = hasRichQuizAnswers(incomingAnswers)
   const incomingScoreNum =
     typeof incomingScore === 'number' && Number.isFinite(incomingScore) ? incomingScore : null
 
@@ -53,27 +56,13 @@ async function upsertApplicant(
     return supabase.from('applicants').upsert(fallbackPayload, { onConflict: 'email' }).select('id').single()
   }
 
-  if (attempt.error?.message?.includes('priority_review')) {
-    const { priority_review: _drop, ...fallbackPayload } = payload
-    return supabase.from('applicants').upsert(fallbackPayload, { onConflict: 'email' }).select('id').single()
-  }
-
   return attempt
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const {
-      name,
-      email,
-      phone,
-      answers,
-      score,
-      batchRecommendation,
-      leadSource,
-      wantsCallback,
-    } = body
+    const { name, email, phone, batchSlug, answers, score, batchRecommendation } = body
 
     if (!email || !String(email).includes('@')) {
       return NextResponse.json({ error: 'Valid email required' }, { status: 400 })
@@ -86,17 +75,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!hasQuizAnswers(answers as QuizAnswers)) {
-      return NextResponse.json({ error: 'Quiz answers required' }, { status: 400 })
-    }
-
-    if (typeof score !== 'number' || score <= 0) {
-      return NextResponse.json({ error: 'Valid quiz score required' }, { status: 400 })
-    }
-
     const normalizedEmail = String(email).trim().toLowerCase()
     const normalizedPhone = normalizeIndianPhone(String(phone))
-    const source = VALID_LEAD_SOURCES.has(leadSource) ? leadSource : 'quiz'
+    const slug = batchSlug || batchRecommendation || null
 
     const supabase = tryCreateServiceRoleClient()
     if (!supabase) {
@@ -112,18 +93,19 @@ export async function POST(req: NextRequest) {
       .eq('email', normalizedEmail)
       .maybeSingle()
 
-    const vector = answersToCompatibilityVector(answers as QuizAnswers)
-
     const payload: Record<string, unknown> = {
       email: normalizedEmail,
       name: name?.trim() || null,
       phone: normalizedPhone,
-      quiz_answers: answers,
-      quiz_score: score,
-      batch_slug: batchRecommendation,
-      compatibility_vector: vector,
-      lead_source: source,
-      priority_review: wantsCallback !== false,
+      batch_slug: slug,
+      lead_source: 'apply',
+    }
+
+    if (hasRichQuizAnswers(answers)) {
+      payload.quiz_answers = answers
+      payload.quiz_score = typeof score === 'number' ? score : null
+      payload.compatibility_vector = answersToCompatibilityVector(answers)
+      if (batchRecommendation) payload.batch_slug = batchRecommendation
     }
 
     protectExistingQuizFields(payload, existing, answers, score)
@@ -133,7 +115,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, applicantId: data.id })
   } catch (err) {
-    console.error('[POST /api/quiz]', err)
+    console.error('[POST /api/applicants/init]', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

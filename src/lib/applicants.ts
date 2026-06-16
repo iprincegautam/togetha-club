@@ -26,6 +26,7 @@ export interface ApplicantDbRow {
   status: string
   created_at: string
   priority_review?: boolean
+  lead_source?: string | null
   batches: BatchRelation
   promo_codes?: PromoRelation
 }
@@ -45,5 +46,7 @@ export function mapApplicantRow(row: ApplicantDbRow) {
     createdAt: row.created_at,
     promoCode: parsePromoRelation(row.promo_codes ?? null),
     priorityReview: row.priority_review ?? false,
+    leadSource: row.lead_source ?? null,
+    isQuizLead: Boolean(row.phone && row.quiz_score != null && row.quiz_score > 0),
   }
 }

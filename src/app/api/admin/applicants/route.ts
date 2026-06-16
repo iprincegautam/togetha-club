@@ -20,6 +20,7 @@ export async function GET() {
         status,
         created_at,
         priority_review,
+        lead_source,
         batches ( name, slug ),
         promo_codes ( code )
       `

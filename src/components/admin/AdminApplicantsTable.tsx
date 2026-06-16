@@ -19,6 +19,8 @@ export interface AdminApplicantRow {
   createdAt: string
   promoCode: string | null
   priorityReview: boolean
+  leadSource: string | null
+  isQuizLead: boolean
 }
 
 interface AdminApplicantsTableProps {
@@ -55,23 +57,37 @@ function formatDate(iso: string) {
   })
 }
 
+type LeadFilter = 'all' | 'quiz_leads' | 'callable'
+
 export default function AdminApplicantsTable({ applicants }: AdminApplicantsTableProps) {
   const [statusFilter, setStatusFilter] = useState<ApplicantStatus | 'all'>('all')
+  const [leadFilter, setLeadFilter] = useState<LeadFilter>('all')
 
   const filtered = useMemo(() => {
-    if (statusFilter === 'all') return applicants
-    return applicants.filter((a) => a.status === statusFilter)
-  }, [applicants, statusFilter])
+    let rows = applicants
+    if (statusFilter !== 'all') {
+      rows = rows.filter((a) => a.status === statusFilter)
+    }
+    if (leadFilter === 'quiz_leads') {
+      rows = rows.filter((a) => a.isQuizLead)
+    }
+    if (leadFilter === 'callable') {
+      rows = rows.filter((a) => Boolean(a.phone))
+    }
+    return rows
+  }, [applicants, statusFilter, leadFilter])
 
   const counts = useMemo(() => {
     const pending = applicants.filter((a) => a.status === 'pending').length
     const paid = applicants.filter((a) => a.status === 'paid').length
+    const quizLeads = applicants.filter((a) => a.isQuizLead).length
+    const callable = applicants.filter((a) => Boolean(a.phone)).length
     const byBatch: Record<string, number> = {}
     applicants.forEach((a) => {
       const key = a.batchSlug ?? 'unknown'
       byBatch[key] = (byBatch[key] ?? 0) + 1
     })
-    return { pending, paid, byBatch, total: applicants.length }
+    return { pending, paid, quizLeads, callable, byBatch, total: applicants.length }
   }, [applicants])
 
   return (
@@ -89,6 +105,14 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <div className="admin-stat-num">{counts.paid}</div>
           <div className="admin-stat-label">Paid</div>
         </div>
+        <div className="admin-stat">
+          <div className="admin-stat-num">{counts.quizLeads}</div>
+          <div className="admin-stat-label">Quiz leads</div>
+        </div>
+        <div className="admin-stat">
+          <div className="admin-stat-num">{counts.callable}</div>
+          <div className="admin-stat-label">Has phone</div>
+        </div>
         {Object.entries(counts.byBatch).map(([slug, count]) => (
           <div className="admin-stat" key={slug}>
             <div className="admin-stat-num">{count}</div>
@@ -97,22 +121,39 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
         ))}
       </div>
 
-      <div className="admin-filter">
-        <label className="apply-label" htmlFor="status-filter">
-          Filter by status
-        </label>
-        <select
-          id="status-filter"
-          className="apply-select admin-filter-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as ApplicantStatus | 'all')}
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+      <div className="admin-filter admin-filter-row">
+        <div>
+          <label className="apply-label" htmlFor="status-filter">
+            Filter by status
+          </label>
+          <select
+            id="status-filter"
+            className="apply-select admin-filter-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ApplicantStatus | 'all')}
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="apply-label" htmlFor="lead-filter">
+            Lead type
+          </label>
+          <select
+            id="lead-filter"
+            className="apply-select admin-filter-select"
+            value={leadFilter}
+            onChange={(e) => setLeadFilter(e.target.value as LeadFilter)}
+          >
+            <option value="all">All leads</option>
+            <option value="quiz_leads">Quiz leads (score + phone)</option>
+            <option value="callable">Has phone only</option>
+          </select>
+        </div>
       </div>
 
       <div className="admin-table-wrap">
@@ -122,6 +163,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>Source</th>
               <th>Gender</th>
               <th>Batch</th>
               <th>Promo</th>
@@ -135,7 +177,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={11} className="admin-table-empty">
+                <td colSpan={12} className="admin-table-empty">
                   No applicants found.
                 </td>
               </tr>
@@ -149,6 +191,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                   </td>
                   <td>{row.email}</td>
                   <td>{row.phone ?? '—'}</td>
+                  <td>{row.leadSource ?? (row.isQuizLead ? 'quiz' : '—')}</td>
                   <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
                   <td>{row.batchName || row.batchSlug || '—'}</td>
                   <td>{row.promoCode ? <code className="admin-code">{row.promoCode}</code> : '—'}</td>

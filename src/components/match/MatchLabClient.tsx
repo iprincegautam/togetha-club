@@ -9,7 +9,7 @@ import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import { BATCH_META } from '@/constants/batches'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
-import { loadQuizLead } from '@/lib/quiz-lead-storage'
+import { clearQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
 import { calculateQuizResult } from '@/lib/utils'
 import type { MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
@@ -38,6 +38,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
 
     if (wantsRetake) {
       clearQuizAnswers()
+      clearQuizLead()
       setAnswers(null)
       setAnalysis(null)
       setMode('quiz')
@@ -90,6 +91,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
 
   const retakeQuiz = useCallback(() => {
     clearQuizAnswers()
+    clearQuizLead()
     setAnswers(null)
     setAnalysis(null)
     setMode('quiz')
