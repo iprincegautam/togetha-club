@@ -172,7 +172,7 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
           Choose your <span className="t">tribe.</span>
         </h2>
         <p className="sec-sub">
-          Two generations. Two vibes. One mountain range. Same magic.
+          GenZ or Millennial edition — take the quiz to check your fit, then book your slot.
         </p>
         <div className="trips-grid">
           {ordered.map((batch) => {

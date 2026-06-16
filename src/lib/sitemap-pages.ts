@@ -52,6 +52,15 @@ const CORE_PAGES: PublicSitemapEntry[] = [
     featured: true,
   },
   {
+    path: ROUTES.howItWorks,
+    title: 'How It Works',
+    description:
+      'From compatibility quiz to AI batch matching — how Togetha.Club screens applicants and runs 6-day Himalayan experiences.',
+    priority: 0.85,
+    changeFrequency: 'monthly',
+    featured: true,
+  },
+  {
     path: ROUTES.about,
     title: 'About Togetha.Club',
     description:

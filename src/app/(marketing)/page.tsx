@@ -1,19 +1,15 @@
 import HeroSection from '@/components/home/HeroSection'
-import MarqueeStrip from '@/components/home/MarqueeStrip'
-import ConceptSection from '@/components/home/ConceptSection'
-import AISection from '@/components/home/AISection'
-import HowItWorksSection from '@/components/home/HowItWorksSection'
 import BatchPreviewSection from '@/components/home/BatchPreviewSection'
 import HomeVideoTestimonialsSection from '@/components/home/HomeVideoTestimonialsSection'
-import ReviewsSection from '@/components/home/ReviewsSection'
-import HomeFaqSection from '@/components/home/HomeFaqSection'
+import HomeClosingCta from '@/components/home/HomeClosingCta'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
 import type { Batch, BatchStatus } from '@/types/batch'
+
 export function generateMetadata() {
   return buildMetadata(
     "Togetha.Club — India's First Matchmaking Travel Club",
-    'AI-matched singles. 6 days in the Himalayas. Like Hinge, but for travelers.'
+    'AI-matched singles. 6 days in the Himalayas. Take the quiz, pick your batch, go.'
   )
 }
 
@@ -74,14 +70,9 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <MarqueeStrip />
-      <ConceptSection />
-      <AISection />
-      <HowItWorksSection />
       <BatchPreviewSection batches={batches} />
       <HomeVideoTestimonialsSection />
-      <ReviewsSection />
-      <HomeFaqSection />
+      <HomeClosingCta />
     </>
   )
 }

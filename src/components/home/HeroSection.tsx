@@ -98,22 +98,15 @@ export default function HeroSection() {
           <span className="ht-gold">travelers.</span>
         </h1>
         <p className="hero-sub">
-          <span className="hero-sub-line">
-            24 screened, AI-matched singles. 6 days in the Himalayas.
-          </span>
-          <span className="hero-sub-line">
-            Unlimited ice breakers, one unforgettable bonfire night,
-          </span>
-          <span className="hero-sub-line">
-            and a 60% chance your relationship status changes.
-          </span>
+          24 screened, AI-matched singles. 6 days in the Himalayas — take the quiz to find your
+          batch.
         </p>
         <div className="hero-btns">
           <Link href={ROUTES.match} className="btn-p">
-            ✦ Take the Compatibility Quiz →
+            Take the Quiz →
           </Link>
           <Link href={ROUTES.batches} className="btn-o">
-            See All Batches ♡
+            See Batches
           </Link>
         </div>
       </div>

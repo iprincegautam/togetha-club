@@ -31,7 +31,7 @@ export default function Footer() {
           <Link href={ROUTES.blog}>Journal</Link>
         </li>
         <li>
-          <Link href={`${ROUTES.home}#how`}>How It Works</Link>
+          <Link href={ROUTES.howItWorks}>How It Works</Link>
         </li>
         <li>
           <a href="https://instagram.com/togetha.club" target="_blank" rel="noopener noreferrer">

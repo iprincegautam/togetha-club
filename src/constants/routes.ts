@@ -1,5 +1,6 @@
 export const ROUTES = {
   home: '/',
+  howItWorks: '/how-it-works',
   match: '/match',
   /** Route batch interest through Our AI quiz for lead capture. */
   matchForBatch: (slug?: string) =>
