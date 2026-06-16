@@ -5,6 +5,7 @@ import { calculatePaymentAmounts, statusForPaymentPlan, type PaymentPlan } from 
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay, verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
+import { stopNurtureSequence } from '@/lib/nurture/should-stop'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
@@ -152,6 +153,12 @@ export async function POST(req: NextRequest) {
           batch.name
         )
       }
+    }
+
+    try {
+      await stopNurtureSequence(supabase, applicantId, 'paid')
+    } catch (nurtureErr) {
+      console.warn('[POST /api/payment/verify] nurture stop failed', nurtureErr)
     }
 
     return NextResponse.json({

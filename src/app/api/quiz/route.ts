@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
 import { answersToCompatibilityVector } from '@/lib/match-engine'
+import { extractDateChoiceFromAnswers } from '@/lib/nurture/context'
+import { enrollQuizNurture } from '@/lib/nurture/send'
 import { isValidIndianPhone, normalizeIndianPhone } from '@/lib/phone'
 import { hasQuizAnswers } from '@/lib/quiz-storage'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
@@ -117,6 +119,7 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
 
     const vector = answersToCompatibilityVector(answers as QuizAnswers)
+    const dateChoice = extractDateChoiceFromAnswers(answers)
 
     const payload: Record<string, unknown> = {
       email: normalizedEmail,
@@ -130,10 +133,20 @@ export async function POST(req: NextRequest) {
       priority_review: wantsCallback !== false,
     }
 
+    if (dateChoice) {
+      payload.date_choice = dateChoice
+    }
+
     protectExistingQuizFields(payload, existing, answers, score)
 
     const { data, error } = await upsertApplicant(supabase, payload)
     if (error) throw error
+
+    try {
+      await enrollQuizNurture(supabase, data.id)
+    } catch (nurtureErr) {
+      console.error('[POST /api/quiz] nurture enroll failed', nurtureErr)
+    }
 
     return NextResponse.json({ success: true, applicantId: data.id })
   } catch (err) {
