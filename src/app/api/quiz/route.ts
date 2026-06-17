@@ -143,9 +143,21 @@ export async function POST(req: NextRequest) {
     if (error) throw error
 
     try {
-      await enrollQuizNurture(supabase, data.id)
+      const nurtureResult = await enrollQuizNurture(supabase, data.id)
+      if (!nurtureResult.ok) {
+        console.error('[POST /api/quiz] nurture enroll failed', {
+          applicantId: data.id,
+          email: normalizedEmail,
+          error: nurtureResult.error,
+        })
+      } else {
+        console.info('[POST /api/quiz] nurture enrolled', {
+          applicantId: data.id,
+          email: normalizedEmail,
+        })
+      }
     } catch (nurtureErr) {
-      console.error('[POST /api/quiz] nurture enroll failed', nurtureErr)
+      console.error('[POST /api/quiz] nurture enroll threw', nurtureErr)
     }
 
     return NextResponse.json({ success: true, applicantId: data.id })

@@ -69,6 +69,20 @@ export async function sendNurtureEmail(
       replyTo: 'hello@togetha.club',
     })
 
+    if (result.error) {
+      const message = result.error.message ?? JSON.stringify(result.error)
+      console.error('[nurture] resend API error', { step, email: applicant.email, message })
+      await supabase.from('email_sends').insert({
+        applicant_id: applicant.id,
+        sequence_id: sequenceId ?? null,
+        step,
+        subject: content.subject,
+        failed_at: new Date().toISOString(),
+        error: message,
+      })
+      return { ok: false, skipped: message }
+    }
+
     await supabase.from('email_sends').insert({
       applicant_id: applicant.id,
       sequence_id: sequenceId ?? null,
