@@ -185,6 +185,33 @@
   margin-top: 24px;
 }
 
+.admin-credentials-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: #e8f5f1;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.admin-credentials-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 240px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.admin-credentials-msg {
+  flex-basis: 100%;
+  margin: 0;
+}
+
 .admin-panel {
   border: 2px solid var(--ink);
   border-radius: 3px;

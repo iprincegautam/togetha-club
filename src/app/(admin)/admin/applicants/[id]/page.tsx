@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AdminApplicantDetail from '@/components/admin/AdminApplicantDetail'
+import AdminResendCredentialsButton from '@/components/admin/AdminResendCredentialsButton'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
+import { canResendMemberCredentials } from '@/lib/applicant-payment'
 import { buildApplicantMatchInsight } from '@/lib/match-analysis'
 import { buildMetadata } from '@/lib/metadata'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
@@ -59,11 +61,16 @@ export default async function AdminApplicantPage({ params }: PageProps) {
     }
   }
 
+  const showCredentials = canResendMemberCredentials(data)
+
   return (
     <div className="admin-page">
       <div className="admin-card admin-card-wide">
         <p className="apply-eyebrow">✦ Admin ✦</p>
         <Link href="/admin" className="admin-inline-link">← All applicants</Link>
+        {showCredentials ? (
+          <AdminResendCredentialsButton applicantId={data.id} email={data.email} />
+        ) : null}
         <AdminApplicantDetail applicant={data} matchInsight={matchInsight} />
       </div>
     </div>
