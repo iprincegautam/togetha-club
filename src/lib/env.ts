@@ -12,11 +12,20 @@ const optional = [
   'RESEND_API_KEY',
 ]
 
+function isBuildPhase(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.npm_lifecycle_event === 'build'
+  )
+}
+
 required.forEach((key) => {
-  if (!process.env[key]) throw new Error(`Missing env var: ${key}`)
+  if (!process.env[key] && !isBuildPhase()) {
+    throw new Error(`Missing env var: ${key}`)
+  }
 })
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && !isBuildPhase()) {
   optional.forEach((key) => {
     if (!process.env[key]) {
       console.warn(`[env] Missing optional for production: ${key}`)
