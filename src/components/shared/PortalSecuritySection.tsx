@@ -27,6 +27,10 @@ export default function PortalSecuritySection({
   const [emailStep, setEmailStep] = useState<'idle' | 'otp'>('idle')
   const [msg, setMsg] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   const apiBase = portal === 'member' ? '/api/account/settings' : '/api/partner/settings'
 
@@ -82,6 +86,58 @@ export default function PortalSecuritySection({
     router.refresh()
   }
 
+  const changePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMsg(null)
+
+    if (newPassword !== confirmPassword) {
+      setMsg('New passwords do not match.')
+      return
+    }
+    if (newPassword.length < 8) {
+      setMsg('Password must be at least 8 characters.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const supabase = createBrowserSupabaseClient()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session?.user.email) throw new Error('Session expired. Please sign in again.')
+
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: session.user.email,
+        password: currentPassword,
+      })
+      if (verifyError) throw new Error('Current password is incorrect.')
+
+      if (portal === 'member') {
+        const res = await fetch('/api/account/settings/password', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newPassword }),
+        })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error ?? 'Could not update password.')
+      } else {
+        const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
+        if (updateError) throw updateError
+      }
+
+      setMsg('Password updated.')
+      setShowPasswordForm(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : 'Could not update password.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="account-stack">
       <div className="account-panel">
@@ -91,11 +147,73 @@ export default function PortalSecuritySection({
           Current email: <strong>{currentEmail}</strong>
         </p>
         <p className="account-muted" style={{ marginBottom: 16 }}>
-          <Link href={forgotPasswordRoute} className="portal-link">
-            Change password
-          </Link>{' '}
+          {portal === 'member' ? (
+            <>
+              <button
+                type="button"
+                className="portal-link"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}
+                onClick={() => setShowPasswordForm((v) => !v)}
+              >
+                Change password
+              </button>
+              {' · '}
+              <Link href={forgotPasswordRoute} className="portal-link">
+                Forgot password
+              </Link>
+            </>
+          ) : (
+            <Link href={forgotPasswordRoute} className="portal-link">
+              Change password
+            </Link>
+          )}{' '}
           (email OTP or recovery link)
         </p>
+        {portal === 'member' && showPasswordForm && (
+          <form onSubmit={changePassword} className="admin-form-grid" style={{ marginBottom: 16 }}>
+            <label className="admin-field">
+              <span>Current password</span>
+              <input
+                type="password"
+                className="apply-input"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                disabled={loading}
+                autoComplete="current-password"
+                required
+              />
+            </label>
+            <label className="admin-field">
+              <span>New password</span>
+              <input
+                type="password"
+                className="apply-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                disabled={loading}
+                minLength={8}
+                autoComplete="new-password"
+                required
+              />
+            </label>
+            <label className="admin-field">
+              <span>Confirm new password</span>
+              <input
+                type="password"
+                className="apply-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                disabled={loading}
+                minLength={8}
+                autoComplete="new-password"
+                required
+              />
+            </label>
+            <button type="submit" className="admin-btn" disabled={loading}>
+              {loading ? 'Updating…' : 'Update password'}
+            </button>
+          </form>
+        )}
         <button type="button" className="account-btn-outline" onClick={signOut}>
           Sign out
         </button>

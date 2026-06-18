@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { renderMemberWelcomeEmail } from '@/lib/member-welcome-email'
 
 export const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -32,20 +33,28 @@ export async function sendMemberWelcomeEmail(opts: {
   to: string
   name: string
   loginUrl: string
+  settingsUrl?: string
   temporaryPassword?: string
   existingAccount?: boolean
 }) {
   if (!isResendConfigured() || !resend) return null
 
-  const text = opts.existingAccount
-    ? `Hi ${opts.name},\n\nYour Togetha.Club payment is confirmed and linked to your account.\n\nLog in to track your booking and complete your profile:\n${opts.loginUrl}\n\nUse the password you already set. Forgot it? Use "Forgot password" on the login page.\n\n— Togetha.Club`
-    : `Hi ${opts.name},\n\nYour Togetha.Club spot is confirmed. We created your member account so you can track your booking anytime.\n\nLog in here:\n${opts.loginUrl}\n\nEmail: ${opts.to}\nTemporary password: ${opts.temporaryPassword}\n\nYou can change your password anytime under Account → Forgot password.\n\n— Togetha.Club`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
+  const { subject, text, html } = renderMemberWelcomeEmail({
+    name: opts.name,
+    email: opts.to,
+    loginUrl: opts.loginUrl,
+    settingsUrl: opts.settingsUrl ?? `${siteUrl}/account/settings`,
+    temporaryPassword: opts.temporaryPassword,
+    existingAccount: opts.existingAccount,
+  })
 
   return resend.emails.send({
     from: 'Togetha.Club <hello@togetha.club>',
     to: opts.to,
-    subject: `✦ Your Togetha.Club member login`,
+    subject,
     text,
+    html,
   })
 }
 

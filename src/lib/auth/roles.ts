@@ -18,6 +18,7 @@ export interface ProfileRow {
   dietary_notes?: string | null
   instagram_handle?: string | null
   razorpay_customer_id?: string | null
+  password_change_required?: boolean
 }
 
 export function parseAdminEmails(): string[] {

@@ -81,6 +81,11 @@ export default async function ConfirmationPage({
                 ? `Your spot for ${batchName} is confirmed. We'll email you within 48 hours with your pre-trip pack — what to pack, who you'll meet, and everything else.`
                 : "Your spot is confirmed. We'll email you within 48 hours with your pre-trip pack and everything you need."}
           </p>
+          <p className="apply-foot confirm-credentials">
+            Check your inbox for a separate email with your <strong>member portal login</strong> — the
+            email you used for the quiz plus a temporary password. After signing in, set your own
+            password under Account → Settings.
+          </p>
           <p className="apply-foot">
             Join the group WhatsApp for updates and introductions before departure.
           </p>

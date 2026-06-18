@@ -60,9 +60,25 @@ export async function POST(req: NextRequest) {
 
     const { data: applicantPlanRow } = await supabase
       .from('applicants')
-      .select('payment_plan, final_amount')
+      .select('payment_plan, final_amount, status, razorpay_payment_id')
       .eq('id', applicantId)
       .maybeSingle()
+
+    const alreadyPaid =
+      applicantPlanRow?.status === 'deposit_paid' || applicantPlanRow?.status === 'paid'
+
+    if (alreadyPaid && applicantPlanRow?.razorpay_payment_id === razorpayPaymentId) {
+      return NextResponse.json({
+        success: true,
+        paymentPlan: applicantPlanRow.payment_plan ?? 'full',
+        status: applicantPlanRow.status,
+        alreadyProcessed: true,
+      })
+    }
+
+    if (alreadyPaid) {
+      return NextResponse.json({ error: 'Payment already recorded' }, { status: 409 })
+    }
 
     if (applicantPlanRow?.payment_plan === 'deposit') {
       paymentPlan = 'deposit'

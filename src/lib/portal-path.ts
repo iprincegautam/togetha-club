@@ -15,6 +15,9 @@ export const ACCOUNT_AUTH_PATHS = new Set([
   '/account/reset-password',
 ])
 
+/** Member routes that need a session but hide portal chrome (e.g. forced password setup). */
+export const ACCOUNT_SETUP_PATHS = new Set(['/account/change-password'])
+
 export const PARTNER_AUTH_PATHS = new Set([
   '/partner/login',
   '/partner/signup',

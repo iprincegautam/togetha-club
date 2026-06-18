@@ -56,6 +56,11 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
   const [notes, setNotes] = useState(applicant.admin_notes ?? '')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [resending, setResending] = useState(false)
+  const [resendResult, setResendResult] = useState<{
+    email: string
+    temporaryPassword: string
+  } | null>(null)
 
   const save = async () => {
     setSaving(true)
@@ -73,6 +78,36 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
       router.refresh()
     }
     setSaving(false)
+  }
+
+  const resendCredentials = async () => {
+    if (!paymentVerified) {
+      setMessage('Cannot resend — applicant has not completed payment.')
+      return
+    }
+    if (!confirm(`Resend member login credentials to ${applicant.email}? This resets their password.`)) {
+      return
+    }
+
+    setResending(true)
+    setMessage(null)
+    setResendResult(null)
+
+    const res = await fetch(`/api/admin/applicants/${applicant.id}/resend-credentials`, {
+      method: 'POST',
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(json.error ?? 'Resend failed')
+    } else {
+      setMessage(`Credentials emailed to ${json.email}`)
+      setResendResult({
+        email: json.email,
+        temporaryPassword: json.temporaryPassword,
+      })
+    }
+    setResending(false)
   }
 
   const batchName = relName(applicant.batches)
@@ -113,6 +148,28 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
           <div><dt>Razorpay payment</dt><dd>{applicant.razorpay_payment_id || '—'}</dd></div>
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
         </dl>
+
+        {paymentVerified && (
+          <div style={{ marginTop: 16 }}>
+            <button
+              type="button"
+              className="admin-btn"
+              disabled={resending}
+              onClick={resendCredentials}
+            >
+              {resending ? 'Sending…' : 'Resend member credentials'}
+            </button>
+            <p className="admin-muted" style={{ marginTop: 8, fontSize: 13 }}>
+              Emails a new temporary password and login instructions. Use when the member did not
+              receive the welcome email or forgot their password.
+            </p>
+            {resendResult && (
+              <p className="admin-msg" style={{ marginTop: 8 }}>
+                Temp password (also emailed): <strong>{resendResult.temporaryPassword}</strong>
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {insight && (

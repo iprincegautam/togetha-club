@@ -32,6 +32,7 @@ export const ROUTES = {
   accountSignup: '/account/signup',
   accountForgotPassword: '/account/forgot-password',
   accountResetPassword: '/account/reset-password',
+  accountChangePassword: '/account/change-password',
   accountProfile: '/account/profile',
   accountSettings: '/account/settings',
   accountPayments: '/account/payments',

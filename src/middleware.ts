@@ -4,6 +4,7 @@ import { userHasPartnerAccess } from '@/lib/auth/partner'
 import { userHasAdminAccess } from '@/lib/auth/roles'
 import {
   ACCOUNT_AUTH_PATHS,
+  ACCOUNT_SETUP_PATHS,
   ADMIN_AUTH_PATHS,
   PARTNER_AUTH_PATHS,
 } from '@/lib/portal-path'
@@ -38,6 +39,7 @@ export async function middleware(request: NextRequest) {
 
   if (
     ACCOUNT_AUTH_PATHS.has(pathname) ||
+    ACCOUNT_SETUP_PATHS.has(pathname) ||
     PARTNER_AUTH_PATHS.has(pathname) ||
     ADMIN_AUTH_PATHS.has(pathname)
   ) {
@@ -86,9 +88,10 @@ export async function middleware(request: NextRequest) {
   // ── Member account routes ──
   const isAccountLogin = pathname === '/account/login'
   const isAccountPublic = ACCOUNT_AUTH_PATHS.has(pathname)
+  const isAccountSetup = ACCOUNT_SETUP_PATHS.has(pathname)
   const isAccount = pathname.startsWith('/account')
 
-  if (isAccount && !isAccountPublic && !session) {
+  if (isAccount && !isAccountPublic && !isAccountSetup && !session) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/account/login'
     loginUrl.searchParams.set('next', pathname)
@@ -96,10 +99,43 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAccountLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('password_change_required')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
     const accountUrl = request.nextUrl.clone()
-    accountUrl.pathname = '/account'
+    accountUrl.pathname = profile?.password_change_required
+      ? '/account/change-password'
+      : '/account'
     accountUrl.search = ''
     return NextResponse.redirect(accountUrl)
+  }
+
+  if (isAccountSetup && !session) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/account/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (isAccount && session && !isAccountPublic) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('password_change_required')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (
+      profile?.password_change_required &&
+      pathname !== '/account/change-password'
+    ) {
+      const changeUrl = request.nextUrl.clone()
+      changeUrl.pathname = '/account/change-password'
+      changeUrl.search = ''
+      return NextResponse.redirect(changeUrl)
+    }
   }
 
   // ── Partner / influencer routes ──
