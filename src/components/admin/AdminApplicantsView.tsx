@@ -30,9 +30,13 @@ export default function AdminApplicantsView() {
   }
 
   if (error) {
+    const hint =
+      error === 'Unauthorized'
+        ? 'Sign out and sign in again at /admin/login.'
+        : 'Check Supabase migrations and try again.'
     return (
       <p className="admin-msg" style={{ color: 'var(--rose)' }}>
-        {error}. Check Supabase migrations and try again.
+        {error}. {hint}
       </p>
     )
   }

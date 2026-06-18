@@ -30,17 +30,18 @@ export async function getAdminContext() {
   }
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (userError || !user) {
     return { supabase, session: null, profile: null, isAdmin: false }
   }
 
-  const profile = await fetchProfile(supabase, session.user.id)
-  const isAdmin = userHasAdminAccess(profile, session.user.email)
+  const profile = await fetchProfile(supabase, user.id)
+  const isAdmin = userHasAdminAccess(profile, user.email)
 
-  return { supabase, session, profile, isAdmin }
+  return { supabase, session: { user }, profile, isAdmin }
 }
 
 /** For server pages — redirects handled by caller */

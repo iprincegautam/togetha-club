@@ -32,8 +32,10 @@ export async function middleware(request: NextRequest) {
   })
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const session = user ? { user } : null
 
   const { pathname } = request.nextUrl
 
@@ -183,5 +185,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*', '/partner/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/account/:path*',
+    '/partner/:path*',
+    '/api/admin/:path*',
+    '/api/account/:path*',
+    '/api/partner/:path*',
+  ],
 }

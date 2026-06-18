@@ -245,6 +245,26 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
 
       <div className="admin-panel">
         <h3 className="admin-panel-title">Review</h3>
+        {canResend && (
+          <div className="admin-credentials-inline">
+            <p className="account-muted" style={{ marginBottom: 10 }}>
+              Paid member — resend portal login to <strong>{applicant.email}</strong>
+            </p>
+            <button
+              type="button"
+              className="admin-btn"
+              disabled={resending}
+              onClick={resendCredentials}
+            >
+              {resending ? 'Sending…' : 'Resend member credentials'}
+            </button>
+            {resendResult && (
+              <p className="admin-msg" style={{ marginTop: 10 }}>
+                Temp password: <strong>{resendResult.temporaryPassword}</strong>
+              </p>
+            )}
+          </div>
+        )}
         <label className="admin-field">
           <span>Status</span>
           <select
