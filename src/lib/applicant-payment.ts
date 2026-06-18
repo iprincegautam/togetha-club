@@ -13,6 +13,15 @@ export function hasVerifiedPayment(applicant: ApplicantPaymentFields): boolean {
   return Boolean(applicant.razorpay_payment_id)
 }
 
+/** Paid applicants eligible for member portal credentials (support resend). */
+export function canResendMemberCredentials(applicant: {
+  razorpay_payment_id: string | null
+  status?: string | null
+}): boolean {
+  if (applicant.razorpay_payment_id) return true
+  return applicant.status === 'deposit_paid' || applicant.status === 'paid'
+}
+
 export function formatPaiseInr(paise: number): string {
   return `₹${Math.round(paise / 100).toLocaleString('en-IN')}`
 }

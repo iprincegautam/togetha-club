@@ -6,6 +6,7 @@ import Badge from '@/components/ui/Badge'
 import {
   applicantAmountPaidLabel,
   applicantBalanceDueLabel,
+  canResendMemberCredentials,
   hasVerifiedPayment,
 } from '@/lib/applicant-payment'
 import type { ApplicantStatus } from '@/types/applicant'
@@ -81,7 +82,7 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
   }
 
   const resendCredentials = async () => {
-    if (!paymentVerified) {
+    if (!canResend) {
       setMessage('Cannot resend — applicant has not completed payment.')
       return
     }
@@ -114,6 +115,7 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
   const promoCode = relName(applicant.promo_codes)
   const insight = matchInsight ?? applicant.match_insight
   const paymentVerified = hasVerifiedPayment(applicant)
+  const canResend = canResendMemberCredentials(applicant)
 
   return (
     <div className="admin-stack">
@@ -148,9 +150,19 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
           <div><dt>Razorpay payment</dt><dd>{applicant.razorpay_payment_id || '—'}</dd></div>
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
         </dl>
+      </div>
 
-        {paymentVerified && (
-          <div style={{ marginTop: 16 }}>
+      <div className="admin-panel" id="member-portal">
+        <h3 className="admin-panel-title">Member portal</h3>
+        {canResend ? (
+          <>
+            <p className="account-muted" style={{ marginBottom: 12 }}>
+              This applicant can log in at{' '}
+              <a href="/account/login" className="admin-inline-link" target="_blank" rel="noreferrer">
+                togetha.club/account/login
+              </a>{' '}
+              with their quiz/apply email.
+            </p>
             <button
               type="button"
               className="admin-btn"
@@ -160,16 +172,23 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
               {resending ? 'Sending…' : 'Resend member credentials'}
             </button>
             <p className="admin-muted" style={{ marginTop: 8, fontSize: 13 }}>
-              Emails a new temporary password and login instructions. Use when the member did not
-              receive the welcome email or forgot their password.
+              Generates a new temporary password and emails login instructions. The temp password also
+              appears here for phone support.
             </p>
             {resendResult && (
               <p className="admin-msg" style={{ marginTop: 8 }}>
-                Temp password (also emailed): <strong>{resendResult.temporaryPassword}</strong>
+                Sent to <strong>{resendResult.email}</strong> — temp password:{' '}
+                <strong>{resendResult.temporaryPassword}</strong>
               </p>
             )}
-          </div>
+          </>
+        ) : (
+          <p className="account-muted">
+            Available after the applicant completes payment (status <code>deposit_paid</code> or{' '}
+            <code>paid</code>). Quiz-only leads will not show this action.
+          </p>
         )}
+        {message && <p className="admin-msg" style={{ marginTop: 12 }}>{message}</p>}
       </div>
 
       {insight && (

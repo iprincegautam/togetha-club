@@ -23,6 +23,10 @@ export interface AdminApplicantRow {
   isQuizLead: boolean
 }
 
+function canShowCredentialsAction(status: ApplicantStatus): boolean {
+  return status === 'deposit_paid' || status === 'paid'
+}
+
 interface AdminApplicantsTableProps {
   applicants: AdminApplicantRow[]
 }
@@ -205,6 +209,17 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                     <Link href={ROUTES.adminApplicant(row.id)} className="admin-inline-link">
                       View →
                     </Link>
+                    {canShowCredentialsAction(row.status) && (
+                      <>
+                        {' · '}
+                        <Link
+                          href={`${ROUTES.adminApplicant(row.id)}#member-portal`}
+                          className="admin-inline-link"
+                        >
+                          Credentials
+                        </Link>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))

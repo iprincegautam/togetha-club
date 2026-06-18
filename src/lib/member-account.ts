@@ -129,7 +129,7 @@ export async function resendMemberCredentials(
 ): Promise<ResendCredentialsResult> {
   const { data: applicant, error: fetchError } = await service
     .from('applicants')
-    .select('id, email, name, phone, razorpay_payment_id')
+    .select('id, email, name, phone, razorpay_payment_id, status')
     .eq('id', applicantId)
     .maybeSingle()
 
@@ -138,7 +138,10 @@ export async function resendMemberCredentials(
   }
 
   if (!applicant.razorpay_payment_id) {
-    return { ok: false, error: 'No verified payment — credentials are sent after checkout completes.' }
+    const status = applicant.status as string | undefined
+    if (status !== 'deposit_paid' && status !== 'paid') {
+      return { ok: false, error: 'No verified payment — credentials are sent after checkout completes.' }
+    }
   }
 
   const email = applicant.email.trim().toLowerCase()
