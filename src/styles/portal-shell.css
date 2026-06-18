@@ -273,17 +273,19 @@
   display: block;
   position: fixed;
   left: 0;
+  right: 0;
   bottom: 0;
   z-index: 800;
   padding: 12px 16px;
   padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, rgba(44, 24, 16, 0.92) 40%);
   pointer-events: none;
 }
 
 .portal-mobile-signout {
   pointer-events: auto;
-  width: auto;
-  min-width: 120px;
+  width: 100%;
+  max-width: 320px;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.35);
 }
 

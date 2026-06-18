@@ -1,5 +1,8 @@
 import Link from 'next/link'
-import AdminApplicantsView from '@/components/admin/AdminApplicantsView'
+import AdminApplicantsTable from '@/components/admin/AdminApplicantsTable'
+import AdminAuthActions from '@/components/admin/AdminAuthActions'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
+import { fetchAdminApplicants } from '@/lib/admin-applicants'
 import { buildMetadata } from '@/lib/metadata'
 
 export function generateMetadata() {
@@ -9,7 +12,23 @@ export function generateMetadata() {
   )
 }
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const auth = await requireAdminApiAccess()
+
+  let applicants: Awaited<ReturnType<typeof fetchAdminApplicants>> = []
+  let loadError: string | null = null
+
+  if ('error' in auth) {
+    loadError = auth.error ?? 'Unauthorized'
+  } else {
+    try {
+      applicants = await fetchAdminApplicants(auth.service)
+    } catch (err) {
+      console.error('[admin page applicants]', err)
+      loadError = 'Could not load applicants'
+    }
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-card admin-card-wide">
@@ -31,7 +50,13 @@ export default function AdminPage() {
           </Link>
         </div>
 
-        <AdminApplicantsView />
+        {loadError ? (
+          <AdminAuthActions
+            message={`${loadError}. Sign out, then sign in again with your admin account.`}
+          />
+        ) : (
+          <AdminApplicantsTable applicants={applicants} />
+        )}
       </div>
     </div>
   )

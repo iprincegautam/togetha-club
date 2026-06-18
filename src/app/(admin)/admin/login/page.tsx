@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
+import PortalSignOutButton from '@/components/auth/PortalSignOutButton'
 import '@/components/apply/apply.css'
 
 export default function AdminLoginPage() {
@@ -103,6 +104,14 @@ export default function AdminLoginPage() {
             {loading ? 'Signing in...' : 'Sign in →'}
           </button>
         </form>
+
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <PortalSignOutButton
+            redirectTo={ROUTES.adminLogin}
+            label="Clear session"
+            className="account-btn-outline"
+          />
+        </div>
       </div>
     </div>
   )

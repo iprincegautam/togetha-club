@@ -68,10 +68,15 @@ export async function getAdminSession() {
   if (!supabase) return { supabase: null, session: null }
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
 
-  return { supabase, session }
+  if (error || !user) {
+    return { supabase, session: null }
+  }
+
+  return { supabase, session: { user } }
 }
 
 /** @deprecated Use tryCreateServerSupabaseClient */

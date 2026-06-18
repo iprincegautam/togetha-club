@@ -191,8 +191,17 @@ export default function PortalShell({
         <main className={`portal-content portal-content--${variant}`}>
           {showBell && (
             <div className="portal-topbar">
-              <div className="portal-bell-wrap">
-                <button
+          <div className="portal-bell-wrap">
+            {variant === 'admin' && (
+              <button
+                type="button"
+                className="portal-signout portal-topbar-signout"
+                onClick={signOut}
+              >
+                Sign out
+              </button>
+            )}
+            <button
                   type="button"
                   className="portal-bell-btn"
                   aria-label="Notifications"

@@ -1,8 +1,9 @@
 import { headers } from 'next/headers'
 import PortalShell from '@/components/layout/PortalShell'
 import PortalBackLink from '@/components/layout/PortalBackLink'
+import AdminAuthActions from '@/components/admin/AdminAuthActions'
 import { ROUTES } from '@/constants/routes'
-import { getAdminSession } from '@/lib/supabase/server'
+import { getAdminContext } from '@/lib/auth/admin'
 import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
 import '@/styles/portal-shell.css'
@@ -15,15 +16,30 @@ export default async function AdminLayout({
 }) {
   const headerList = await headers()
   const isAuthPage = headerList.get('x-portal-auth-page') === '1'
-  const { session } = await getAdminSession()
+  const ctx = await getAdminContext()
 
-  if (!session || isAuthPage) {
+  if (isAuthPage) {
     return (
       <div className="admin-layout portal-guest-wrap">
         <div className="portal-back-bar portal-back-bar--light">
           <PortalBackLink variant="light" />
         </div>
         <div className="admin-layout-body">{children}</div>
+      </div>
+    )
+  }
+
+  if (!ctx.session || !ctx.isAdmin) {
+    return (
+      <div className="admin-layout portal-guest-wrap">
+        <div className="portal-back-bar portal-back-bar--light">
+          <PortalBackLink variant="light" />
+        </div>
+        <div className="admin-layout-body">
+          <div className="admin-page">
+            <AdminAuthActions message="Admin session expired or access denied." />
+          </div>
+        </div>
       </div>
     )
   }

@@ -333,10 +333,17 @@
 .portal-topbar {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   padding: 0 0 16px;
   border-bottom: 1px dashed rgba(44, 24, 16, 0.15);
   margin-bottom: 20px;
+}
+
+.portal-topbar-signout {
+  width: auto;
+  min-width: 110px;
+  margin-right: auto;
 }
 
 .portal-entitlement-circles {
