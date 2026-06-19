@@ -1,0 +1,7 @@
+# Local-only assets (already in .gitignore; Vercel CLI still uploads unless listed here)
+influencers video/
+
+# Never upload local build artifacts or git history
+.next/
+.vercel/output/
+.git/
