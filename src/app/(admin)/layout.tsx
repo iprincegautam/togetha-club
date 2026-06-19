@@ -4,6 +4,7 @@ import PortalBackLink from '@/components/layout/PortalBackLink'
 import AdminAuthActions from '@/components/admin/AdminAuthActions'
 import { ROUTES } from '@/constants/routes'
 import { getAdminContext } from '@/lib/auth/admin'
+import { isAdminAuthPath } from '@/lib/portal-path'
 import '@/components/admin/admin.css'
 import '@/styles/portal-nav.css'
 import '@/styles/portal-shell.css'
@@ -15,8 +16,9 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const headerList = await headers()
-  const isAuthPage = headerList.get('x-portal-auth-page') === '1'
-  const ctx = await getAdminContext()
+  const pathname = headerList.get('x-pathname') ?? ''
+  const isAuthPage =
+    headerList.get('x-portal-auth-page') === '1' || isAdminAuthPath(pathname)
 
   if (isAuthPage) {
     return (
@@ -28,6 +30,8 @@ export default async function AdminLayout({
       </div>
     )
   }
+
+  const ctx = await getAdminContext()
 
   if (!ctx.session || !ctx.isAdmin) {
     return (

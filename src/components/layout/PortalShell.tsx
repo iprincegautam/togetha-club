@@ -56,6 +56,7 @@ export default function PortalShell({
 
   const signOut = async () => {
     const supabase = createBrowserSupabaseClient()
+    await fetch('/api/auth/signout', { method: 'POST' })
     await supabase.auth.signOut()
     router.push(signOutHref)
     router.refresh()

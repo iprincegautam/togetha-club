@@ -6,6 +6,7 @@ import {
 } from '@/lib/supabase/server'
 import {
   type ProfileRow,
+  isBootstrapAdminEmail,
   userHasAdminAccess,
 } from '@/lib/auth/roles'
 
@@ -23,6 +24,30 @@ export async function fetchProfile(
   return data as ProfileRow
 }
 
+async function ensureBootstrapAdminProfile(
+  userId: string,
+  email: string,
+  profile: ProfileRow | null
+): Promise<ProfileRow | null> {
+  if (!isBootstrapAdminEmail(email)) return profile
+
+  const service = tryCreateServiceRoleClient()
+  if (!service) return profile
+
+  const normalized = email.trim().toLowerCase()
+  await service.from('profiles').upsert(
+    {
+      id: userId,
+      email: normalized,
+      full_name: profile?.full_name ?? null,
+      role: 'ops',
+    },
+    { onConflict: 'id' }
+  )
+
+  return fetchProfile(service, userId)
+}
+
 export async function getAdminContext() {
   const supabase = await createServerAuthClient()
   if (!supabase) {
@@ -38,7 +63,16 @@ export async function getAdminContext() {
     return { supabase, session: null, profile: null, isAdmin: false }
   }
 
-  const profile = await fetchProfile(supabase, user.id)
+  let profile = await fetchProfile(supabase, user.id)
+
+  if (
+    user.email &&
+    !userHasAdminAccess(profile, user.email) &&
+    isBootstrapAdminEmail(user.email)
+  ) {
+    profile = await ensureBootstrapAdminProfile(user.id, user.email, profile)
+  }
+
   const isAdmin = userHasAdminAccess(profile, user.email)
 
   return { supabase, session: { user }, profile, isAdmin }

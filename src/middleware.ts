@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { userHasPartnerAccess } from '@/lib/auth/partner'
-import { userHasAdminAccess } from '@/lib/auth/roles'
+import { isBootstrapAdminEmail, userHasAdminAccess } from '@/lib/auth/roles'
 import {
   ACCOUNT_AUTH_PATHS,
   ACCOUNT_SETUP_PATHS,
@@ -9,8 +9,26 @@ import {
   PARTNER_AUTH_PATHS,
 } from '@/lib/portal-path'
 
+function isPortalAuthPage(pathname: string): boolean {
+  return (
+    ACCOUNT_AUTH_PATHS.has(pathname) ||
+    ACCOUNT_SETUP_PATHS.has(pathname) ||
+    PARTNER_AUTH_PATHS.has(pathname) ||
+    ADMIN_AUTH_PATHS.has(pathname)
+  )
+}
+
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const { pathname } = request.nextUrl
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-pathname', pathname)
+  if (isPortalAuthPage(pathname)) {
+    requestHeaders.set('x-portal-auth-page', '1')
+  }
+
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -23,7 +41,9 @@ export async function middleware(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-        supabaseResponse = NextResponse.next({ request })
+        supabaseResponse = NextResponse.next({
+          request: { headers: requestHeaders },
+        })
         cookiesToSet.forEach(({ name, value, options }) =>
           supabaseResponse.cookies.set(name, value, options)
         )
@@ -36,17 +56,6 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const session = user ? { user } : null
-
-  const { pathname } = request.nextUrl
-
-  if (
-    ACCOUNT_AUTH_PATHS.has(pathname) ||
-    ACCOUNT_SETUP_PATHS.has(pathname) ||
-    PARTNER_AUTH_PATHS.has(pathname) ||
-    ADMIN_AUTH_PATHS.has(pathname)
-  ) {
-    supabaseResponse.headers.set('x-portal-auth-page', '1')
-  }
 
   // ── Admin routes ──
   const isAdminLogin = pathname === '/admin/login'
@@ -65,7 +74,11 @@ export async function middleware(request: NextRequest) {
       .eq('id', session.user.id)
       .maybeSingle()
 
-    if (!userHasAdminAccess(profile, session.user.email)) {
+    const hasAdminAccess =
+      userHasAdminAccess(profile, session.user.email) ||
+      isBootstrapAdminEmail(session.user.email)
+
+    if (!hasAdminAccess) {
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/admin/login'
       loginUrl.searchParams.set('error', 'forbidden')
@@ -80,7 +93,11 @@ export async function middleware(request: NextRequest) {
       .eq('id', session.user.id)
       .maybeSingle()
 
-    if (userHasAdminAccess(profile, session.user.email)) {
+    const hasAdminAccess =
+      userHasAdminAccess(profile, session.user.email) ||
+      isBootstrapAdminEmail(session.user.email)
+
+    if (hasAdminAccess) {
       const adminUrl = request.nextUrl.clone()
       adminUrl.pathname = '/admin'
       return NextResponse.redirect(adminUrl)
@@ -192,5 +209,6 @@ export const config = {
     '/api/admin/:path*',
     '/api/account/:path*',
     '/api/partner/:path*',
+    '/api/auth/signout',
   ],
 }

@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (searchParams.get('error') === 'forbidden') {
-      setError('This account does not have admin access. Contact the team lead.')
+      setError('This account does not have admin access. Use an email listed in ADMIN_EMAILS, or ask ops to set your profile role to ops.')
     }
   }, [searchParams])
 
