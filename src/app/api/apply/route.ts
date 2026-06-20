@@ -7,7 +7,14 @@ import {
 } from '@/lib/payment-plan'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import { isMissingColumnError, resolvePromoDiscount } from '@/lib/promo'
-import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
+import {
+  buildOrderReceipt,
+  formatRazorpayApiError,
+  getRazorpayCheckoutKeyId,
+  isRazorpayConfigured,
+  razorpay,
+  validateRazorpayKeyConfiguration,
+} from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
 const VALID_SLUGS = ['batch-a', 'batch-b']
@@ -191,12 +198,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment not configured' }, { status: 503 })
     }
 
-    const order = await razorpay.orders.create({
-      amount: chargeNow,
-      currency: 'INR',
-      receipt: applicantId,
-      notes: { payment_plan: plan },
-    })
+    const keyCheck = validateRazorpayKeyConfiguration()
+    if (!keyCheck.ok) {
+      console.error('[POST /api/apply]', keyCheck.message)
+      return NextResponse.json({ error: keyCheck.message }, { status: 503 })
+    }
+
+    let order
+    try {
+      order = await razorpay.orders.create({
+        amount: chargeNow,
+        currency: 'INR',
+        receipt: buildOrderReceipt(applicantId),
+        notes: { payment_plan: plan, applicant_id: applicantId },
+      })
+    } catch (razorpayErr) {
+      console.error('[POST /api/apply] Razorpay order.create failed:', razorpayErr)
+      return NextResponse.json(
+        { error: formatRazorpayApiError(razorpayErr) },
+        { status: 502 }
+      )
+    }
 
     const { error: orderError } = await supabase
       .from('applicants')
@@ -214,10 +236,13 @@ export async function POST(req: NextRequest) {
       originalAmount,
       discountAmount,
       currency: 'INR',
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      keyId: getRazorpayCheckoutKeyId(),
     })
   } catch (err) {
     console.error('[POST /api/apply]', err)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: formatRazorpayApiError(err) },
+      { status: 500 }
+    )
   }
 }

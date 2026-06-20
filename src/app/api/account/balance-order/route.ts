@@ -2,7 +2,14 @@ import { NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
 import { requireMemberApiAccess } from '@/lib/auth/member'
 import { getOrCreateRazorpayCustomer } from '@/lib/razorpay-customer'
-import { isRazorpayConfigured, razorpay } from '@/lib/razorpay'
+import {
+  buildOrderReceipt,
+  formatRazorpayApiError,
+  getRazorpayCheckoutKeyId,
+  isRazorpayConfigured,
+  razorpay,
+  validateRazorpayKeyConfiguration,
+} from '@/lib/razorpay'
 
 export async function POST() {
   const auth = await requireMemberApiAccess()
@@ -44,16 +51,28 @@ export async function POST() {
     phone: auth.profile!.phone,
   })
 
-  const order = await razorpay.orders.create({
-    amount: balanceDue,
-    currency: 'INR',
-    receipt: `${applicant.id}-balance`,
-    notes: {
-      payment_plan: 'balance',
-      applicant_id: applicant.id,
-      ...(customerId ? { customer_id: customerId } : {}),
-    },
-  })
+  const keyCheck = validateRazorpayKeyConfiguration()
+  if (!keyCheck.ok) {
+    console.error('[POST /api/account/balance-order]', keyCheck.message)
+    return NextResponse.json({ error: keyCheck.message }, { status: 503 })
+  }
+
+  let order
+  try {
+    order = await razorpay.orders.create({
+      amount: balanceDue,
+      currency: 'INR',
+      receipt: buildOrderReceipt(`${applicant.id}-bal`),
+      notes: {
+        payment_plan: 'balance',
+        applicant_id: applicant.id,
+        ...(customerId ? { customer_id: customerId } : {}),
+      },
+    })
+  } catch (razorpayErr) {
+    console.error('[POST /api/account/balance-order] Razorpay order.create failed:', razorpayErr)
+    return NextResponse.json({ error: formatRazorpayApiError(razorpayErr) }, { status: 502 })
+  }
 
   await auth.service
     .from('applicants')
@@ -64,7 +83,7 @@ export async function POST() {
     orderId: order.id,
     amount: balanceDue,
     currency: 'INR',
-    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    keyId: getRazorpayCheckoutKeyId(),
     customerId: customerId ?? undefined,
   })
 }
