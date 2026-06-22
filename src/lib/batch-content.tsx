@@ -4,108 +4,19 @@ import {
   PolicyTab,
   ReviewsTab,
   VibeTab,
-  type IncludeItem,
-  type ItineraryDay,
   type PolicyData,
   type ReviewData,
   type VibeCardData,
 } from '@/components/batches/BatchTabPanels'
-import { INCLUDE_GLYPH, VIBE_GLYPH } from '@/constants/brand-glyphs'
-const BATCH_A_ITINERARY: ItineraryDay[] = [
-  {
-    num: 1,
-    location: 'Delhi → Manali',
-    title: 'The Beginning of Something',
-    activities: [
-      { text: 'Overnight Volvo from Delhi', variant: 'gold' },
-      { text: 'First Meeting — Ice Breaker Round 1', variant: 'highlight' },
-      { text: 'Name game that gets weird fast', variant: 'highlight' },
-      { text: 'Arrive Manali dawn', variant: 'gold' },
-    ],
-  },
-  {
-    num: 2,
-    location: '△ Manali Town',
-    title: 'Chaos, Chai & First Impressions',
-    activities: [
-      { text: 'Breakfast together (your first proper meal)', variant: 'gold' },
-      { text: 'Ice Breaker Games — Round 2', variant: 'highlight' },
-      { text: 'Old Manali café crawl', variant: 'gold' },
-      { text: 'Hadimba Temple walk', variant: 'gold' },
-      { text: 'Evening group dinner — assigned seats (by us)', variant: 'highlight' },
-      { text: 'Rooftop chai with strangers becoming friends', variant: 'gold' },
-    ],
-  },
-  {
-    num: 3,
-    location: 'Kasol',
-    title: 'The Day Everything Opens Up',
-    activities: [
-      { text: 'Manali → Kasol road trip (the most beautiful 4 hrs)', variant: 'gold' },
-      { text: 'Paired activities (we choose the pairs)', variant: 'highlight' },
-      { text: 'Parvati River walk', variant: 'gold' },
-      { text: "Sunset at the ghats — it's a lot", variant: 'gold' },
-      { text: 'Paired dinner (yes, we pair you)', variant: 'highlight' },
-    ],
-  },
-  {
-    num: 4,
-    location: '♡ Kasol',
-    title: 'THE Night — Bonfire + Stars',
-    activities: [
-      { text: 'Morning hike to Kheerganga trail start', variant: 'gold' },
-      { text: 'Lazy afternoon — explore or do nothing', variant: 'gold' },
-      { text: 'BONFIRE NIGHT — The signature evening', variant: 'rose' },
-      { text: 'Guitar. Stories. Unfiltered conversation.', variant: 'gold' },
-      { text: 'Stargazing at 9,000 ft', variant: 'gold' },
-      { text: 'Ends when it ends', variant: 'gold' },
-    ],
-  },
-  {
-    num: 5,
-    location: '△ Sissu, Lahaul',
-    title: 'The Mountains Decide Everything',
-    activities: [
-      { text: 'Kasol → Sissu via Rohtang (when open)', variant: 'gold' },
-      { text: 'Sissu Lake — glassy water at 10,000 ft', variant: 'gold' },
-      { text: 'Last group game — brutal honesty round', variant: 'highlight' },
-      { text: 'Dinner at Sissu village', variant: 'gold' },
-      { text: 'Group reflection circle — what happened this week', variant: 'highlight' },
-    ],
-  },
-  {
-    num: 6,
-    location: '→ Sissu → Delhi',
-    title: "You Won't Go Back the Same",
-    activities: [
-      { text: 'Morning in Sissu — last looks', variant: 'gold' },
-      { text: 'Journey back, Volvo AC', variant: 'gold' },
-      { text: 'Private group WhatsApp unlocked', variant: 'gold' },
-      { text: 'Arrive Delhi late evening', variant: 'gold' },
-      'Whatever happens next is up to you.',
-    ],
-  },
-]
-
-const BATCH_A_INCLUDES: IncludeItem[] = [
-  { icon: INCLUDE_GLYPH.transport, title: 'Delhi–Manali–Delhi Transport', desc: 'AC Volvo sleeper both ways. We travel together from Day 1.' },
-  { icon: INCLUDE_GLYPH.stay, title: '5 Nights Accommodation', desc: 'Comfortable guesthouses & camps. Single-gender sharing rooms.' },
-  { icon: INCLUDE_GLYPH.meals, title: 'All Meals Included', desc: 'Breakfast, lunch, dinner. Group meals only — no solo dining allowed.' },
-  { icon: INCLUDE_GLYPH.games, title: 'Ice Breaker Game Sets', desc: 'Custom-designed games. 3 rounds over 6 days. Gets progressively more real.' },
-  { icon: INCLUDE_GLYPH.bonfire, title: 'Bonfire Night Setup', desc: 'Wood, chai, snacks, guitar. We handle everything. You just show up.' },
-  { icon: INCLUDE_GLYPH.guide, title: 'Dedicated Trip Lead', desc: 'Trained facilitator with you 24/7. Not a tour guide — a vibe curator.' },
-  { icon: INCLUDE_GLYPH.group, title: 'Private Group Access', desc: 'WhatsApp group unlocked on Day 6. Pre-trip info channel from Day 1.' },
-  { icon: INCLUDE_GLYPH.verify, title: 'Identity Verification', desc: 'Everyone in your group is verified. No catfishing. No surprises.' },
-  { icon: INCLUDE_GLYPH.safety, title: 'First Aid & Emergency', desc: 'First aid kit, altitude medication, emergency SOS. Mountain-ready.' },
-]
-
-const BATCH_A_NOT_INCLUDED = [
-  'Flights to/from Delhi',
-  'Personal shopping & souvenirs',
-  'Alcohol (dry trip — this is intentional)',
-  'Travel insurance (recommended separately)',
-  'Tips for local vendors',
-]
+import {
+  BATCH_A_INCLUDES,
+  BATCH_A_ITINERARY,
+  BATCH_A_NOT_INCLUDED,
+  BATCH_B_INCLUDES,
+  BATCH_B_ITINERARY,
+  BATCH_B_NOT_INCLUDED,
+} from '@/lib/batch-trip-data'
+import { VIBE_GLYPH } from '@/constants/brand-glyphs'
 
 const BATCH_A_VIBE_CARDS: VibeCardData[] = [
   { icon: VIBE_GLYPH.energy, title: 'Electric Energy', desc: 'GenZ moves fast. Our games and activities match that pace. Nothing is slow or boring.' },
@@ -158,12 +69,12 @@ const BATCH_A_FAQ = [
   {
     question: "What happens if I don't click with anyone romantically?",
     answer:
-      "You still get 5 nights in the Himalayas with 23 interesting, vetted, single people who chose to do something different with their time. The worst outcome is: incredible trip, 23 new friends, and a story you'll tell for years. That's a pretty good worst case.",
+      "You still get 3 nights in the Himalayas with 23 interesting, vetted, single people who chose to do something different with their time. The worst outcome is: incredible trip, 23 new friends, and a story you'll tell for years. That's a pretty good worst case.",
   },
   {
-    question: 'How does the profile screening actually work?',
+    question: 'How do I book my spot?',
     answer:
-      "You fill a multi-step application. Our team reads every single one. We look at intent, energy, how you write, what you're looking for. Then some applications get a 10-min call. We're not filtering for looks — we're filtering for genuine people who want to be there. Takes 2–5 days. You'll hear back either way.",
+      "Take the quiz, pick your Friday departure on togetha.club, and pay to lock your slot. Once payment goes through you're in — 12 boys and 12 girls on the same trip. Our AI uses your quiz to place you in the best-fit cohort. You meet everyone on Day 1.",
   },
   {
     question: 'Is there a gender balance guarantee?',
@@ -183,96 +94,13 @@ const BATCH_A_FAQ = [
   {
     question: 'Can I come with a friend?',
     answer:
-      "Each person applies individually and is screened individually. If both are approved, yes — but we won't always pair you in room/activity groups. The point is to push you to meet the other 22 people. Coming with a friend sometimes creates a safety bubble that defeats the purpose.",
+      "Each person books their own slot. If you're both coming, yes — but we won't always pair you in room/activity groups. The point is to push you to meet the other 22 people. Coming with a friend sometimes creates a safety bubble that defeats the purpose.",
   },
   {
     question: "I'm shy / introverted. Is this for me?",
     answer:
       "Some of our best connections have been between introverts who finally found someone who operates at their pace. The activities are designed so nobody has to perform. There's always free time. Nobody will force you to do anything. And honestly, the mountains help with this more than we can explain.",
   },
-]
-
-const BATCH_B_ITINERARY: ItineraryDay[] = [
-  {
-    num: 1,
-    location: 'Delhi → Manali',
-    title: 'Leave the city behind',
-    activities: [
-      { text: 'Premium Volvo — Delhi pickup', variant: 'gold' },
-      { text: 'Welcome letter in your seat', variant: 'gold' },
-      { text: 'Arrival at sunrise', variant: 'gold' },
-      { text: 'Welcome circle + introductions', variant: 'highlight' },
-    ],
-  },
-  {
-    num: 2,
-    location: '△ Manali',
-    title: 'Slow mornings, deep conversations',
-    activities: [
-      { text: 'Leisurely breakfast — no rush', variant: 'gold' },
-      { text: 'Deep Connection Game — Round 1', variant: 'rose' },
-      { text: "Manali's old district walk", variant: 'gold' },
-      { text: 'Curated dinner — assigned seating by personality type', variant: 'highlight' },
-      { text: 'Evening wine & stories at guesthouse', variant: 'gold' },
-    ],
-  },
-  {
-    num: 3,
-    location: 'Kasol',
-    title: 'The Parvati Valley changes people',
-    activities: [
-      { text: 'Scenic drive — Manali to Kasol', variant: 'gold' },
-      { text: 'Riverside lunch at a local dhaba', variant: 'gold' },
-      { text: 'Paired evening walk (we assign pairs)', variant: 'highlight' },
-      { text: 'Sunset meditation / journaling hour', variant: 'gold' },
-      { text: 'Group dinner under fairy lights', variant: 'gold' },
-    ],
-  },
-  {
-    num: 4,
-    location: '♡ Kasol',
-    title: 'The bonfire that stays with you',
-    activities: [
-      { text: 'Free morning — explore or rest', variant: 'gold' },
-      { text: 'BONFIRE NIGHT — The signature evening', variant: 'rose' },
-      { text: 'Stories, music, real conversation', variant: 'gold' },
-      { text: 'Premium whisky & wine (Millennial edition perk)', variant: 'gold' },
-      { text: 'Stargazing until the mountains ask you to sleep', variant: 'gold' },
-    ],
-  },
-  {
-    num: 5,
-    location: '△ Sissu',
-    title: 'Above the clouds. Above pretense.',
-    activities: [
-      { text: 'Journey to Sissu via Atal Tunnel', variant: 'gold' },
-      { text: 'Sissu Lake — reflections (literal and otherwise)', variant: 'gold' },
-      { text: 'Deep connection round 3 — what you want, actually', variant: 'rose' },
-      { text: 'Village dinner — cooked by local family', variant: 'gold' },
-    ],
-  },
-  {
-    num: 6,
-    location: '→ Return',
-    title: "You're different now",
-    activities: [
-      { text: 'Last morning at Sissu', variant: 'gold' },
-      { text: 'Group letter exchange — write to someone you met', variant: 'highlight' },
-      { text: 'Journey back', variant: 'gold' },
-      { text: 'Private group chat unlocked', variant: 'gold' },
-    ],
-  },
-]
-
-const BATCH_B_INCLUDES: IncludeItem[] = [
-  { icon: INCLUDE_GLYPH.transport, title: 'Premium Private Transport', desc: 'Private AC vehicle both ways. Not shared Volvo — your own vehicle for the group.' },
-  { icon: INCLUDE_GLYPH.stay, title: 'Boutique Guesthouses', desc: 'Carefully selected properties. Views, warmth, character. Not hostels.' },
-  { icon: INCLUDE_GLYPH.drinks, title: 'Premium Meals + Drinks', desc: 'All meals. Wine & whisky at bonfire night. Curated menus, not mass catering.' },
-  { icon: INCLUDE_GLYPH.connection, title: 'Deep Connection Facilitation', desc: 'Three guided sessions designed by a relationship psychologist. Not games — conversations with purpose.' },
-  { icon: INCLUDE_GLYPH.bonfire, title: 'The Bonfire Experience', desc: 'Full setup, live music, curated playlist, premium bonfire experience under open sky.' },
-  { icon: INCLUDE_GLYPH.letter, title: 'Letter Exchange Kit', desc: 'Stationery to write to someone in your group. Anonymous delivery on Day 6.' },
-  { icon: INCLUDE_GLYPH.guide, title: 'Lead + Co-Lead', desc: "Two trained facilitators. They've done this before. They know when to step in and when to disappear." },
-  { icon: INCLUDE_GLYPH.photo, title: 'Photography Moments', desc: "Two curated photography sessions. You'll have actual good photos from this trip." },
 ]
 
 const BATCH_B_VIBE_CARDS: VibeCardData[] = [
@@ -362,7 +190,7 @@ function buildBatchATabs() {
       label: 'Day-by-Day',
       content: (
         <ItineraryTab
-          title="Six days that'll change how you think about travel. And people."
+          title="3 nights · 4 days — Manali, Sissu & Kasol."
           days={BATCH_A_ITINERARY}
         />
       ),
@@ -419,7 +247,7 @@ function buildBatchBTabs() {
       label: 'Day-by-Day',
       content: (
         <ItineraryTab
-          title="Slower. Deeper. More wine. Fewer filters."
+          title="Same route. Slower pace. Manali → Sissu → Kasol."
           days={BATCH_B_ITINERARY}
           roseAccent
         />
@@ -433,6 +261,7 @@ function buildBatchBTabs() {
           label="Premium inclusions"
           title="Everything included. Nothing left to chance."
           items={BATCH_B_INCLUDES}
+          notIncluded={BATCH_B_NOT_INCLUDED}
         />
       ),
     },

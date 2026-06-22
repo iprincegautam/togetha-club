@@ -11,7 +11,7 @@ const STATS = [
     numClass: '',
     label: (
       <>
-        <strong>Screened singles per batch</strong>
+        <strong>Verified singles per batch</strong>
         <br />
         12 boys · 12 girls · always balanced.
       </>

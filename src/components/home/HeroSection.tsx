@@ -98,8 +98,8 @@ export default function HeroSection() {
           <span className="ht-gold">travelers.</span>
         </h1>
         <p className="hero-sub">
-          24 screened, AI-matched singles. 6 days in the Himalayas — take the quiz to find your
-          batch.
+          Take the quiz, book your slot, pay online — then 6 days in the Himalayas with 12 boys and
+          12 girls, AI-matched.
         </p>
         <div className="hero-btns">
           <Link href={ROUTES.match} className="btn-p">

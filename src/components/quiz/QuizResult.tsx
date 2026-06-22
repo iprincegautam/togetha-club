@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
 import { BATCH_AGE_LIMITS, parseQuizAge } from '@/lib/batch-age'
-import { hasCompletedQuizLead } from '@/lib/quiz-lead-storage'
+import { ensureNurtureEmail } from '@/lib/quiz-lead'
+import { hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
 import { ROUTES } from '@/constants/routes'
 import type { QuizAnswers, QuizResult as QuizResultType } from '@/types/quiz'
 
@@ -23,6 +24,15 @@ const BATCH_LABELS: Record<QuizResultType['batchRecommendation'], string> = {
 
 export default function QuizResult({ result, answers }: QuizResultProps) {
   const [unlocked, setUnlocked] = useState(() => hasCompletedQuizLead())
+
+  useEffect(() => {
+    if (!unlocked) return
+    const lead = loadQuizLead()
+    if (!lead?.applicantId) return
+    ensureNurtureEmail(lead.applicantId).catch((err) =>
+      console.warn('[QuizResult] nurture backup failed', err)
+    )
+  }, [unlocked])
 
   const badgeColor = result.batchRecommendation === 'batch-b' ? 'rose' : 'teal'
   const userAge = parseQuizAge(answers)

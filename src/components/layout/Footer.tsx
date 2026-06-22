@@ -25,6 +25,9 @@ export default function Footer() {
           <Link href={ROUTES.about}>About</Link>
         </li>
         <li>
+          <Link href={ROUTES.careers}>Careers</Link>
+        </li>
+        <li>
           <Link href={ROUTES.contact}>Contact Us</Link>
         </li>
         <li>

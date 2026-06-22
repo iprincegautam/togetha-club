@@ -18,4 +18,11 @@ export const BUSINESS = {
   slotBookingPercent: 30,
   governingLaw: 'laws of India',
   governingCourts: 'courts at New Delhi',
+  agentName: 'Sophie',
+  whatsappUrl: 'https://wa.me/917054183391',
+  whatsappDisplay: '+91 70541 83391',
+  phoneUrl: 'tel:+917830910776',
+  phoneDisplay: '+91 78309 10776',
+  instagramUrl: 'https://ig.me/m/togetha.club',
+  instagramHandle: '@togetha.club',
 } as const

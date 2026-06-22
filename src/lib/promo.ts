@@ -36,6 +36,8 @@ const STATIC_PROMO_CODES: Record<
   { discountType: DiscountType; discountValue: number; grantsPriority: boolean }
 > = {
   SARAH200: { discountType: 'fixed_inr', discountValue: 2000, grantsPriority: true },
+  STANDARD: { discountType: 'percent', discountValue: 10, grantsPriority: false },
+  MAX: { discountType: 'percent', discountValue: 10, grantsPriority: true },
 }
 
 let promoSchemaUnavailableCache: boolean | null = null

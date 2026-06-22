@@ -48,7 +48,7 @@ const BATCH_CONFIG: Record<
     trustItems: [
       'Verified profiles only',
       'Secure Razorpay payment',
-      'Full refund if rejected',
+      'Book online · instant confirmation',
       '12 boys · 12 girls balance guaranteed',
     ],
   },
@@ -66,7 +66,7 @@ const BATCH_CONFIG: Record<
     trustItems: [
       'Premium accommodation',
       'Private transport',
-      'Full refund if rejected',
+      'Book online · instant confirmation',
       '12M · 12F guaranteed',
     ],
   },

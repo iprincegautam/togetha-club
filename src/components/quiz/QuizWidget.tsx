@@ -9,6 +9,7 @@ import {
   QUIZ_DEPARTURE_QUESTION_ID,
 } from '@/lib/batch-age'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
+import { loadQuizAnswers } from '@/lib/quiz-storage'
 import { useQuiz } from '@/hooks/useQuiz'
 import QuizResult from '@/components/quiz/QuizResult'
 import type { DateOption } from '@/lib/batches'
@@ -90,7 +91,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
     completionNotifiedRef.current = true
 
     if (delegateResults) {
-      onComplete?.(ans)
+      onComplete?.(loadQuizAnswers() ?? ans)
       return
     }
 

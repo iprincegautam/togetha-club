@@ -107,8 +107,8 @@ export default function MatchPreviewPanel({
           <div className="match-stat-value">{active.placementChance}%</div>
           <div className="match-stat-label">Likely placement chance</div>
           <p className="match-stat-copy">
-            If approved, this is how strongly our algorithm would prioritize you for{' '}
-            {active.batchLabel.toLowerCase()}.
+            This is how strongly our algorithm prioritizes you for{' '}
+            {active.batchLabel.toLowerCase()} once you book.
           </p>
         </div>
         {active.cohortMatchPercent != null && (
@@ -191,8 +191,8 @@ export default function MatchPreviewPanel({
       )}
 
       <p className="match-footnote">
-        Preview only — final batch placement still includes human review. Cohort overlap uses real
-        applicant quiz data when available.
+        Preview only — your slot is confirmed when you pay. AI batch placement uses your quiz
+        answers once you book.
       </p>
     </div>
   )

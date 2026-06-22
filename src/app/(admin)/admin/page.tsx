@@ -45,6 +45,9 @@ export default async function AdminPage() {
           <Link href="/admin/waitlist" className="admin-quick-link">
             Waitlist
           </Link>
+          <Link href="/admin/interns" className="admin-quick-link">
+            Founding team
+          </Link>
           <Link href="/admin/affiliates" className="admin-quick-link">
             Affiliates
           </Link>

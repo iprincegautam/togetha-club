@@ -47,8 +47,8 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
           you
         </h3>
         <p className="cohort-teaser-sub">
-          Same vibe. Similar values. Already moving toward this batch — identities stay hidden until
-          you&apos;re approved.
+          Same vibe. Similar values. Already booked for this batch — identities stay hidden until
+          departure day.
         </p>
       </div>
 
@@ -105,8 +105,8 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
 
       {teaser.likeYouCount > teaser.people.length && (
         <p className="cohort-more-muted">
-          + {teaser.likeYouCount - teaser.people.length} more profiles like yours in review — unlock
-          after you apply.
+          + {teaser.likeYouCount - teaser.people.length} more profiles like yours on this batch —
+          unlock after you book.
         </p>
       )}
 
@@ -115,7 +115,7 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
           href={ROUTES.batchDetail(selectedBatch)}
           className={`rfbtn cohort-apply-btn${accent === 'rose' ? ' rose' : ''}`}
         >
-          Apply for your slot →
+          Book your slot →
         </Link>
         <p className="cohort-apply-note">
           Opens {BATCH_META[selectedBatch].label} ({BATCH_META[selectedBatch].ageRange}) — pick your

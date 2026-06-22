@@ -33,3 +33,22 @@ next-env.d.ts
 
 # Local source uploads (copied into public/videos/)
 influencers video/
+
+# Privacy: raw Instagram DM data (never commit)
+classified_dms.json
+.tmp/
+scripts/output/
+classification_cache.json
+high_urgency_leads.csv
+question_frequency.txt
+sophie_knowledge_base.txt
+togetha_knowledge_base.txt
+instagram-togetha.club-*/
+instagram-*/
+messages.json
+parsed_dms.json
+
+# API keys
+*.key
+.anthropic
+anthropic_key.txt

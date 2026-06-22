@@ -154,13 +154,28 @@ export async function POST(req: NextRequest) {
         console.info('[POST /api/quiz] nurture enrolled', {
           applicantId: data.id,
           email: normalizedEmail,
+          resendId: nurtureResult.resendId,
         })
       }
+
+      return NextResponse.json({
+        success: true,
+        applicantId: data.id,
+        nurture: {
+          ok: nurtureResult.ok,
+          emailSent: nurtureResult.emailSent ?? false,
+          error: nurtureResult.error ?? null,
+        },
+      })
     } catch (nurtureErr) {
       console.error('[POST /api/quiz] nurture enroll threw', nurtureErr)
     }
 
-    return NextResponse.json({ success: true, applicantId: data.id })
+    return NextResponse.json({
+      success: true,
+      applicantId: data.id,
+      nurture: { ok: false, emailSent: false, error: 'nurture_exception' },
+    })
   } catch (err) {
     console.error('[POST /api/quiz]', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

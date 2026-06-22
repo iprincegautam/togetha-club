@@ -18,6 +18,7 @@ export const GLYPH = {
   letter: '✉',
   cross: '±',
   star: '✧',
+  quote: '❝',
 } as const
 
 export const HOW_IT_WORKS_GLYPH = {

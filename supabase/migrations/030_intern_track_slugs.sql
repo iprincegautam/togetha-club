@@ -1,0 +1,11 @@
+-- Update intern application track slugs to match careers page roles
+
+ALTER TABLE public.intern_applications DROP CONSTRAINT IF EXISTS intern_applications_track_check;
+
+ALTER TABLE public.intern_applications
+  ADD CONSTRAINT intern_applications_track_check
+  CHECK (track IN ('visual-architect', 'motion-storyteller', 'member-experience'));
+
+UPDATE public.intern_applications SET track = 'visual-architect' WHERE track = 'growth-design';
+UPDATE public.intern_applications SET track = 'motion-storyteller' WHERE track = 'story-video';
+UPDATE public.intern_applications SET track = 'member-experience' WHERE track = 'growth-conversations';

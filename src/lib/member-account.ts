@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { fetchPackagePricePaise } from '@/lib/package-pricing'
 import { sendMemberWelcomeEmail } from '@/lib/resend'
 
 export function generateTemporaryPassword(length = 14): string {
@@ -240,4 +241,160 @@ export async function resendMemberCredentials(
   })
 
   return { ok: true, email, temporaryPassword: tempPassword, isNewUser }
+}
+
+export type AdminProvisionResult =
+  | { ok: true; applicantId: string; email: string; temporaryPassword: string; isNewUser: boolean }
+  | { ok: false; error: string }
+
+/** Admin: create direct-lead applicant and email portal login + temp password (before payment). */
+export async function adminProvisionMemberLogin(
+  service: SupabaseClient,
+  input: { name: string; email: string; phone: string }
+): Promise<AdminProvisionResult> {
+  const email = input.email.trim().toLowerCase()
+  const name = input.name.trim()
+  const phone = input.phone.trim()
+
+  if (!email.includes('@')) {
+    return { ok: false, error: 'Valid email required' }
+  }
+  if (!name) {
+    return { ok: false, error: 'Name required' }
+  }
+
+  const { data: existingApplicant } = await service
+    .from('applicants')
+    .select('id, email, name, phone')
+    .eq('email', email)
+    .maybeSingle()
+
+  let applicantId = existingApplicant?.id as string | undefined
+  const packagePricePaise = await fetchPackagePricePaise(service)
+
+  if (!applicantId) {
+    const { data: created, error: createError } = await service
+      .from('applicants')
+      .insert({
+        email,
+        name,
+        phone,
+        status: 'pending',
+        lead_source: 'direct',
+        original_amount: packagePricePaise,
+        discount_amount: 0,
+        final_amount: packagePricePaise,
+        payment_plan: 'full',
+      })
+      .select('id')
+      .single()
+
+    if (createError || !created) {
+      return { ok: false, error: createError?.message ?? 'Could not create applicant' }
+    }
+    applicantId = created.id
+  } else {
+    await service
+      .from('applicants')
+      .update({
+        name,
+        phone,
+        lead_source: 'direct',
+        original_amount: packagePricePaise,
+        final_amount: packagePricePaise,
+      })
+      .eq('id', applicantId)
+  }
+
+  const tempPassword = generateTemporaryPassword()
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
+  const loginUrl = `${siteUrl}/account/login`
+  const settingsUrl = `${siteUrl}/account/settings`
+
+  const { data: profileByApplicant } = await service
+    .from('profiles')
+    .select('id, role, email')
+    .eq('applicant_id', applicantId)
+    .maybeSingle()
+
+  const { data: profileByEmail } = profileByApplicant
+    ? { data: null }
+    : await service.from('profiles').select('id, role, email').ilike('email', email).maybeSingle()
+
+  const existingProfile = profileByApplicant ?? profileByEmail
+  let userId = existingProfile?.id as string | undefined
+  let isNewUser = false
+
+  if (!userId) {
+    const { data: created, error: createError } = await service.auth.admin.createUser({
+      email,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { full_name: name },
+    })
+
+    if (createError) {
+      const msg = createError.message.toLowerCase()
+      if (msg.includes('already') || msg.includes('registered')) {
+        const { data: listData } = await service.auth.admin.listUsers({ page: 1, perPage: 1000 })
+        const match = listData.users.find((u) => u.email?.toLowerCase() === email)
+        if (!match) {
+          return { ok: false, error: 'Account exists but could not be located' }
+        }
+        userId = match.id
+      } else {
+        return { ok: false, error: createError.message }
+      }
+    } else {
+      userId = created.user.id
+      isNewUser = true
+    }
+  }
+
+  if (!userId) {
+    return { ok: false, error: 'Could not create member account' }
+  }
+
+  if (!isNewUser) {
+    const { error: pwdError } = await service.auth.admin.updateUserById(userId, {
+      password: tempPassword,
+    })
+    if (pwdError) {
+      return { ok: false, error: pwdError.message }
+    }
+  }
+
+  const { error: profileError } = await service.from('profiles').upsert(
+    {
+      id: userId,
+      email,
+      full_name: name,
+      phone,
+      applicant_id: applicantId,
+      role:
+        existingProfile?.role === 'super_admin' || existingProfile?.role === 'ops'
+          ? existingProfile.role
+          : 'member',
+      password_change_required: true,
+    },
+    { onConflict: 'id' }
+  )
+
+  if (profileError) {
+    return { ok: false, error: profileError.message }
+  }
+
+  if (!applicantId) {
+    return { ok: false, error: 'Applicant record missing' }
+  }
+
+  await sendMemberWelcomeEmail({
+    to: email,
+    name,
+    loginUrl,
+    settingsUrl,
+    temporaryPassword: tempPassword,
+  })
+
+  return { ok: true, applicantId: applicantId!, email, temporaryPassword: tempPassword, isNewUser }
 }

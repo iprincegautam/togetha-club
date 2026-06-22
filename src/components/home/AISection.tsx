@@ -70,7 +70,7 @@ export default function AISection() {
               <div className="ai-note-title">How the algorithm works</div>
               <div className="ai-note-body">
                 Your quiz answers are converted into a 12-dimension compatibility vector. We
-                run a constrained optimisation across all approved applicants to form a batch
+                run a constrained optimisation across booked travelers to form a batch
                 where average pairwise compatibility is maximised — while maintaining exact
                 12M/12F balance.
               </div>

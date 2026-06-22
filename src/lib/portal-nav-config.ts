@@ -11,6 +11,7 @@ export type PortalNavItem = {
 
 const MEMBER_PORTAL_NAV: readonly PortalNavItem[] = [
   { href: ROUTES.account, label: 'My booking' },
+  { href: ROUTES.accountCompleteProfile, label: 'Complete profile', highlight: true },
   { href: ROUTES.accountPayments, label: 'Payments' },
   { href: ROUTES.accountProfile, label: 'Profile' },
   { href: ROUTES.accountSettings, label: 'Settings' },
@@ -36,10 +37,12 @@ const ADMIN_PORTAL_NAV: readonly PortalNavItem[] = [
     isActive: (p) => p === ROUTES.admin || p.startsWith('/admin/applicants'),
     badgeKey: 'applications',
   },
+  { href: ROUTES.adminProvisionMember, label: 'Direct login', match: 'prefix' },
   { href: ROUTES.adminBatches, label: 'Batches', match: 'prefix' },
   { href: ROUTES.adminWaitlist, label: 'Waitlist', match: 'exact' },
   { href: ROUTES.adminAffiliates, label: 'Affiliates', match: 'prefix' },
   { href: ROUTES.adminContent, label: 'Content review', badgeKey: 'content-review' },
+  { href: ROUTES.adminAnnotate, label: 'DM annotations', match: 'prefix' },
   { href: ROUTES.adminPayouts, label: 'Payouts' },
   { href: ROUTES.adminNotifications, label: 'Notifications' },
 ]

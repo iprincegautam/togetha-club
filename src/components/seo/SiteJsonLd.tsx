@@ -44,7 +44,7 @@ export default function SiteJsonLd() {
       url: SITE_URL,
       name: BUSINESS.tradingName,
       description:
-        'Book matchmaking travel batches, take the AI compatibility quiz, and join screened singles in the Himalayas.',
+        'Book matchmaking travel batches, take the AI compatibility quiz, pay online, and join verified singles in the Himalayas.',
       inLanguage: 'en-IN',
       publisher: { '@id': `${SITE_URL}/#organization` },
     },

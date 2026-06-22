@@ -2,7 +2,7 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'What exactly is Togetha.Club?',
     answer:
-      "India's first matchmaking travel club for verified singles. You apply, get screened, and — if approved — join a batch of 24 people (12 boys, 12 girls) on a 6-day Himalayan trip. Our AI helps place you in the cohort where you're most likely to connect. It's not a dating app. It's a real trip with real people.",
+      "India's first matchmaking travel club for verified singles. Take the quiz, book your slot for the Friday you want, pay on the website, and show up for a 6-day Himalayan trip with 24 people (12 boys, 12 girls). Our AI matches you into the cohort where you're most likely to connect. It's not a dating app. It's a real trip with real people.",
   },
   {
     question: 'How does the AI matching work?',
@@ -15,14 +15,14 @@ export const HOME_FAQ_ITEMS = [
       'Batch A — GenZ Edition is for ages 18–25. Batch B — Millennial Edition is for ages 26–36. Same route (Manali → Kasol → Sissu), same 12+12 balance, slightly different energy and price point. Your age decides which band you belong in.',
   },
   {
-    question: 'How do I get approved?',
+    question: 'How do I book my spot?',
     answer:
-      'Take the quiz, pick your batch, and submit a full application. Our team reads every one — intent, energy, how you write, what you\'re looking for. Some applicants get a short call. Screening usually takes 2–5 days. We\'ll tell you either way.',
+      'Take the 12-question quiz, pick Batch A or B and your Friday departure, then pay on togetha.club to lock your slot. Once payment goes through, you\'re in — 12 boys and 12 girls on the same trip, AI-matched from your quiz.',
   },
   {
     question: 'Is this safe? Who actually goes on these trips?',
     answer:
-      'Everyone is individually screened and verified before they pay. Batches are gender-balanced by design. Trip leaders and partner properties are vetted. You\'re not meeting strangers from the internet — you\'re meeting people who passed the same bar you did.',
+      'Every batch is exactly 12 boys and 12 girls. Everyone on the trip is verified. Trip leaders and partner properties are vetted. You\'re not meeting random strangers from the internet — you\'re meeting singles who booked the same experience you did.',
   },
   {
     question: "What if I don't find a romantic connection?",
@@ -32,7 +32,7 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'Can I come with a friend?',
     answer:
-      'Each person applies and is approved individually. If you\'re both in, yes — but we won\'t always room or group you together. The point is to meet the other 22 people, not hide in a bubble.',
+      'Each person books their own slot. If you\'re both coming, yes — but we won\'t always room or group you together. The point is to meet the other 22 people, not hide in a bubble.',
   },
   {
     question: "I'm introverted — is this still for me?",

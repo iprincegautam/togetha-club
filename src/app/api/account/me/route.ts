@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { activeStageIndex, bookingStageFromStatus, requireMemberApiAccess } from '@/lib/auth/member'
+import { hasVerifiedPayment } from '@/lib/applicant-payment'
+import { isProfileComplete } from '@/lib/payment-claim'
+import { resolveApplicantPackagePricePaise, formatPaiseAsPackageInr } from '@/lib/package-pricing'
 import { getBatchDateOptions } from '@/constants/batches'
 
 export async function GET() {
@@ -17,6 +20,10 @@ export async function GET() {
     dateIndex !== null && !Number.isNaN(dateIndex)
       ? dateOptions[dateIndex]?.label ?? a.date_choice
       : a.date_choice
+
+  const paid = hasVerifiedPayment(a)
+  const profileComplete = isProfileComplete(a)
+  const packagePricePaise = await resolveApplicantPackagePricePaise(auth.service, a)
 
   return NextResponse.json({
     profile: {
@@ -45,7 +52,14 @@ export async function GET() {
       amountPaid: a.amount_paid,
       balanceDue: a.balance_due,
       finalAmount: a.final_amount,
+      originalAmount: a.original_amount,
+      discountAmount: a.discount_amount,
       createdAt: a.created_at,
     },
+    hasVerifiedPayment: paid,
+    profileComplete,
+    canCompleteQuiz: paid && !profileComplete,
+    packagePricePaise,
+    packagePriceLabel: formatPaiseAsPackageInr(packagePricePaise),
   })
 }

@@ -1,0 +1,17 @@
+[
+  {
+    "raw_message": "Hey! How much does the Bali batch cost?",
+    "category": "pricing_payment",
+    "urgency": "high"
+  },
+  {
+    "raw_message": "Is this only for couples or can solo travelers join?",
+    "category": "how_to_join",
+    "urgency": "medium"
+  },
+  {
+    "raw_message": "What's included in the stay? Private room?",
+    "category": "accommodation",
+    "urgency": "low"
+  }
+]

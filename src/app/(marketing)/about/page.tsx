@@ -7,7 +7,7 @@ import '@/components/legal/legal.css'
 export function generateMetadata() {
   return buildMetadata(
     'About Togetha.Club — Matchmaking Travel Club',
-    'Founded as an experience-driven matchmaking travel club for screened singles across India — people are the product, the trip is the context.'
+    'Founded as an experience-driven matchmaking travel club for verified singles across India — people are the product, the trip is the context.'
   )
 }
 
@@ -21,7 +21,7 @@ export default function AboutPage() {
 
         <p className="legal-intro">
           {BUSINESS.tradingName} is not a travel package company. We are an experience-driven
-          matchmaking travel club for screened singles who want real connection — not another swipe
+          matchmaking travel club for verified singles who want real connection — not another swipe
           session. The people are the product; the Himalayan batch is the context where chemistry
           actually has room to happen.
         </p>
@@ -30,8 +30,8 @@ export default function AboutPage() {
           <h2>What we do</h2>
           <p>
             Every month we run curated batches — GenZ (18–25) and Millennial (26–36) editions — with
-            balanced cohorts, AI-assisted compatibility screening, and six days in Manali, Kasol, and
-            Sissu. You apply, we review, you meet your matched group offline.
+            balanced cohorts, AI compatibility matching, and 3 nights across Manali, Sissu, and
+            Sissu. Take the quiz, book your slot, pay online, and show up.
           </p>
         </section>
 

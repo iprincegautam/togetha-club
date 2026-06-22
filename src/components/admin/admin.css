@@ -403,6 +403,26 @@
   background: rgba(26, 107, 90, 0.08);
 }
 
+.admin-link-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.admin-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.admin-link-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 @media (max-width: 768px) {
   .admin-table th,
   .admin-table td {

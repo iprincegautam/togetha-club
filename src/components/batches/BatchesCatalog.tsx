@@ -16,12 +16,12 @@ function catalogCta(batch: BatchCatalogRow, promoCode?: string): { href: string;
   if (batch.slug === 'batch-c' || batch.status === 'coming_soon') {
     return {
       href: matchUrl,
-      label: 'Check my fit →',
+      label: 'Book your slot →',
     }
   }
   return {
     href: matchUrl,
-    label: 'Check my fit →',
+    label: 'Book your slot →',
   }
 }
 
@@ -92,7 +92,7 @@ export default function BatchesCatalog({ batches, promoCode }: BatchesCatalogPro
         })}
       </div>
       <p className="batches-catalog-foot">
-        Every batch starts with the AI quiz — we&apos;ll capture your fit and reach out to help you book.
+        Every batch starts with the quiz — then pick your Friday and pay on togetha.club to confirm.
       </p>
     </section>
   )

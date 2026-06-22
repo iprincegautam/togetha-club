@@ -9,7 +9,8 @@ import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import { BATCH_META } from '@/constants/batches'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
-import { clearQuizLead, hasCompletedQuizLead } from '@/lib/quiz-lead-storage'
+import { clearQuizLead, hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
+import { ensureNurtureEmail } from '@/lib/quiz-lead'
 import { calculateQuizResult } from '@/lib/utils'
 import type { MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
@@ -101,11 +102,20 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const handleQuizComplete = useCallback((saved: QuizAnswers) => {
     setAnswers(saved)
     setAnalysis(null)
-    setMode(hasCompletedQuizLead() ? 'results' : 'lead')
+    // Always gate results behind lead capture after a fresh quiz run.
+    setMode('lead')
   }, [])
 
+  useEffect(() => {
+    if (mode !== 'results') return
+    const lead = loadQuizLead()
+    if (!lead?.applicantId) return
+    ensureNurtureEmail(lead.applicantId).catch((err) =>
+      console.warn('[MatchLab] nurture backup failed', err)
+    )
+  }, [mode])
+
   const unlockResults = useCallback(() => {
-    if (!hasCompletedQuizLead()) return
     setMode('results')
   }, [])
 

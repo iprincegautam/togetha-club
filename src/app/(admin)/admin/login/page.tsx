@@ -14,7 +14,9 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
 
   useEffect(() => {
     if (searchParams.get('error') === 'forbidden') {
@@ -25,6 +27,7 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setInfo('')
 
     if (!email.includes('@')) {
       setError('Please enter a valid email address.')
@@ -51,6 +54,36 @@ export default function AdminLoginPage() {
       setError(err instanceof Error ? err.message : 'Sign in failed. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    setError('')
+    setInfo('')
+
+    if (!email.includes('@')) {
+      setError('Enter your email above, then click forgot password.')
+      return
+    }
+
+    setResetLoading(true)
+
+    try {
+      const supabase = createBrowserSupabaseClient()
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/auth/callback?next=/account/reset-password`,
+      })
+
+      if (resetError) {
+        throw resetError
+      }
+
+      setInfo('Password reset email sent. Check your inbox, then return here to sign in.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not send reset email.')
+    } finally {
+      setResetLoading(false)
     }
   }
 
@@ -100,9 +133,26 @@ export default function AdminLoginPage() {
             </p>
           )}
 
-          <button type="submit" className="apply-submit" disabled={loading}>
+          {info && (
+            <p className="apply-sub" role="status" style={{ marginBottom: 0 }}>
+              {info}
+            </p>
+          )}
+
+          <button type="submit" className="apply-submit" disabled={loading || resetLoading}>
             {loading ? 'Signing in...' : 'Sign in →'}
           </button>
+
+          <p style={{ marginTop: 16, textAlign: 'center' }}>
+            <button
+              type="button"
+              className="portal-link"
+              onClick={handleForgotPassword}
+              disabled={loading || resetLoading}
+            >
+              {resetLoading ? 'Sending reset email...' : 'Forgot password?'}
+            </button>
+          </p>
         </form>
 
         <div style={{ marginTop: 20, textAlign: 'center' }}>

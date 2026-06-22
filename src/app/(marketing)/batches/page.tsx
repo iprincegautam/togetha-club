@@ -59,7 +59,7 @@ export default async function BatchesPage({ searchParams }: PageProps) {
             <span className="gold">Take the AI quiz first.</span>
           </h2>
           <p className="batches-cta-sub">
-            We&apos;ll match you to the right batch, save your details, and follow up within 24 hours.
+            Quiz first, then pick your Friday and pay on the website to lock your slot.
           </p>
           <div className="batches-cta-btns">
             <Link href={withPromoQuery(ROUTES.matchForBatch('batch-a'), promo)} className="batches-cta-btn teal">
@@ -70,7 +70,7 @@ export default async function BatchesPage({ searchParams }: PageProps) {
             </Link>
           </div>
           <p className="batches-cta-foot">
-            Invite only · Profile screened · Identity verified · 12 boys · 12 girls
+            Invite only · Pay online · Identity verified · 12 boys · 12 girls
           </p>
         </div>
       </div>

@@ -9,9 +9,22 @@
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "node scripts/apply-migration-002.mjs",
+    "db:migrate:dm-leads": "node scripts/apply-migration-025.mjs",
+    "dm:weekly-review": "node scripts/weekly-review.mjs",
+    "dm:import": "node scripts/import-classified-dms.mjs",
+    "db:migrate:annotations": "node scripts/apply-migration-028.mjs",
+    "db:migrate:interns": "node scripts/apply-migration-029.mjs",
+    "db:migrate:voice-architect": "node scripts/apply-migration-031.mjs",
+    "db:setup:intern-resumes": "node scripts/setup-intern-resumes-bucket.mjs",
+    "annotations:seed": "node scripts/seed-annotations.mjs",
+    "annotations:build-from-export": "node scripts/build-classified-dms-from-instagram-export.mjs",
+    "annotations:judge": "node scripts/judge-annotations.mjs",
+    "annotations:auto": "node scripts/auto-annotate-dms.mjs",
+    "annotations:pipeline": "node scripts/run-llm-annotation-pipeline.mjs",
     "smoke": "bash scripts/smoke-test.sh"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.2",
     "clsx": "^2.1.1",
@@ -19,6 +32,7 @@
     "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "recharts": "^2.15.3",
     "resend": "^6.12.4",
     "tailwind-merge": "^3.3.0"
   },
@@ -28,6 +42,7 @@
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
     "pg": "^8.21.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "ws": "^8.21.0"
   }
 }

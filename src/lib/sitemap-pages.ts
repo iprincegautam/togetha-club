@@ -1,4 +1,5 @@
 import { getAllBlogPosts } from '@/lib/blog'
+import { getInternTrackSlugs } from '@/content/careers/roles'
 import { ROUTES } from '@/constants/routes'
 
 export type SitemapChangeFrequency =
@@ -55,7 +56,7 @@ const CORE_PAGES: PublicSitemapEntry[] = [
     path: ROUTES.howItWorks,
     title: 'How It Works',
     description:
-      'From compatibility quiz to AI batch matching — how Togetha.Club screens applicants and runs 6-day Himalayan experiences.',
+      'From compatibility quiz to booking your slot — pay online, AI batch matching, and 6-day Himalayan experiences.',
     priority: 0.85,
     changeFrequency: 'monthly',
     featured: true,
@@ -66,6 +67,15 @@ const CORE_PAGES: PublicSitemapEntry[] = [
     description:
       'An experience-driven matchmaking travel club for screened singles — people first, the trip is the context.',
     priority: 0.8,
+    changeFrequency: 'monthly',
+    featured: true,
+  },
+  {
+    path: ROUTES.careers,
+    title: 'Careers — Join the Team',
+    description:
+      'Four founding roles — Visual Architect, Motion Storyteller, Member Experience Lead, Voice Architect. ₹15,000/month · 3 months → PPO.',
+    priority: 0.75,
     changeFrequency: 'monthly',
     featured: true,
   },
@@ -159,8 +169,18 @@ function blogPages(): PublicSitemapEntry[] {
   }))
 }
 
+function careersTrackPages(): PublicSitemapEntry[] {
+  return getInternTrackSlugs().map((slug) => ({
+    path: ROUTES.careersTrack(slug),
+    title: `Intern — ${slug}`,
+    description: 'Founding team summer internship role at Togetha.Club',
+    priority: 0.65,
+    changeFrequency: 'monthly' as const,
+  }))
+}
+
 export function getPublicSitemapEntries(): PublicSitemapEntry[] {
-  return [...CORE_PAGES, ...batchPages(), ...blogPages(), ...LEGAL_PAGES]
+  return [...CORE_PAGES, ...batchPages(), ...blogPages(), ...careersTrackPages(), ...LEGAL_PAGES]
 }
 
 export function getFeaturedSiteMapSections(): PublicSitemapEntry[] {

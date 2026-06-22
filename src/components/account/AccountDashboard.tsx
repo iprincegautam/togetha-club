@@ -1,8 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import BookingPipeline from '@/components/account/BookingPipeline'
 import BalancePayButton from '@/components/account/BalancePayButton'
+import ClaimPaymentForm from '@/components/account/ClaimPaymentForm'
+import { ROUTES } from '@/constants/routes'
 import { formatPaise } from '@/lib/utils'
 
 interface AccountData {
@@ -16,8 +19,15 @@ interface AccountData {
     paymentPlan: string | null
     amountPaid: number | null
     balanceDue: number | null
+    finalAmount: number | null
+    originalAmount: number | null
+    discountAmount: number | null
     kycStatus: string
   }
+  hasVerifiedPayment: boolean
+  profileComplete: boolean
+  canCompleteQuiz: boolean
+  packagePriceLabel: string
 }
 
 export default function AccountDashboard() {
@@ -41,15 +51,14 @@ export default function AccountDashboard() {
   if (!data?.booking) {
     return (
       <p className="account-muted">
-        No booking is linked to this account yet. If you just paid, wait a minute and refresh — or
-        contact hello@togetha.club.
+        No booking is linked to this account yet. Contact hello@togetha.club if you expected access.
       </p>
     )
   }
 
-  const { booking, profile } = data
+  const { booking, profile, hasVerifiedPayment, profileComplete, canCompleteQuiz } = data
   const showBalance =
-    booking.status === 'deposit_paid' && (booking.balanceDue ?? 0) > 0
+    hasVerifiedPayment && booking.status === 'deposit_paid' && (booking.balanceDue ?? 0) > 0
 
   return (
     <div className="account-stack">
@@ -61,41 +70,87 @@ export default function AccountDashboard() {
         <p className="account-sub">{profile.email}</p>
       </div>
 
-      <div className="account-panel">
-        <h2 className="account-panel-title">Booking status</h2>
-        <BookingPipeline stageIndex={booking.stageIndex} status={booking.status} />
-      </div>
+      {!hasVerifiedPayment && (
+        <ClaimPaymentForm
+          onClaimed={load}
+          packagePriceLabel={data.packagePriceLabel ?? 'the package price'}
+        />
+      )}
 
-      <div className="account-panel">
-        <h2 className="account-panel-title">Trip details</h2>
-        <dl className="account-dl">
-          <div>
-            <dt>Batch</dt>
-            <dd>{booking.batchName ?? booking.batchSlug ?? '—'}</dd>
+      {hasVerifiedPayment && canCompleteQuiz && (
+        <div className="account-panel" style={{ borderColor: 'var(--teal-stamp)' }}>
+          <h2 className="account-panel-title">Complete your profile</h2>
+          <p className="account-sub">
+            Payment linked — take the compatibility quiz and choose your batch to finish your
+            booking profile.
+          </p>
+          <Link href={ROUTES.accountCompleteProfile} className="apply-submit" style={{ display: 'inline-block', textAlign: 'center', textDecoration: 'none' }}>
+            Start quiz →
+          </Link>
+        </div>
+      )}
+
+      {hasVerifiedPayment && (
+        <>
+          <div className="account-panel">
+            <h2 className="account-panel-title">Booking status</h2>
+            <BookingPipeline stageIndex={booking.stageIndex} status={booking.status} />
+            {profileComplete && (
+              <p className="account-msg" style={{ marginTop: 12 }}>
+                Profile complete — your quiz and batch preferences are saved.
+              </p>
+            )}
           </div>
-          <div>
-            <dt>Departure</dt>
-            <dd>{booking.dateChoice ?? '—'}</dd>
+
+          <div className="account-panel">
+            <h2 className="account-panel-title">Trip & payment details</h2>
+            <dl className="account-dl">
+              <div>
+                <dt>Batch</dt>
+                <dd>{booking.batchName ?? booking.batchSlug ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Departure</dt>
+                <dd>{booking.dateChoice ?? '—'}</dd>
+              </div>
+              <div>
+                <dt>Package</dt>
+                <dd>
+                  {booking.originalAmount != null
+                    ? formatPaise(booking.originalAmount)
+                    : '—'}
+                  {booking.discountAmount != null && booking.discountAmount > 0 && (
+                    <> · discount −{formatPaise(booking.discountAmount)}</>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>Payment</dt>
+                <dd>
+                  {!hasVerifiedPayment
+                    ? 'Awaiting payment link'
+                    : booking.paymentPlan === 'deposit'
+                      ? 'Deposit paid'
+                      : 'Paid in full'}
+                  {booking.amountPaid != null && booking.amountPaid > 0 && (
+                    <> · {formatPaise(booking.amountPaid)}</>
+                  )}
+                </dd>
+              </div>
+              {showBalance && (
+                <div>
+                  <dt>Balance due</dt>
+                  <dd className="account-balance">{formatPaise(booking.balanceDue!)}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Profile / KYC</dt>
+                <dd>{booking.kycStatus.replace('_', ' ')}</dd>
+              </div>
+            </dl>
           </div>
-          <div>
-            <dt>Payment</dt>
-            <dd>
-              {booking.paymentPlan === 'deposit' ? 'Deposit paid' : 'Paid in full'}
-              {booking.amountPaid != null && ` · ${formatPaise(booking.amountPaid)}`}
-            </dd>
-          </div>
-          {showBalance && (
-            <div>
-              <dt>Balance due</dt>
-              <dd className="account-balance">{formatPaise(booking.balanceDue!)}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Profile / KYC</dt>
-            <dd>{booking.kycStatus.replace('_', ' ')}</dd>
-          </div>
-        </dl>
-      </div>
+        </>
+      )}
 
       {showBalance && (
         <div className="account-panel">

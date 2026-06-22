@@ -6,7 +6,7 @@ const ITEMS = [
   'Bonfire Night',
   'Ice Breaker Sessions',
   'Verified Profiles',
-  '5 Nights / 6 Days',
+  '3 Nights / 4 Days',
   '60% Chance of Love',
 ] as const
 

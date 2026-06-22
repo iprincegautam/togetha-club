@@ -1,3 +1,4 @@
+import { renderTripDetailsHtml, renderTripDetailsText } from '@/lib/batch-trip-email'
 import {
   buildMetaphorEmailBlock,
   buildMountainsEmailBlock,
@@ -57,14 +58,18 @@ function email1(ctx: NurtureEmailContext): NurtureEmailContent {
   const creativeLine = hasCreative
     ? 'We read your quiz — including the answers you wrote in your own words.'
     : 'We read your quiz and saved your compatibility profile.'
+  const tripDetailsText = renderTripDetailsText(ctx.batchSlug)
+  const tripDetailsHtml = renderTripDetailsHtml(ctx.batchSlug, ctx.batchUrl)
 
-  const subject = `${ctx.firstName}, your batch preview is ready (locked)`
+  const subject = `${ctx.firstName}, your itinerary + batch preview`
 
   const text = `Hi ${ctx.firstName},
 
 ${creativeLine}
 
 ${fitLine(ctx)} We don't show names, faces, or full matches until you reserve.
+
+${tripDetailsText}
 
 ${ctx.departure.fomoLine}
 
@@ -83,6 +88,7 @@ Unsubscribe: ${ctx.unsubscribeUrl}`
     `<p style="font-size:16px;line-height:1.6;">Hi ${ctx.firstName},</p>
     <p style="font-size:15px;line-height:1.65;">${creativeLine}</p>
     <p style="font-size:15px;line-height:1.65;">${fitLine(ctx)} <strong>We don't show names, faces, or full matches until you reserve.</strong></p>
+    ${tripDetailsHtml}
     <p style="font-size:15px;line-height:1.65;background:#f5edd8;padding:14px;border-left:3px solid #1a6b5a;margin:18px 0;">${ctx.departure.fomoLine}</p>
     <p style="font-size:14px;color:#6b5344;">${ctx.vacantBoys} boys · ${ctx.vacantGirls} girls still open · deposit ${ctx.depositLabel}</p>
     <p style="font-size:15px;line-height:1.65;font-style:italic;">You're one step away from unlocking who's on your batch.</p>

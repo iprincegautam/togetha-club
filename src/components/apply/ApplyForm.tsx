@@ -310,7 +310,7 @@ export default function ApplyForm({
           >
             <span className="apply-step-num">{n}</span>
             <span className="apply-step-label">
-              {n === 1 ? 'About you' : n === 2 ? 'Preferences' : 'Pay'}
+              {n === 1 ? 'About you' : n === 2 ? 'Pick your date' : 'Pay & confirm'}
             </span>
           </div>
         ))}

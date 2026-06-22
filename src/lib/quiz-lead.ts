@@ -15,6 +15,35 @@ export type SubmitQuizLeadInput = {
 
 export type SubmitQuizLeadResult = {
   applicantId: string
+  nurtureEmailSent?: boolean
+  nurtureError?: string | null
+}
+
+export async function ensureNurtureEmail(applicantId: string): Promise<{
+  sent: boolean
+  error: string | null
+}> {
+  return triggerNurtureEmail(applicantId)
+}
+
+async function triggerNurtureEmail(applicantId: string): Promise<{
+  sent: boolean
+  error: string | null
+}> {
+  try {
+    const res = await fetch('/api/quiz/enroll-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicantId }),
+    })
+    const data = (await res.json()) as { ok?: boolean; error?: string }
+    if (!res.ok || !data.ok) {
+      return { sent: false, error: data.error ?? 'enroll_failed' }
+    }
+    return { sent: true, error: null }
+  } catch {
+    return { sent: false, error: 'enroll_request_failed' }
+  }
 }
 
 export async function submitQuizLead(
@@ -35,7 +64,11 @@ export async function submitQuizLead(
     }),
   })
 
-  const data = (await res.json()) as { error?: string; applicantId?: string }
+  const data = (await res.json()) as {
+    error?: string
+    applicantId?: string
+    nurture?: { ok?: boolean; emailSent?: boolean; error?: string | null }
+  }
 
   if (!res.ok) {
     throw new Error(data.error || 'Something went wrong. Please try again.')
@@ -45,5 +78,18 @@ export async function submitQuizLead(
     throw new Error('Could not save your details. Please try again.')
   }
 
-  return { applicantId: data.applicantId }
+  let nurtureEmailSent = Boolean(data.nurture?.emailSent)
+  let nurtureError = data.nurture?.error ?? null
+
+  if (!nurtureEmailSent) {
+    const backup = await triggerNurtureEmail(data.applicantId)
+    nurtureEmailSent = backup.sent
+    nurtureError = backup.error
+  }
+
+  return {
+    applicantId: data.applicantId,
+    nurtureEmailSent,
+    nurtureError,
+  }
 }

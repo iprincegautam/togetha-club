@@ -182,3 +182,13 @@ export function isPlaceholderRazorpayEmail(email: string | undefined | null): bo
     normalized === 'null@razorpay.com'
   )
 }
+
+/** Razorpay IDs are case-insensitive; users often paste Pay_ from receipts. */
+export function normalizeRazorpayPaymentId(raw: string): string {
+  return raw.trim().replace(/^pay_/i, 'pay_')
+}
+
+export function isValidRazorpayPaymentId(raw: string): boolean {
+  const id = normalizeRazorpayPaymentId(raw)
+  return id.startsWith('pay_') && id.length > 4
+}

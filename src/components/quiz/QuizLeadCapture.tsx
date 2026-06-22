@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { BATCH_AGE_LIMITS } from '@/lib/batch-age'
 import { formatIndianPhoneDisplay, isValidIndianPhone, normalizeIndianPhone } from '@/lib/phone'
-import { saveQuizLead } from '@/lib/quiz-lead-storage'
+import { saveQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
 import { submitQuizLead, type QuizLeadSource } from '@/lib/quiz-lead'
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -29,9 +29,10 @@ export default function QuizLeadCapture({
   mode,
   onSuccess,
 }: Props) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  const savedLead = mode === 'gate' ? loadQuizLead() : null
+  const [name, setName] = useState(savedLead?.name ?? '')
+  const [email, setEmail] = useState(savedLead?.email ?? '')
+  const [phone, setPhone] = useState(savedLead?.phone ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -63,7 +64,7 @@ export default function QuizLeadCapture({
 
     setLoading(true)
     try {
-      const { applicantId } = await submitQuizLead({
+      const { applicantId, nurtureEmailSent, nurtureError } = await submitQuizLead({
         name: name.trim(),
         email: email.trim().toLowerCase(),
         phone: normalizedPhone,
@@ -83,6 +84,9 @@ export default function QuizLeadCapture({
       })
 
       setSuccess(true)
+      if (!nurtureEmailSent && nurtureError) {
+        console.warn('[QuizLeadCapture] nurture email not sent', nurtureError)
+      }
       onSuccess(applicantId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
