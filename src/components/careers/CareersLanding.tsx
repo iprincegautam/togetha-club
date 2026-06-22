@@ -28,9 +28,7 @@ export default function CareersLanding({ initialOpen = null }: CareersLandingPro
       <h1 className="careers-hero-title">
         We&apos;re building
         <br />
-        India&apos;s first love trip.
-        <br />
-        Help us tell it.
+        India&apos;s first matchmaking travel club
       </h1>
 
       <p className="careers-hero-sub">{CAREERS_PROGRAM.heroSub}</p>

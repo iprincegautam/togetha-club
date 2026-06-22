@@ -10,7 +10,7 @@ type PageProps = {
 export function generateMetadata() {
   return buildMetadata(
     'Careers — Join the Team | Togetha.Club',
-    "We're building India's first love trip. Four founding roles — Visual Architect, Motion Storyteller, Member Experience Lead, Voice Architect. ₹15,000/month · 3 months → PPO."
+    "We're building India's first matchmaking travel club. Four founding roles — Visual Architect, Motion Storyteller, Member Experience Lead, Voice Architect. ₹15,000/month · 3 months → PPO."
   )
 }
 
