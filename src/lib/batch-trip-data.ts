@@ -287,3 +287,30 @@ export function getBatchTripDetails(batchSlug: MatchableBatchSlug): BatchTripDet
       }
   }
 }
+
+export type BatchItineraryPresentation = BatchTripDetails & {
+  itineraryTitle: string
+  includesLabel: string
+  includesTitle: string
+  roseAccent: boolean
+}
+
+export function getBatchItineraryPresentation(batchSlug: MatchableBatchSlug): BatchItineraryPresentation {
+  const details = getBatchTripDetails(batchSlug)
+  if (batchSlug === 'batch-b') {
+    return {
+      ...details,
+      itineraryTitle: 'Same route. Slower pace. Manali → Sissu → Kasol.',
+      includesLabel: 'Premium inclusions',
+      includesTitle: 'Everything included. Nothing left to chance.',
+      roseAccent: true,
+    }
+  }
+  return {
+    ...details,
+    itineraryTitle: '3 nights · 4 days — Manali, Sissu & Kasol.',
+    includesLabel: 'In the box',
+    includesTitle: 'Everything that makes it work.',
+    roseAccent: false,
+  }
+}
