@@ -151,7 +151,8 @@
   opacity: 0.45;
 }
 
-.booking-step.done {
+.booking-step.done,
+.booking-step.current {
   opacity: 1;
 }
 
@@ -159,6 +160,12 @@
   background: var(--teal-stamp);
   color: var(--cream);
   border-color: var(--teal-stamp);
+  box-shadow: 0 0 0 4px rgba(26, 107, 90, 0.22);
+}
+
+.booking-step.current .booking-step-label {
+  color: var(--teal-stamp);
+  font-weight: 650;
 }
 
 .booking-step-dot {
