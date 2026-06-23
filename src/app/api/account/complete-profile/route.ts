@@ -82,10 +82,18 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { error: updateError } = await auth.service
+  let { error: updateError } = await auth.service
     .from('applicants')
     .update(updates)
     .eq('id', auth.applicant.id)
+
+  if (updateError?.message?.includes('profile_completed_at')) {
+    const { profile_completed_at: _removed, ...withoutTimestamp } = updates
+    ;({ error: updateError } = await auth.service
+      .from('applicants')
+      .update(withoutTimestamp)
+      .eq('id', auth.applicant.id))
+  }
 
   if (updateError) {
     console.error('[POST /api/account/complete-profile]', updateError)

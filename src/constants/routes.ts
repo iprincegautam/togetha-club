@@ -30,6 +30,7 @@ export const ROUTES = {
   adminProvisionMember: '/admin/provision-member',
   adminAnnotate: '/admin/annotate',
   account: '/account',
+  accountPayBalance: '/account#pay-balance',
   accountLogin: '/account/login',
   accountSignup: '/account/signup',
   accountForgotPassword: '/account/forgot-password',

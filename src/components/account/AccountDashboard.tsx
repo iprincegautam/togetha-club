@@ -50,6 +50,15 @@ export default function AccountDashboard() {
     load()
   }, [])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.location.hash !== '#pay-balance') return
+    const el = document.getElementById('pay-balance')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [data, loading])
+
   if (loading) return <p className="account-muted">Loading your booking…</p>
   if (!data?.booking) {
     return (
@@ -178,7 +187,7 @@ export default function AccountDashboard() {
       )}
 
       {canPayBalance && (
-        <div className="account-panel">
+        <div className="account-panel" id="pay-balance">
           <h2 className="account-panel-title">Pay remaining balance</h2>
           <p className="account-sub">
             Your profile is approved. Pay the remaining balance anytime before departure — optional

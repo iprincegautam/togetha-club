@@ -5,6 +5,9 @@ import { isProfileComplete } from '@/lib/payment-claim'
 
 type RouteParams = { params: Promise<{ id: string }> }
 
+const APPLICANT_SELECT =
+  'id, email, name, status, kyc_status, quiz_answers, batch_slug, gender'
+
 export async function POST(_request: Request, { params }: RouteParams) {
   const auth = await requireAdminApiAccess()
   if ('error' in auth) {
@@ -15,9 +18,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
 
   const { data: applicant, error: fetchError } = await auth.service
     .from('applicants')
-    .select(
-      'id, email, name, status, kyc_status, quiz_answers, batch_slug, gender, profile_completed_at'
-    )
+    .select(APPLICANT_SELECT)
     .eq('id', id)
     .maybeSingle()
 

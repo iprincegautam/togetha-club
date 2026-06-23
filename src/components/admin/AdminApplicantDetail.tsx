@@ -61,6 +61,7 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
   const [notes, setNotes] = useState(applicant.admin_notes ?? '')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [profileMessage, setProfileMessage] = useState<string | null>(null)
   const [resending, setResending] = useState(false)
   const [resendResult, setResendResult] = useState<{
     email: string
@@ -135,7 +136,7 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
     }
 
     setApprovingProfile(true)
-    setMessage(null)
+    setProfileMessage(null)
 
     const res = await fetch(`/api/admin/applicants/${applicant.id}/approve-profile`, {
       method: 'POST',
@@ -143,10 +144,10 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
     const json = await res.json()
 
     if (!res.ok) {
-      setMessage(json.error ?? 'Could not approve profile')
+      setProfileMessage(json.error ?? 'Could not approve profile')
     } else {
       setKycStatus(json.applicant?.kyc_status ?? 'approved')
-      setMessage('Profile approved — member can pay balance anytime before departure.')
+      setProfileMessage('Profile approved — member can pay balance anytime before departure.')
       router.refresh()
     }
     setApprovingProfile(false)
@@ -230,6 +231,11 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
               {approvingProfile ? 'Approving…' : 'Approve profile'}
             </button>
           </>
+        )}
+        {profileMessage && (
+          <p className={`admin-msg${profileMessage.includes('approved') ? '' : ' apply-error'}`} style={{ marginTop: 12 }}>
+            {profileMessage}
+          </p>
         )}
       </div>
 
