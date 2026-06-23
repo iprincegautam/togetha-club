@@ -8,6 +8,8 @@ export type BookingStage =
   | 'approved'
   | 'rejected'
 
+export type BookingStepState = 'done' | 'current' | 'pending'
+
 export function bookingStageFromStatus(status: string): BookingStage {
   switch (status) {
     case 'deposit_paid':
@@ -33,10 +35,23 @@ export const BOOKING_STAGES: { id: BookingStage; label: string }[] = [
 ]
 
 export type BookingPipelineState = {
-  /** Last step index that is fully complete (inclusive). */
+  /** Last step index that is fully complete (inclusive). Kept for legacy callers. */
   completedThrough: number
   /** Active step index — may be ahead of completedThrough when action is pending. */
   currentIndex: number
+  /** Explicit UI state per step — avoids false checkmarks on skipped optional steps. */
+  stepStates: BookingStepState[]
+}
+
+function pipeline(
+  stepStates: BookingStepState[],
+  currentIndex: number
+): BookingPipelineState {
+  let completedThrough = -1
+  stepStates.forEach((state, i) => {
+    if (state === 'done') completedThrough = i
+  })
+  return { completedThrough, currentIndex, stepStates }
 }
 
 /** @deprecated Use bookingPipelineState — kept for callers that only need a single index. */
@@ -59,43 +74,40 @@ export function bookingPipelineState(
   const kycApproved = isProfileKycApproved(kycStatus)
 
   if (status === 'rejected') {
-    return { completedThrough: 4, currentIndex: 4 }
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
   }
 
   if (isProfileKycRejected(kycStatus)) {
-    return { completedThrough: 1, currentIndex: 3 }
+    return pipeline(['done', 'done', 'pending', 'current', 'pending'], 3)
   }
 
-  if (status === 'approved') {
-    return { completedThrough: 4, currentIndex: 4 }
-  }
-
-  if (status === 'paid' && profileComplete) {
-    return { completedThrough: 4, currentIndex: 4 }
+  if (status === 'approved' || (status === 'paid' && profileComplete)) {
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
   }
 
   if (status === 'paid') {
-    return { completedThrough: 2, currentIndex: profileComplete ? 3 : 2 }
+    return pipeline(
+      ['done', 'done', 'current', profileComplete ? 'done' : 'pending', 'pending'],
+      profileComplete ? 3 : 2
+    )
   }
 
   if (status === 'deposit_paid') {
     if (!profileComplete) {
-      return { completedThrough: 1, currentIndex: 1 }
+      return pipeline(['done', 'current', 'pending', 'pending', 'pending'], 1)
     }
 
     if (!kycApproved) {
-      // Profile submitted — waiting for admin to approve before balance opens.
-      return { completedThrough: 1, currentIndex: 3 }
+      return pipeline(['done', 'done', 'pending', 'current', 'pending'], 3)
     }
 
     if (balance > 0) {
-      // Profile approved — balance optional until departure; under review complete.
-      return { completedThrough: 3, currentIndex: 2 }
+      // Approved for trip — balance is optional until departure (step 2 stays open, not checked).
+      return pipeline(['done', 'done', 'pending', 'done', 'current'], 4)
     }
 
-    // Edge case: zero balance but still deposit_paid — ready for final approval.
-    return { completedThrough: 2, currentIndex: 4 }
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
   }
 
-  return { completedThrough: 0, currentIndex: 0 }
+  return pipeline(['current', 'pending', 'pending', 'pending', 'pending'], 0)
 }

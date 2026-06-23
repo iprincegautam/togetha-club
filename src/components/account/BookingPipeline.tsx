@@ -1,16 +1,18 @@
 'use client'
 
-import { BOOKING_STAGES } from '@/lib/booking-stages'
+import { BOOKING_STAGES, type BookingStepState } from '@/lib/booking-stages'
 
 interface BookingPipelineProps {
   stageIndex: number
   completedThrough?: number
+  stepStates?: BookingStepState[]
   status: string
 }
 
 export default function BookingPipeline({
   stageIndex,
   completedThrough,
+  stepStates,
   status,
 }: BookingPipelineProps) {
   if (status === 'rejected') {
@@ -29,8 +31,9 @@ export default function BookingPipeline({
   return (
     <ol className="booking-pipeline">
       {BOOKING_STAGES.map((stage, i) => {
-        const done = i <= doneThrough
-        const current = i === stageIndex
+        const explicit = stepStates?.[i]
+        const done = explicit ? explicit === 'done' : i <= doneThrough
+        const current = explicit ? explicit === 'current' : i === stageIndex
         return (
           <li
             key={stage.id}

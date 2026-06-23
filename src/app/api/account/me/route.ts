@@ -54,6 +54,7 @@ export async function GET() {
       stage: bookingStageFromStatus(a.status),
       stageIndex: pipeline.currentIndex,
       completedThrough: pipeline.completedThrough,
+      stepStates: pipeline.stepStates,
       pipelineCurrentIndex: pipeline.currentIndex,
       kycStatus: a.kyc_status,
       batchSlug: a.batch_slug,

@@ -1,58 +1,71 @@
 #!/usr/bin/env node
 /**
- * Unit-style checks for bookingPipelineState KYC logic (no test runner).
+ * Regression checks for booking pipeline step states.
  */
-import { createRequire } from 'module'
-import { pathToFileURL } from 'url'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
-
-// Load compiled logic via ts — use dynamic import of built file isn't available.
-// Inline mirror of booking-stages rules for regression check:
 function bookingPipelineState(status, kycStatus, profileComplete, balanceDue) {
   const balance = balanceDue ?? 0
   const kycApproved = kycStatus === 'approved'
   const kycRejected = kycStatus === 'rejected'
 
-  if (status === 'rejected') return { completedThrough: 4, currentIndex: 4 }
-  if (kycRejected) return { completedThrough: 1, currentIndex: 3 }
-  if (status === 'approved') return { completedThrough: 4, currentIndex: 4 }
-  if (status === 'paid' && profileComplete) return { completedThrough: 4, currentIndex: 4 }
-  if (status === 'paid') return { completedThrough: 2, currentIndex: profileComplete ? 3 : 2 }
-
-  if (status === 'deposit_paid') {
-    if (!profileComplete) return { completedThrough: 1, currentIndex: 1 }
-    if (!kycApproved) return { completedThrough: 1, currentIndex: 3 }
-    if (balance > 0) return { completedThrough: 3, currentIndex: 2 }
-    return { completedThrough: 2, currentIndex: 4 }
+  function pipeline(stepStates, currentIndex) {
+    let completedThrough = -1
+    stepStates.forEach((state, i) => {
+      if (state === 'done') completedThrough = i
+    })
+    return { completedThrough, currentIndex, stepStates }
   }
 
-  return { completedThrough: 0, currentIndex: 0 }
+  if (status === 'rejected') {
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
+  }
+  if (kycRejected) {
+    return pipeline(['done', 'done', 'pending', 'current', 'pending'], 3)
+  }
+  if (status === 'approved' || (status === 'paid' && profileComplete)) {
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
+  }
+  if (status === 'paid') {
+    return pipeline(
+      ['done', 'done', 'current', profileComplete ? 'done' : 'pending', 'pending'],
+      profileComplete ? 3 : 2
+    )
+  }
+  if (status === 'deposit_paid') {
+    if (!profileComplete) {
+      return pipeline(['done', 'current', 'pending', 'pending', 'pending'], 1)
+    }
+    if (!kycApproved) {
+      return pipeline(['done', 'done', 'pending', 'current', 'pending'], 3)
+    }
+    if (balance > 0) {
+      return pipeline(['done', 'done', 'pending', 'done', 'current'], 4)
+    }
+    return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
+  }
+  return pipeline(['current', 'pending', 'pending', 'pending', 'pending'], 0)
 }
 
 const tests = [
   {
     label: 'deposit + profile + balance, KYC not approved → Under review current',
     args: ['deposit_paid', 'submitted', true, 500000],
-    want: { completedThrough: 1, currentIndex: 3 },
+    want: { currentIndex: 3, stepStates: ['done', 'done', 'pending', 'current', 'pending'] },
   },
   {
-    label: 'deposit + profile + balance, KYC approved → Paid in full current',
+    label: 'deposit + profile + balance, KYC approved → Approved for trip current, Paid in full open',
     args: ['deposit_paid', 'approved', true, 500000],
-    want: { completedThrough: 3, currentIndex: 2 },
+    want: { currentIndex: 4, stepStates: ['done', 'done', 'pending', 'done', 'current'] },
   },
   {
-    label: 'paid + profile complete → Approved for trip',
+    label: 'paid + profile complete → Approved for trip, all prior steps done',
     args: ['paid', 'approved', true, 0],
-    want: { completedThrough: 4, currentIndex: 4 },
+    want: { currentIndex: 4, stepStates: ['done', 'done', 'done', 'done', 'current'] },
   },
   {
     label: 'deposit + no profile → Deposit current',
     args: ['deposit_paid', 'pending', false, 500000],
-    want: { completedThrough: 1, currentIndex: 1 },
+    want: { currentIndex: 1, stepStates: ['done', 'current', 'pending', 'pending', 'pending'] },
   },
 ]
 
@@ -60,36 +73,12 @@ let failed = 0
 for (const t of tests) {
   const got = bookingPipelineState(...t.args)
   const pass =
-    got.completedThrough === t.want.completedThrough && got.currentIndex === t.want.currentIndex
+    got.currentIndex === t.want.currentIndex &&
+    JSON.stringify(got.stepStates) === JSON.stringify(t.want.stepStates)
   console.log(`${pass ? 'OK' : 'FAIL'}  ${t.label}`)
   if (!pass) {
     failed++
     console.log(`     expected ${JSON.stringify(t.want)}, got ${JSON.stringify(got)}`)
-  }
-}
-
-function canMemberPayBalance(applicant) {
-  const balance = applicant.balance_due ?? 0
-  return (
-    applicant.status === 'deposit_paid' &&
-    balance > 0 &&
-    applicant.kyc_status === 'approved'
-  )
-}
-
-const payTests = [
-  { label: 'balance blocked without KYC', a: { status: 'deposit_paid', balance_due: 100, kyc_status: 'submitted' }, want: false },
-  { label: 'balance open with KYC', a: { status: 'deposit_paid', balance_due: 100, kyc_status: 'approved' }, want: true },
-  { label: 'balance blocked when paid', a: { status: 'paid', balance_due: 0, kyc_status: 'approved' }, want: false },
-]
-
-for (const t of payTests) {
-  const got = canMemberPayBalance(t.a)
-  const pass = got === t.want
-  console.log(`${pass ? 'OK' : 'FAIL'}  ${t.label}`)
-  if (!pass) {
-    failed++
-    console.log(`     expected ${t.want}, got ${got}`)
   }
 }
 

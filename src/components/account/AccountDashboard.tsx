@@ -14,6 +14,7 @@ interface AccountData {
     status: string
     stageIndex: number
     completedThrough?: number
+    stepStates?: ('done' | 'current' | 'pending')[]
     batchName: string | null
     batchSlug: string | null
     dateChoice: string | null
@@ -111,14 +112,17 @@ export default function AccountDashboard() {
             <BookingPipeline
               stageIndex={booking.stageIndex}
               completedThrough={booking.completedThrough}
+              stepStates={booking.stepStates}
               status={booking.status}
             />
             {booking.stageIndex >= 4 &&
-              (booking.completedThrough ?? 0) >= 4 &&
               booking.status !== 'rejected' && (
               <p className="account-msg" style={{ marginTop: 12 }}>
                 Your slot is confirmed for this departure. We&apos;ll email you pre-trip details
                 before you leave.
+                {canPayBalance
+                  ? ' You can pay the remaining balance anytime before departure (optional until then).'
+                  : null}
               </p>
             )}
             {profileComplete && booking.stageIndex < 4 && !profileKycApproved && (
@@ -131,7 +135,7 @@ export default function AccountDashboard() {
             )}
             {profileKycApproved && hasBalanceOwed && booking.stageIndex < 4 && (
               <p className="account-msg" style={{ marginTop: 12 }}>
-                Profile approved — pay your remaining balance anytime before departure.
+                Profile approved — finishing up your booking status…
               </p>
             )}
           </div>
@@ -190,8 +194,8 @@ export default function AccountDashboard() {
         <div className="account-panel" id="pay-balance">
           <h2 className="account-panel-title">Pay remaining balance</h2>
           <p className="account-sub">
-            Your profile is approved. Pay the remaining balance anytime before departure — optional
-            until then, but required to confirm your spot in full.
+            You&apos;re approved for this trip. Pay the remaining balance anytime before departure
+            — optional until then.
           </p>
           {payMsg && <p className="account-msg">{payMsg}</p>}
           <BalancePayButton
