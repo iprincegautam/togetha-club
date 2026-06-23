@@ -160,7 +160,11 @@ export default function CareersLanding({ initialOpen = null }: CareersLandingPro
       </div>
 
       <p className="careers-footer-line">
-        ✦ togetha.club/careers · {CAREERS_PROGRAM.footerLine} ✦
+        ✦{' '}
+        <Link href={ROUTES.careers} className="careers-footer-link">
+          Join the founding team
+        </Link>{' '}
+        · {CAREERS_PROGRAM.footerLine} ✦
       </p>
     </div>
   )

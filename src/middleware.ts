@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isInternTrackSlug } from '@/content/careers/roles'
 import { userHasPartnerAccess } from '@/lib/auth/partner'
 import { isBootstrapAdminEmail, userHasAdminAccess } from '@/lib/auth/roles'
 import {
@@ -8,6 +9,32 @@ import {
   ADMIN_AUTH_PATHS,
   PARTNER_AUTH_PATHS,
 } from '@/lib/portal-path'
+
+function careersRedirect(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl
+
+  // Recover from malformed URLs like /careershttps:/togetha.club/careers
+  if (pathname.includes('careershttps:') || pathname.includes('careershttp:')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/careers'
+    url.search = ''
+    return NextResponse.redirect(url, 308)
+  }
+
+  if (pathname.startsWith('/careers/') && pathname !== '/careers/apply') {
+    const track = pathname.slice('/careers/'.length).split('/')[0]
+    const url = request.nextUrl.clone()
+    url.pathname = '/careers'
+    if (track && isInternTrackSlug(track)) {
+      url.searchParams.set('role', track)
+    } else {
+      url.search = ''
+    }
+    return NextResponse.redirect(url, 308)
+  }
+
+  return null
+}
 
 function isPortalAuthPage(pathname: string): boolean {
   return (
@@ -20,6 +47,10 @@ function isPortalAuthPage(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  const careersResponse = careersRedirect(request)
+  if (careersResponse) return careersResponse
+
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
   if (isPortalAuthPage(pathname)) {
@@ -203,6 +234,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/careers/:path*',
     '/admin/:path*',
     '/account/:path*',
     '/partner/:path*',
