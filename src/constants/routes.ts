@@ -61,4 +61,6 @@ export const ROUTES = {
   careersApply: '/careers/apply',
   careersTrack: (slug: string) => `/careers/${slug}`,
   careersApplyTrack: (slug: string) => `/careers/apply?track=${slug}`,
+  adminInterns: '/admin/interns',
+  adminIntern: (id: string) => `/admin/interns/${id}`,
 } as const

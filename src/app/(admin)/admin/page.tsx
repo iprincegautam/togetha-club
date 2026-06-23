@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import AdminApplicantsTable from '@/components/admin/AdminApplicantsTable'
 import AdminAuthActions from '@/components/admin/AdminAuthActions'
+import { ROUTES } from '@/constants/routes'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { fetchAdminApplicants } from '@/lib/admin-applicants'
 import { buildMetadata } from '@/lib/metadata'
@@ -45,7 +46,7 @@ export default async function AdminPage() {
           <Link href="/admin/waitlist" className="admin-quick-link">
             Waitlist
           </Link>
-          <Link href="/admin/interns" className="admin-quick-link">
+          <Link href={ROUTES.adminInterns} className="admin-quick-link">
             Founding team
           </Link>
           <Link href="/admin/affiliates" className="admin-quick-link">

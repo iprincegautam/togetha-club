@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AdminInternsTable from '@/components/admin/AdminInternsTable'
+import { ROUTES } from '@/constants/routes'
 import { buildMetadata } from '@/lib/metadata'
 import '@/components/admin/admin.css'
 
@@ -18,7 +19,7 @@ export default function AdminInternsPage() {
         <h1 className="admin-title">Founding team</h1>
         <p className="apply-sub" style={{ textAlign: 'left' }}>
           Summer 2026 internship applications — four tracks, resume PDFs, assignment emails.{' '}
-          <Link href="/admin" className="admin-inline-link">
+          <Link href={ROUTES.admin} className="admin-inline-link">
             ← Trip applicants
           </Link>
         </p>

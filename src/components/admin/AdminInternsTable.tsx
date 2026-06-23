@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
+import { ROUTES } from '@/constants/routes'
 import { CAREERS_ROLES } from '@/content/careers/roles'
 import type { InternApplicationStatus, InternTrackSlug } from '@/content/careers/types'
 
@@ -153,19 +155,24 @@ export default function AdminInternsTable() {
               <th>Status</th>
               <th>Applied</th>
               <th>Links</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="admin-table-empty">
+                <td colSpan={9} className="admin-table-empty">
                   No founding team applications yet.
                 </td>
               </tr>
             ) : (
               filtered.map((row) => (
                 <tr key={row.id}>
-                  <td>{row.full_name}</td>
+                  <td>
+                    <Link href={ROUTES.adminIntern(row.id)} className="admin-row-link">
+                      {row.full_name}
+                    </Link>
+                  </td>
                   <td>
                     <a href={`mailto:${row.email}`} className="admin-inline-link">
                       {row.email}
@@ -211,6 +218,11 @@ export default function AdminInternsTable() {
                         </button>
                       )}
                     </div>
+                  </td>
+                  <td>
+                    <Link href={ROUTES.adminIntern(row.id)} className="admin-inline-link">
+                      View →
+                    </Link>
                   </td>
                 </tr>
               ))
