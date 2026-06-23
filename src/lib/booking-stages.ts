@@ -1,3 +1,5 @@
+import { isProfileKycApproved, isProfileKycRejected } from '@/lib/applicant-kyc'
+
 export type BookingStage =
   | 'applied'
   | 'deposit_paid'
@@ -54,12 +56,17 @@ export function bookingPipelineState(
   balanceDue?: number | null
 ): BookingPipelineState {
   const balance = balanceDue ?? 0
+  const kycApproved = isProfileKycApproved(kycStatus)
 
   if (status === 'rejected') {
     return { completedThrough: 4, currentIndex: 4 }
   }
 
-  if (status === 'approved' || kycStatus === 'approved') {
+  if (isProfileKycRejected(kycStatus)) {
+    return { completedThrough: 1, currentIndex: 3 }
+  }
+
+  if (status === 'approved') {
     return { completedThrough: 4, currentIndex: 4 }
   }
 
@@ -75,11 +82,19 @@ export function bookingPipelineState(
     if (!profileComplete) {
       return { completedThrough: 1, currentIndex: 1 }
     }
-    if (balance > 0) {
-      // Deposit + profile done — still owe balance; do NOT mark "Paid in full" complete.
-      return { completedThrough: 1, currentIndex: 2 }
+
+    if (!kycApproved) {
+      // Profile submitted — waiting for admin to approve before balance opens.
+      return { completedThrough: 1, currentIndex: 3 }
     }
-    return { completedThrough: 2, currentIndex: 3 }
+
+    if (balance > 0) {
+      // Profile approved — balance optional until departure; under review complete.
+      return { completedThrough: 3, currentIndex: 2 }
+    }
+
+    // Edge case: zero balance but still deposit_paid — ready for final approval.
+    return { completedThrough: 2, currentIndex: 4 }
   }
 
   return { completedThrough: 0, currentIndex: 0 }

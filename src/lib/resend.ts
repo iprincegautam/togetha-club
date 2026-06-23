@@ -66,6 +66,8 @@ export async function sendBalancePaymentReminderEmail(opts: {
   balanceDuePaise: number
   amountPaidPaise: number
   finalAmountPaise: number | null
+  originalAmountPaise?: number | null
+  discountAmountPaise?: number | null
   departureLabel?: string | null
 }) {
   if (!isResendConfigured() || !resend) {

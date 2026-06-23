@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
 import { requireMemberApiAccess } from '@/lib/auth/member'
 import { getOrCreateRazorpayCustomer } from '@/lib/razorpay-customer'
+import { canMemberPayBalance } from '@/lib/applicant-kyc'
 import {
   buildOrderReceipt,
   formatRazorpayApiError,
@@ -22,6 +23,18 @@ export async function POST() {
 
   if (balanceDue <= 0) {
     return NextResponse.json({ error: 'No balance due on this booking' }, { status: 400 })
+  }
+
+  if (!canMemberPayBalance(applicant)) {
+    return NextResponse.json(
+      {
+        error:
+          applicant.kyc_status !== 'approved'
+            ? 'Balance payment opens after our team approves your profile.'
+            : 'Balance payment is not available for this booking.',
+      },
+      { status: 403 }
+    )
   }
 
   if (applicant.status !== 'deposit_paid') {

@@ -66,6 +66,7 @@ type LeadFilter = 'all' | 'quiz_leads' | 'callable'
 export default function AdminApplicantsTable({ applicants }: AdminApplicantsTableProps) {
   const [statusFilter, setStatusFilter] = useState<ApplicantStatus | 'all'>('all')
   const [leadFilter, setLeadFilter] = useState<LeadFilter>('all')
+  const [emailQuery, setEmailQuery] = useState('')
 
   const filtered = useMemo(() => {
     let rows = applicants
@@ -78,8 +79,16 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
     if (leadFilter === 'callable') {
       rows = rows.filter((a) => Boolean(a.phone))
     }
+    const q = emailQuery.trim().toLowerCase()
+    if (q) {
+      rows = rows.filter(
+        (a) =>
+          a.email.toLowerCase().includes(q) ||
+          (a.name?.toLowerCase().includes(q) ?? false)
+      )
+    }
     return rows
-  }, [applicants, statusFilter, leadFilter])
+  }, [applicants, statusFilter, leadFilter, emailQuery])
 
   const counts = useMemo(() => {
     const pending = applicants.filter((a) => a.status === 'pending').length
@@ -126,6 +135,19 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
       </div>
 
       <div className="admin-filter admin-filter-row">
+        <div>
+          <label className="apply-label" htmlFor="email-filter">
+            Search name or email
+          </label>
+          <input
+            id="email-filter"
+            className="apply-input admin-filter-select"
+            type="search"
+            placeholder="e.g. techhitech11@gmail.com"
+            value={emailQuery}
+            onChange={(e) => setEmailQuery(e.target.value)}
+          />
+        </div>
         <div>
           <label className="apply-label" htmlFor="status-filter">
             Filter by status
@@ -217,6 +239,17 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                           className="admin-inline-link"
                         >
                           Credentials
+                        </Link>
+                      </>
+                    )}
+                    {(row.status === 'deposit_paid' || row.status === 'paid') && (
+                      <>
+                        {' · '}
+                        <Link
+                          href={`${ROUTES.adminApplicant(row.id)}#balance-email`}
+                          className="admin-inline-link"
+                        >
+                          Payments
                         </Link>
                       </>
                     )}

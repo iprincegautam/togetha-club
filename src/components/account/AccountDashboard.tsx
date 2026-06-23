@@ -27,6 +27,8 @@ interface AccountData {
   }
   hasVerifiedPayment: boolean
   profileComplete: boolean
+  profileKycApproved: boolean
+  canPayBalance: boolean
   canCompleteQuiz: boolean
   packagePriceLabel: string
 }
@@ -57,9 +59,11 @@ export default function AccountDashboard() {
     )
   }
 
-  const { booking, profile, hasVerifiedPayment, profileComplete, canCompleteQuiz } = data
-  const showBalance =
+  const { booking, profile, hasVerifiedPayment, profileComplete, profileKycApproved, canPayBalance, canCompleteQuiz } = data
+  const hasBalanceOwed =
     hasVerifiedPayment && booking.status === 'deposit_paid' && (booking.balanceDue ?? 0) > 0
+  const awaitingProfileApproval =
+    hasBalanceOwed && profileComplete && !profileKycApproved && booking.kycStatus !== 'rejected'
 
   return (
     <div className="account-stack">
@@ -108,9 +112,17 @@ export default function AccountDashboard() {
                 before you leave.
               </p>
             )}
-            {profileComplete && booking.stageIndex < 4 && (
+            {profileComplete && booking.stageIndex < 4 && !profileKycApproved && (
               <p className="account-msg" style={{ marginTop: 12 }}>
                 Profile complete — your quiz and batch preferences are saved.
+                {awaitingProfileApproval
+                  ? ' Our team is reviewing your profile; balance payment opens after approval.'
+                  : null}
+              </p>
+            )}
+            {profileKycApproved && hasBalanceOwed && booking.stageIndex < 4 && (
+              <p className="account-msg" style={{ marginTop: 12 }}>
+                Profile approved — pay your remaining balance anytime before departure.
               </p>
             )}
           </div>
@@ -150,7 +162,7 @@ export default function AccountDashboard() {
                   )}
                 </dd>
               </div>
-              {showBalance && (
+              {hasBalanceOwed && (
                 <div>
                   <dt>Balance due</dt>
                   <dd className="account-balance">{formatPaise(booking.balanceDue!)}</dd>
@@ -165,11 +177,12 @@ export default function AccountDashboard() {
         </>
       )}
 
-      {showBalance && (
+      {canPayBalance && (
         <div className="account-panel">
           <h2 className="account-panel-title">Pay remaining balance</h2>
           <p className="account-sub">
-            Complete your payment to confirm your spot in full before departure.
+            Your profile is approved. Pay the remaining balance anytime before departure — optional
+            until then, but required to confirm your spot in full.
           </p>
           {payMsg && <p className="account-msg">{payMsg}</p>}
           <BalancePayButton

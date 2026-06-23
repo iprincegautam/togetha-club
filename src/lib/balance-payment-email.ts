@@ -36,6 +36,8 @@ export function renderBalancePaymentReminderEmail(opts: {
   balanceDuePaise: number
   amountPaidPaise: number
   finalAmountPaise: number | null
+  originalAmountPaise?: number | null
+  discountAmountPaise?: number | null
   departureLabel?: string | null
   payUrl: string
 }): { subject: string; text: string; html: string } {
@@ -44,16 +46,32 @@ export function renderBalancePaymentReminderEmail(opts: {
   const paidSoFar = formatPaise(opts.amountPaidPaise)
   const total =
     opts.finalAmountPaise != null ? formatPaise(opts.finalAmountPaise) : null
+  const listPrice =
+    opts.originalAmountPaise != null &&
+    opts.finalAmountPaise != null &&
+    opts.originalAmountPaise > opts.finalAmountPaise
+      ? formatPaise(opts.originalAmountPaise)
+      : null
+  const discount =
+    opts.discountAmountPaise != null && opts.discountAmountPaise > 0
+      ? formatPaise(opts.discountAmountPaise)
+      : null
   const departureLine = opts.departureLabel
     ? `Your departure: ${opts.departureLabel}.`
     : 'Your Himalayan departure is coming up.'
+
+  const totalLine = total
+    ? listPrice && discount
+      ? `Package ${listPrice} · discount ${discount} · your total ${total}`
+      : `Your trip total is ${total}`
+    : null
 
   const subject = `✦ Complete your trip payment — ${balance} due before departure`
 
   const text = `Hi ${firstName},
 
 Thank you for reserving your spot on ${opts.batchName}. ${departureLine}
-
+${totalLine ? `${totalLine}.\n` : ''}
 You've paid ${paidSoFar} so far${total ? ` toward ${total}` : ''}. The remaining balance is ${balance}, due before your trip.
 
 Pay securely on your member portal (same email you booked with):
@@ -67,11 +85,17 @@ See you in the mountains,
 Togetha.Club
 hello@togetha.club`
 
+  const pricingBlock =
+    totalLine != null
+      ? `<p style="margin:0 0 6px;"><strong>Trip total:</strong> ${total}${listPrice && discount ? ` <span style="color:#6b5344;">(${listPrice} − ${discount} discount)</span>` : ''}</p>`
+      : ''
+
   const html = emailShell(`
     <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#1a6b5a;">✦ Balance due ✦</p>
     <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;line-height:1.3;">Hi ${firstName}, complete your trip payment</h1>
     <p style="margin:0 0 16px;line-height:1.6;">Thank you for reserving your spot on <strong>${opts.batchName}</strong>. ${departureLine}</p>
     <div style="margin:20px 0;padding:16px 18px;background:#f5edd8;border:1px dashed #2c1810;border-radius:4px;font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;">
+      ${pricingBlock}
       <p style="margin:0 0 6px;"><strong>Paid so far:</strong> ${paidSoFar}${total ? ` of ${total}` : ''}</p>
       <p style="margin:0;font-size:16px;"><strong>Balance due now:</strong> ${balance}</p>
     </div>
@@ -89,6 +113,8 @@ export function buildBalancePaymentReminder(opts: {
   balanceDuePaise: number
   amountPaidPaise: number
   finalAmountPaise: number | null
+  originalAmountPaise?: number | null
+  discountAmountPaise?: number | null
   departureLabel?: string | null
   siteUrl?: string
 }) {

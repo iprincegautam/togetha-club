@@ -3,6 +3,7 @@ import { isDevelopment } from '@/lib/is-dev'
 import { requireMemberApiAccess } from '@/lib/auth/member'
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, verifyRazorpaySignature } from '@/lib/razorpay'
+import { canMemberPayBalance } from '@/lib/applicant-kyc'
 import { recordApplicantPayment } from '@/lib/applicant-payments'
 
 export async function POST(req: NextRequest) {
@@ -21,6 +22,18 @@ export async function POST(req: NextRequest) {
 
     const applicant = auth.applicant
     const balanceDue = applicant.balance_due ?? 0
+
+    if (!canMemberPayBalance(applicant)) {
+      return NextResponse.json(
+        {
+          error:
+            applicant.kyc_status !== 'approved'
+              ? 'Balance payment opens after our team approves your profile.'
+              : 'Balance payment is not available for this booking.',
+        },
+        { status: 403 }
+      )
+    }
 
     if (balanceDue <= 0) {
       return NextResponse.json({ error: 'No balance due' }, { status: 400 })

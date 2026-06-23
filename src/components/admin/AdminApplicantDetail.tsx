@@ -9,6 +9,8 @@ import {
   canResendMemberCredentials,
   hasVerifiedPayment,
 } from '@/lib/applicant-payment'
+import { isProfileKycApproved, kycStatusLabel } from '@/lib/applicant-kyc'
+import { isProfileComplete } from '@/lib/payment-claim'
 import type { ApplicantStatus } from '@/types/applicant'
 
 interface ApplicantDetailProps {
@@ -30,6 +32,8 @@ interface ApplicantDetailProps {
     admin_notes: string | null
     created_at: string
     razorpay_payment_id: string | null
+    kyc_status: string | null
+    profile_completed_at: string | null
     match_insight?: Record<string, unknown> | null
     batches?: { name: string; slug: string } | { name: string; slug: string }[] | null
     promo_codes?: { code: string } | { code: string }[] | null
@@ -62,6 +66,8 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
     email: string
     temporaryPassword: string
   } | null>(null)
+  const [kycStatus, setKycStatus] = useState(applicant.kyc_status ?? 'pending')
+  const [approvingProfile, setApprovingProfile] = useState(false)
 
   const save = async () => {
     setSaving(true)
@@ -111,6 +117,41 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
     setResending(false)
   }
 
+  const profileComplete = isProfileComplete(applicant)
+  const profileApproved = isProfileKycApproved(kycStatus)
+
+  const approveProfile = async () => {
+    if (!profileComplete) {
+      setMessage('Applicant has not submitted their profile yet.')
+      return
+    }
+    if (profileApproved) return
+    if (
+      !confirm(
+        `Approve profile for ${applicant.name || applicant.email}?\n\nThis unlocks optional balance payment in the member portal.`
+      )
+    ) {
+      return
+    }
+
+    setApprovingProfile(true)
+    setMessage(null)
+
+    const res = await fetch(`/api/admin/applicants/${applicant.id}/approve-profile`, {
+      method: 'POST',
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(json.error ?? 'Could not approve profile')
+    } else {
+      setKycStatus(json.applicant?.kyc_status ?? 'approved')
+      setMessage('Profile approved — member can pay balance anytime before departure.')
+      router.refresh()
+    }
+    setApprovingProfile(false)
+  }
+
   const batchName = relName(applicant.batches)
   const promoCode = relName(applicant.promo_codes)
   const insight = matchInsight ?? applicant.match_insight
@@ -152,7 +193,44 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
             <dd>{applicant.razorpay_payment_id || '—'}</dd>
           </div>
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
+          <div>
+            <dt>Profile / KYC</dt>
+            <dd>{kycStatusLabel(kycStatus)}</dd>
+          </div>
         </dl>
+      </div>
+
+      <div className="admin-panel" id="profile-review">
+        <h3 className="admin-panel-title">Profile review</h3>
+        {!profileComplete ? (
+          <p className="account-muted">
+            Waiting for the member to complete the compatibility quiz, batch, and departure date in
+            the portal.
+          </p>
+        ) : profileApproved ? (
+          <>
+            <p className="admin-msg">Profile approved — balance payment is open in the member portal.</p>
+            <p className="admin-muted" style={{ fontSize: 13 }}>
+              They can pay the remaining balance anytime before departure. Use the payments panel
+              above to copy the link or email a reminder.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="account-muted" style={{ marginBottom: 12 }}>
+              Profile submitted ({kycStatusLabel(kycStatus)}). Review quiz answers and match insight,
+              then approve to unlock balance payment.
+            </p>
+            <button
+              type="button"
+              className="admin-btn"
+              disabled={approvingProfile}
+              onClick={approveProfile}
+            >
+              {approvingProfile ? 'Approving…' : 'Approve profile'}
+            </button>
+          </>
+        )}
       </div>
 
       <div className="admin-panel" id="member-portal">

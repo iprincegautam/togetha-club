@@ -84,6 +84,8 @@ export default async function AdminApplicantPage({ params }: PageProps) {
           applicantId={data.id}
           applicantEmail={data.email}
           balanceDue={data.balance_due}
+          amountPaid={data.amount_paid}
+          paymentPlan={data.payment_plan}
           status={data.status}
           payments={payments}
           totalPaidPaise={paymentSummary.totalPaidPaise}

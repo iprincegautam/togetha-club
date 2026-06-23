@@ -1,10 +1,45 @@
 import { NextResponse } from 'next/server'
+import {
+  buildPreviewResponse,
+  loadApplicantForBalance,
+} from '@/lib/admin-balance-link'
+import { normalizeApplicantIdOrEmail } from '@/lib/admin-applicant-lookup'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
-import { memberBalancePayUrl } from '@/lib/applicant-payments'
-import { getBatchDateOptions } from '@/constants/batches'
+import { assertBookingAmountsForEmail } from '@/lib/applicant-booking-amounts'
+import { canAdminSendBalanceReminder } from '@/lib/applicant-kyc'
 import { sendBalancePaymentReminderEmail } from '@/lib/resend'
 
 type RouteParams = { params: Promise<{ id: string }> }
+
+export async function GET(_request: Request, { params }: RouteParams) {
+  const auth = await requireAdminApiAccess()
+  if ('error' in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
+  const { id: rawId } = await params
+  const id = normalizeApplicantIdOrEmail(rawId)
+
+  if (id.includes('/')) {
+    return NextResponse.json(
+      {
+        error:
+          'Invalid applicant id in URL (contains /). Use /api/admin/applicants/send-balance-link?email=... instead.',
+        received: rawId,
+        example:
+          '/api/admin/applicants/send-balance-link?email=techhitech11@gmail.com',
+      },
+      { status: 400 }
+    )
+  }
+
+  const loaded = await loadApplicantForBalance(auth, id)
+  if ('error' in loaded) {
+    return NextResponse.json({ error: loaded.error }, { status: loaded.status })
+  }
+
+  return NextResponse.json(buildPreviewResponse(loaded))
+}
 
 export async function POST(_request: Request, { params }: RouteParams) {
   const auth = await requireAdminApiAccess()
@@ -12,26 +47,37 @@ export async function POST(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
-  const { id } = await params
-  const { data: applicant, error } = await auth.service
-    .from('applicants')
-    .select(
-      `
-      id, email, name, status, balance_due, amount_paid, final_amount,
-      date_choice, batch_slug,
-      batches ( name )
-    `
-    )
-    .eq('id', id)
-    .maybeSingle()
+  const { id: rawId } = await params
+  const id = normalizeApplicantIdOrEmail(rawId)
 
-  if (error || !applicant) {
-    return NextResponse.json({ error: 'Applicant not found' }, { status: 404 })
+  if (id.includes('/')) {
+    return NextResponse.json(
+      {
+        error:
+          'Invalid applicant id in URL. Use /api/admin/applicants/send-balance-link?email=... instead.',
+      },
+      { status: 400 }
+    )
   }
 
-  const balanceDue = applicant.balance_due ?? 0
-  if (balanceDue <= 0) {
-    return NextResponse.json({ error: 'No balance due on this booking' }, { status: 400 })
+  const loaded = await loadApplicantForBalance(auth, id)
+  if ('error' in loaded) {
+    return NextResponse.json({ error: loaded.error }, { status: loaded.status })
+  }
+
+  const { applicant, amounts, batchName, departureLabel, payUrl } = loaded
+
+  if (!canAdminSendBalanceReminder(applicant)) {
+    return NextResponse.json(
+      {
+        error:
+          applicant.kyc_status !== 'approved'
+            ? 'Approve profile before sending a balance payment reminder.'
+            : 'Balance reminder is only for deposit bookings with an outstanding balance.',
+        payUrl,
+      },
+      { status: 400 }
+    )
   }
 
   if (applicant.status !== 'deposit_paid') {
@@ -41,26 +87,20 @@ export async function POST(_request: Request, { params }: RouteParams) {
     )
   }
 
-  const batch = Array.isArray(applicant.batches) ? applicant.batches[0] : applicant.batches
-  const batchName = batch?.name ?? applicant.batch_slug ?? 'your Togetha trip'
-  const slug = applicant.batch_slug ?? ''
-  const dateIndex = applicant.date_choice ? Number(applicant.date_choice) : null
-  const dateOptions = getBatchDateOptions(slug)
-  const departureLabel =
-    dateIndex !== null && !Number.isNaN(dateIndex)
-      ? dateOptions[dateIndex]?.label ?? applicant.date_choice
-      : applicant.date_choice
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
-  const payUrl = memberBalancePayUrl(siteUrl)
+  const validation = assertBookingAmountsForEmail(amounts)
+  if (!validation.ok) {
+    return NextResponse.json({ error: validation.error, payUrl }, { status: 400 })
+  }
 
   const emailResult = await sendBalancePaymentReminderEmail({
     to: applicant.email,
     name: applicant.name || 'there',
     batchName,
-    balanceDuePaise: balanceDue,
-    amountPaidPaise: applicant.amount_paid ?? 0,
-    finalAmountPaise: applicant.final_amount,
+    balanceDuePaise: amounts.balanceDuePaise,
+    amountPaidPaise: amounts.amountPaidPaise,
+    finalAmountPaise: amounts.finalAmountPaise,
+    originalAmountPaise: amounts.originalAmountPaise,
+    discountAmountPaise: amounts.discountAmountPaise,
     departureLabel,
   })
 
@@ -75,6 +115,11 @@ export async function POST(_request: Request, { params }: RouteParams) {
     ok: true,
     email: applicant.email,
     payUrl,
-    balanceDue,
+    balanceDue: amounts.balanceDuePaise,
+    amounts: {
+      paid: amounts.amountPaidPaise,
+      final: amounts.finalAmountPaise,
+      balance: amounts.balanceDuePaise,
+    },
   })
 }

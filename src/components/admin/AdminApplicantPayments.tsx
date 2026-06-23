@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { formatPaise } from '@/lib/utils'
 import type { ApplicantPaymentKind } from '@/lib/applicant-payments'
 
@@ -17,6 +17,8 @@ interface AdminApplicantPaymentsProps {
   applicantId: string
   applicantEmail: string
   balanceDue: number | null
+  amountPaid: number | null
+  paymentPlan: string | null
   status: string
   payments: AdminPaymentRow[]
   totalPaidPaise: number
@@ -44,6 +46,8 @@ export default function AdminApplicantPayments({
   applicantId,
   applicantEmail,
   balanceDue,
+  amountPaid,
+  paymentPlan,
   status,
   payments,
   totalPaidPaise,
@@ -52,9 +56,72 @@ export default function AdminApplicantPayments({
   const [message, setMessage] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [preview, setPreview] = useState<{
+    formatted: {
+      original: string | null
+      final: string | null
+      discount: string | null
+      paid: string
+      balance: string
+    }
+    canSend: boolean
+    validationError: string | null
+    emailPreview: { subject: string; text: string }
+  } | null>(null)
+
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(true)
+
+  useEffect(() => {
+    setPreviewLoading(true)
+    setPreviewError(null)
+    fetch(`/api/admin/applicants/${applicantId}/send-balance-link`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.error) {
+          setPreview(null)
+          setPreviewError(json.error)
+          return
+        }
+        if (json.amounts?.formatted) {
+          setPreview({
+            formatted: json.amounts.formatted,
+            canSend: Boolean(json.canSend),
+            validationError: json.validationError ?? null,
+            emailPreview: json.emailPreview ?? { subject: '', text: '' },
+          })
+        }
+      })
+      .catch(() => {
+        setPreviewError('Could not load balance email preview.')
+      })
+      .finally(() => {
+        setPreviewLoading(false)
+      })
+  }, [applicantId])
 
   const balance = balanceDue ?? 0
-  const canSendBalanceLink = status === 'deposit_paid' && balance > 0
+  const paid = amountPaid ?? 0
+  const isDepositBooking =
+    paymentPlan === 'deposit' ||
+    status === 'deposit_paid' ||
+    payments.some((row) => row.payment_kind === 'deposit')
+  const showBalanceTools =
+    isDepositBooking || balance > 0 || paid > 0 || payments.length > 0
+
+  const sendBlockReason = (() => {
+    if (status !== 'deposit_paid') {
+      return `Status is "${status}" — set to deposit_paid to send a balance reminder.`
+    }
+    if (balance <= 0) {
+      return 'balance_due is zero on this row — nothing left to collect.'
+    }
+    if (preview?.validationError) return preview.validationError
+    if (preview && !preview.canSend) {
+      return 'Booking amounts failed validation — fix totals in Supabase first.'
+    }
+    return null
+  })()
 
   const copyPayLink = async () => {
     try {
@@ -67,10 +134,13 @@ export default function AdminApplicantPayments({
   }
 
   const sendBalanceEmail = async () => {
-    if (!canSendBalanceLink) return
+    if (sendBlockReason) {
+      setMessage(sendBlockReason)
+      return
+    }
     if (
       !confirm(
-        `Email balance payment link to ${applicantEmail}?\n\nBalance due: ${formatPaise(balance)}`
+        `Email balance payment link to ${applicantEmail}?\n\nBalance due (from DB): ${preview?.formatted.balance ?? formatPaise(balance)}`
       )
     ) {
       return
@@ -93,7 +163,7 @@ export default function AdminApplicantPayments({
   }
 
   return (
-    <div className="admin-panel">
+    <div className="admin-panel" id="payments">
       <h3 className="admin-panel-title">Payment receipts</h3>
       <p className="account-muted" style={{ marginBottom: 12 }}>
         Each Razorpay <code>pay_</code> ID is logged separately — deposit first, then balance when
@@ -150,8 +220,64 @@ export default function AdminApplicantPayments({
         )}
       </dl>
 
-      {canSendBalanceLink && (
-        <div className="admin-credentials-inline" style={{ marginTop: 16 }}>
+      {showBalanceTools && (
+        <div className="admin-credentials-inline" id="balance-email" style={{ marginTop: 16 }}>
+          <h4 className="admin-panel-title" style={{ fontSize: '1rem', marginBottom: 8 }}>
+            Balance payment reminder
+          </h4>
+          {previewLoading && (
+            <p className="account-muted" style={{ marginBottom: 12 }}>
+              Loading email preview from database…
+            </p>
+          )}
+          {previewError && !previewLoading && (
+            <p className="apply-error" style={{ marginBottom: 12 }}>
+              {previewError}
+            </p>
+          )}
+          {preview && (
+            <div className="admin-panel" style={{ marginBottom: 16, padding: 12, background: 'var(--cream)' }}>
+              <strong>Email preview — amounts from database</strong>
+              <dl className="admin-dl" style={{ marginTop: 8 }}>
+                {preview.formatted.original && (
+                  <div>
+                    <dt>List price</dt>
+                    <dd>{preview.formatted.original}</dd>
+                  </div>
+                )}
+                {preview.formatted.discount && (
+                  <div>
+                    <dt>Discount</dt>
+                    <dd>−{preview.formatted.discount}</dd>
+                  </div>
+                )}
+                {preview.formatted.final && (
+                  <div>
+                    <dt>Trip total</dt>
+                    <dd>{preview.formatted.final}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt>Paid so far</dt>
+                  <dd>{preview.formatted.paid}</dd>
+                </div>
+                <div>
+                  <dt>Balance due</dt>
+                  <dd>{preview.formatted.balance}</dd>
+                </div>
+              </dl>
+              {preview.validationError && (
+                <p className="apply-error" style={{ marginTop: 8 }}>
+                  {preview.validationError}
+                </p>
+              )}
+              <p className="admin-muted" style={{ marginTop: 8, fontSize: 13, whiteSpace: 'pre-wrap' }}>
+                <strong>Subject:</strong> {preview.emailPreview.subject}
+                {'\n\n'}
+                {preview.emailPreview.text}
+              </p>
+            </div>
+          )}
           <p className="account-muted" style={{ marginBottom: 10 }}>
             Member portal link (log in → pay remaining balance):
           </p>
@@ -165,15 +291,22 @@ export default function AdminApplicantPayments({
             <button
               type="button"
               className="admin-btn"
-              disabled={sending}
+              disabled={sending || previewLoading || Boolean(sendBlockReason)}
               onClick={sendBalanceEmail}
             >
               {sending ? 'Sending…' : 'Email balance payment link'}
             </button>
           </div>
-          <p className="admin-muted" style={{ marginTop: 8, fontSize: 13 }}>
-            Email includes amount due, departure context, and a button to the member portal.
-          </p>
+          {sendBlockReason ? (
+            <p className="apply-error" style={{ marginTop: 8, fontSize: 13 }}>
+              {sendBlockReason}
+            </p>
+          ) : (
+            <p className="admin-muted" style={{ marginTop: 8, fontSize: 13 }}>
+              Sends to <strong>{applicantEmail}</strong> with amount due, departure context, and a
+              button to the member portal.
+            </p>
+          )}
         </div>
       )}
 

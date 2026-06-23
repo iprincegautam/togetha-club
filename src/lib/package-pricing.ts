@@ -51,16 +51,23 @@ export async function fetchPackagePricePaise(
   return fallbackPackagePricePaise()
 }
 
-/** Prefer batch-specific DB price, then stored applicant amount, then default package price. */
+/** Prefer stored applicant checkout totals, then batch DB price, then fallback. */
 export async function resolveApplicantPackagePricePaise(
   supabase: SupabaseClient,
-  applicant: { batch_slug?: string | null; original_amount?: number | null }
+  applicant: {
+    batch_slug?: string | null
+    original_amount?: number | null
+    final_amount?: number | null
+  }
 ): Promise<number> {
-  if (applicant.batch_slug) {
-    return fetchPackagePricePaise(supabase, applicant.batch_slug)
+  if (applicant.final_amount != null && applicant.final_amount > 0) {
+    return applicant.final_amount
   }
   if (applicant.original_amount != null && applicant.original_amount > 0) {
     return applicant.original_amount
+  }
+  if (applicant.batch_slug) {
+    return fetchPackagePricePaise(supabase, applicant.batch_slug)
   }
   return fetchPackagePricePaise(supabase)
 }

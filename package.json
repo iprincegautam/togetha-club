@@ -21,7 +21,9 @@
     "annotations:judge": "node scripts/judge-annotations.mjs",
     "annotations:auto": "node scripts/auto-annotate-dms.mjs",
     "annotations:pipeline": "node scripts/run-llm-annotation-pipeline.mjs",
-    "smoke": "bash scripts/smoke-test.sh"
+    "smoke": "bash scripts/smoke-test.sh",
+    "check:pipeline": "node scripts/check-booking-pipeline.mjs",
+    "check:endpoints": "node scripts/check-kyc-endpoints.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

@@ -3,6 +3,8 @@ import { bookingPipelineState, bookingStageFromStatus, requireMemberApiAccess } 
 import { hasVerifiedPayment } from '@/lib/applicant-payment'
 import { isProfileComplete } from '@/lib/payment-claim'
 import { resolveApplicantPackagePricePaise, formatPaiseAsPackageInr } from '@/lib/package-pricing'
+import { bookingPackageLabelFromApplicant } from '@/lib/applicant-booking-amounts'
+import { canMemberPayBalance, isProfileKycApproved } from '@/lib/applicant-kyc'
 import { getBatchDateOptions } from '@/constants/batches'
 
 export async function GET() {
@@ -24,6 +26,7 @@ export async function GET() {
   const paid = hasVerifiedPayment(a)
   const profileComplete = isProfileComplete(a)
   const packagePricePaise = await resolveApplicantPackagePricePaise(auth.service, a)
+  const storedLabel = bookingPackageLabelFromApplicant(a)
   const pipeline = bookingPipelineState(
     a.status,
     a.kyc_status,
@@ -66,8 +69,10 @@ export async function GET() {
     },
     hasVerifiedPayment: paid,
     profileComplete,
+    profileKycApproved: isProfileKycApproved(a.kyc_status),
+    canPayBalance: canMemberPayBalance(a),
     canCompleteQuiz: paid && !profileComplete,
     packagePricePaise,
-    packagePriceLabel: formatPaiseAsPackageInr(packagePricePaise),
+    packagePriceLabel: storedLabel ?? formatPaiseAsPackageInr(packagePricePaise),
   })
 }
