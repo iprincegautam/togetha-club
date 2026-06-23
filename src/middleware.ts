@@ -45,11 +45,26 @@ function isPortalAuthPage(pathname: string): boolean {
   )
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+function needsPortalAuth(pathname: string): boolean {
+  return (
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/partner') ||
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/account') ||
+    pathname.startsWith('/api/partner') ||
+    pathname === '/api/auth/signout'
+  )
+}
 
+export async function middleware(request: NextRequest) {
   const careersResponse = careersRedirect(request)
   if (careersResponse) return careersResponse
+
+  const { pathname } = request.nextUrl
+  if (!needsPortalAuth(pathname)) {
+    return NextResponse.next()
+  }
 
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
@@ -234,13 +249,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/careers/:path*',
-    '/admin/:path*',
-    '/account/:path*',
-    '/partner/:path*',
-    '/api/admin/:path*',
-    '/api/account/:path*',
-    '/api/partner/:path*',
-    '/api/auth/signout',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)',
   ],
 }
