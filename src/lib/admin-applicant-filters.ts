@@ -4,9 +4,12 @@ import type { ApplicantStatus } from '@/types/applicant'
 
 export type LeadFilter = 'all' | 'quiz_leads' | 'callable'
 
+export type GenderFilter = 'all' | 'm' | 'f'
+
 export type AdminApplicantFilters = {
   status: ApplicantStatus | 'all'
   lead: LeadFilter
+  gender: GenderFilter
   name: string
   email: string
   date: string
@@ -16,12 +19,13 @@ export type AdminApplicantFilterRow = {
   name: string | null
   email: string
   phone: string | null
+  gender: 'm' | 'f' | null
   status: ApplicantStatus
   isQuizLead: boolean
   departureLabel: string | null
 }
 
-const FILTER_KEYS = ['status', 'lead', 'name', 'email', 'date'] as const
+const FILTER_KEYS = ['status', 'lead', 'gender', 'name', 'email', 'date'] as const
 
 const VALID_STATUSES: (ApplicantStatus | 'all')[] = [
   'all',
@@ -34,9 +38,12 @@ const VALID_STATUSES: (ApplicantStatus | 'all')[] = [
 
 const VALID_LEADS: LeadFilter[] = ['all', 'quiz_leads', 'callable']
 
+const VALID_GENDERS: GenderFilter[] = ['all', 'm', 'f']
+
 export const DEFAULT_ADMIN_APPLICANT_FILTERS: AdminApplicantFilters = {
   status: 'all',
   lead: 'all',
+  gender: 'all',
   name: '',
   email: '',
   date: '',
@@ -79,12 +86,16 @@ export function parseAdminApplicantFilters(
 
   const statusRaw = params.get('status') ?? 'all'
   const leadRaw = params.get('lead') ?? 'all'
+  const genderRaw = params.get('gender') ?? 'all'
 
   return {
     status: VALID_STATUSES.includes(statusRaw as ApplicantStatus | 'all')
       ? (statusRaw as ApplicantStatus | 'all')
       : 'all',
     lead: VALID_LEADS.includes(leadRaw as LeadFilter) ? (leadRaw as LeadFilter) : 'all',
+    gender: VALID_GENDERS.includes(genderRaw as GenderFilter)
+      ? (genderRaw as GenderFilter)
+      : 'all',
     name: params.get('name')?.trim() ?? '',
     email: params.get('email')?.trim() ?? '',
     date: params.get('date')?.trim() ?? '',
@@ -95,6 +106,7 @@ export function filtersToSearchParams(filters: AdminApplicantFilters): URLSearch
   const params = new URLSearchParams()
   if (filters.status !== 'all') params.set('status', filters.status)
   if (filters.lead !== 'all') params.set('lead', filters.lead)
+  if (filters.gender !== 'all') params.set('gender', filters.gender)
   if (filters.name.trim()) params.set('name', filters.name.trim())
   if (filters.email.trim()) params.set('email', filters.email.trim())
   if (filters.date.trim()) params.set('date', filters.date.trim())
@@ -135,6 +147,10 @@ export function filterAdminApplicants<T extends AdminApplicantFilterRow>(
     rows = rows.filter((row) => row.isQuizLead)
   } else if (filters.lead === 'callable') {
     rows = rows.filter((row) => Boolean(row.phone))
+  }
+
+  if (filters.gender !== 'all') {
+    rows = rows.filter((row) => row.gender === filters.gender)
   }
 
   const nameQ = filters.name.trim().toLowerCase()

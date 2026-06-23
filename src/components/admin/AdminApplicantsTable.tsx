@@ -9,6 +9,7 @@ import {
   filterAdminApplicants,
   filtersToSearchParams,
   parseAdminApplicantFilters,
+  type GenderFilter,
   type LeadFilter,
   uniqueDepartureLabels,
 } from '@/lib/admin-applicant-filters'
@@ -125,6 +126,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
   const hasActiveFilters =
     filters.status !== 'all' ||
     filters.lead !== 'all' ||
+    filters.gender !== 'all' ||
     Boolean(filters.name) ||
     Boolean(filters.email) ||
     Boolean(filters.date)
@@ -209,6 +211,21 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
                 {label}
               </option>
             ))}
+          </select>
+        </div>
+        <div>
+          <label className="apply-label" htmlFor="gender-filter">
+            Gender
+          </label>
+          <select
+            id="gender-filter"
+            className="apply-select admin-filter-select"
+            value={filters.gender}
+            onChange={(e) => updateFilters({ gender: e.target.value as GenderFilter })}
+          >
+            <option value="all">All genders</option>
+            <option value="m">Male</option>
+            <option value="f">Female</option>
           </select>
         </div>
         <div>
