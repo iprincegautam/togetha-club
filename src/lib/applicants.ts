@@ -22,6 +22,7 @@ export interface ApplicantDbRow {
   phone: string | null
   gender: string | null
   batch_slug: string | null
+  date_choice?: string | null
   quiz_score: number | null
   status: string
   created_at: string

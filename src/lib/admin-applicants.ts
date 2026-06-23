@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
 import { mapApplicantRow, type ApplicantDbRow } from '@/lib/applicants'
 
 export async function fetchAdminApplicants(service: SupabaseClient) {
@@ -9,6 +10,7 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
     phone,
     gender,
     batch_slug,
+    date_choice,
     quiz_score,
     status,
     created_at,
@@ -49,5 +51,11 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
 
   if (fetchError) throw fetchError
 
-  return (rows ?? []).map((row) => mapApplicantRow(row))
+  return (rows ?? []).map((row) => {
+    const mapped = mapApplicantRow(row)
+    return {
+      ...mapped,
+      departureLabel: resolveApplicantDepartureLabel(row.date_choice, row.batch_slug),
+    }
+  })
 }

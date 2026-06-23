@@ -1,9 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
-import { ROUTES } from '@/constants/routes'
+import {
+  adminApplicantHref,
+  filterAdminApplicants,
+  filtersToSearchParams,
+  parseAdminApplicantFilters,
+  type LeadFilter,
+  uniqueDepartureLabels,
+} from '@/lib/admin-applicant-filters'
 import type { ApplicantStatus } from '@/types/applicant'
 
 export interface AdminApplicantRow {
@@ -21,6 +29,7 @@ export interface AdminApplicantRow {
   priorityReview: boolean
   leadSource: string | null
   isQuizLead: boolean
+  departureLabel: string | null
 }
 
 function canShowCredentialsAction(status: ApplicantStatus): boolean {
@@ -61,38 +70,48 @@ function formatDate(iso: string) {
   })
 }
 
-type LeadFilter = 'all' | 'quiz_leads' | 'callable'
-
 export default function AdminApplicantsTable({ applicants }: AdminApplicantsTableProps) {
-  const [statusFilter, setStatusFilter] = useState<ApplicantStatus | 'all'>('all')
-  const [leadFilter, setLeadFilter] = useState<LeadFilter>('all')
-  const [emailQuery, setEmailQuery] = useState('')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  const filtered = useMemo(() => {
-    let rows = applicants
-    if (statusFilter !== 'all') {
-      rows = rows.filter((a) => a.status === statusFilter)
-    }
-    if (leadFilter === 'quiz_leads') {
-      rows = rows.filter((a) => a.isQuizLead)
-    }
-    if (leadFilter === 'callable') {
-      rows = rows.filter((a) => Boolean(a.phone))
-    }
-    const q = emailQuery.trim().toLowerCase()
-    if (q) {
-      rows = rows.filter(
-        (a) =>
-          a.email.toLowerCase().includes(q) ||
-          (a.name?.toLowerCase().includes(q) ?? false)
-      )
-    }
-    return rows
-  }, [applicants, statusFilter, leadFilter, emailQuery])
+  const filters = useMemo(
+    () => parseAdminApplicantFilters(searchParams),
+    [searchParams]
+  )
+
+  const [nameDraft, setNameDraft] = useState(filters.name)
+  const [emailDraft, setEmailDraft] = useState(filters.email)
+
+  useEffect(() => {
+    setNameDraft(filters.name)
+    setEmailDraft(filters.email)
+  }, [filters.name, filters.email])
+
+  const updateFilters = useCallback(
+    (next: Partial<typeof filters>) => {
+      const merged = { ...filters, ...next }
+      const query = filtersToSearchParams(merged).toString()
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    },
+    [filters, pathname, router]
+  )
+
+  const applyTextFilters = () => {
+    updateFilters({ name: nameDraft, email: emailDraft })
+  }
+
+  const departureOptions = useMemo(() => uniqueDepartureLabels(applicants), [applicants])
+
+  const filtered = useMemo(
+    () => filterAdminApplicants(applicants, filters),
+    [applicants, filters]
+  )
 
   const counts = useMemo(() => {
     const pending = applicants.filter((a) => a.status === 'pending').length
     const paid = applicants.filter((a) => a.status === 'paid').length
+    const depositPaid = applicants.filter((a) => a.status === 'deposit_paid').length
     const quizLeads = applicants.filter((a) => a.isQuizLead).length
     const callable = applicants.filter((a) => Boolean(a.phone)).length
     const byBatch: Record<string, number> = {}
@@ -100,8 +119,15 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
       const key = a.batchSlug ?? 'unknown'
       byBatch[key] = (byBatch[key] ?? 0) + 1
     })
-    return { pending, paid, quizLeads, callable, byBatch, total: applicants.length }
+    return { pending, paid, depositPaid, quizLeads, callable, byBatch, total: applicants.length }
   }, [applicants])
+
+  const hasActiveFilters =
+    filters.status !== 'all' ||
+    filters.lead !== 'all' ||
+    Boolean(filters.name) ||
+    Boolean(filters.email) ||
+    Boolean(filters.date)
 
   return (
     <div className="admin-dashboard">
@@ -115,8 +141,12 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <div className="admin-stat-label">Pending</div>
         </div>
         <div className="admin-stat">
+          <div className="admin-stat-num">{counts.depositPaid}</div>
+          <div className="admin-stat-label">Deposit paid</div>
+        </div>
+        <div className="admin-stat">
           <div className="admin-stat-num">{counts.paid}</div>
-          <div className="admin-stat-label">Paid</div>
+          <div className="admin-stat-label">Paid in full</div>
         </div>
         <div className="admin-stat">
           <div className="admin-stat-num">{counts.quizLeads}</div>
@@ -136,17 +166,50 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
 
       <div className="admin-filter admin-filter-row">
         <div>
+          <label className="apply-label" htmlFor="name-filter">
+            Name
+          </label>
+          <input
+            id="name-filter"
+            className="apply-input admin-filter-select"
+            type="search"
+            placeholder="e.g. Ishan"
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyTextFilters()}
+          />
+        </div>
+        <div>
           <label className="apply-label" htmlFor="email-filter">
-            Search name or email
+            Email
           </label>
           <input
             id="email-filter"
             className="apply-input admin-filter-select"
             type="search"
-            placeholder="e.g. techhitech11@gmail.com"
-            value={emailQuery}
-            onChange={(e) => setEmailQuery(e.target.value)}
+            placeholder="e.g. rathiishan69@gmail.com"
+            value={emailDraft}
+            onChange={(e) => setEmailDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applyTextFilters()}
           />
+        </div>
+        <div>
+          <label className="apply-label" htmlFor="date-filter">
+            Travel date
+          </label>
+          <select
+            id="date-filter"
+            className="apply-select admin-filter-select"
+            value={filters.date}
+            onChange={(e) => updateFilters({ date: e.target.value })}
+          >
+            <option value="">All departure dates</option>
+            {departureOptions.map((label) => (
+              <option key={label} value={label}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
         <div>
           <label className="apply-label" htmlFor="status-filter">
@@ -155,8 +218,10 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <select
             id="status-filter"
             className="apply-select admin-filter-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ApplicantStatus | 'all')}
+            value={filters.status}
+            onChange={(e) =>
+              updateFilters({ status: e.target.value as ApplicantStatus | 'all' })
+            }
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -172,13 +237,31 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <select
             id="lead-filter"
             className="apply-select admin-filter-select"
-            value={leadFilter}
-            onChange={(e) => setLeadFilter(e.target.value as LeadFilter)}
+            value={filters.lead}
+            onChange={(e) => updateFilters({ lead: e.target.value as LeadFilter })}
           >
             <option value="all">All leads</option>
             <option value="quiz_leads">Quiz leads (score + phone)</option>
             <option value="callable">Has phone only</option>
           </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+          <button type="button" className="admin-btn" onClick={applyTextFilters}>
+            Apply search
+          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="admin-link-btn"
+              onClick={() => {
+                setNameDraft('')
+                setEmailDraft('')
+                router.replace(pathname, { scroll: false })
+              }}
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
@@ -189,6 +272,7 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>Travel date</th>
               <th>Source</th>
               <th>Gender</th>
               <th>Batch</th>
@@ -203,59 +287,59 @@ export default function AdminApplicantsTable({ applicants }: AdminApplicantsTabl
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={12} className="admin-table-empty">
+                <td colSpan={13} className="admin-table-empty">
                   No applicants found.
                 </td>
               </tr>
             ) : (
-              filtered.map((row) => (
-                <tr key={row.id}>
-                  <td>
-                    <Link href={ROUTES.adminApplicant(row.id)} className="admin-row-link">
-                      {row.name || '—'}
-                    </Link>
-                  </td>
-                  <td>{row.email}</td>
-                  <td>{row.phone ?? '—'}</td>
-                  <td>{row.leadSource ?? (row.isQuizLead ? 'quiz' : '—')}</td>
-                  <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
-                  <td>{row.batchName || row.batchSlug || '—'}</td>
-                  <td>{row.promoCode ? <code className="admin-code">{row.promoCode}</code> : '—'}</td>
-                  <td>{row.priorityReview ? 'Yes' : '—'}</td>
-                  <td>{row.quizScore ?? '—'}</td>
-                  <td>
-                    <Badge color={statusBadgeColor(row.status)}>{row.status}</Badge>
-                  </td>
-                  <td>{formatDate(row.createdAt)}</td>
-                  <td>
-                    <Link href={ROUTES.adminApplicant(row.id)} className="admin-inline-link">
-                      View →
-                    </Link>
-                    {canShowCredentialsAction(row.status) && (
-                      <>
-                        {' · '}
-                        <Link
-                          href={`${ROUTES.adminApplicant(row.id)}#member-portal`}
-                          className="admin-inline-link"
-                        >
-                          Credentials
-                        </Link>
-                      </>
-                    )}
-                    {(row.status === 'deposit_paid' || row.status === 'paid') && (
-                      <>
-                        {' · '}
-                        <Link
-                          href={`${ROUTES.adminApplicant(row.id)}#balance-email`}
-                          className="admin-inline-link"
-                        >
-                          Payments
-                        </Link>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))
+              filtered.map((row) => {
+                const detailHref = adminApplicantHref(row.id, filters)
+                return (
+                  <tr key={row.id}>
+                    <td>
+                      <Link href={detailHref} className="admin-row-link">
+                        {row.name || '—'}
+                      </Link>
+                    </td>
+                    <td>{row.email}</td>
+                    <td>{row.phone ?? '—'}</td>
+                    <td>{row.departureLabel ?? '—'}</td>
+                    <td>{row.leadSource ?? (row.isQuizLead ? 'quiz' : '—')}</td>
+                    <td>{row.gender === 'm' ? 'M' : row.gender === 'f' ? 'F' : '—'}</td>
+                    <td>{row.batchName || row.batchSlug || '—'}</td>
+                    <td>
+                      {row.promoCode ? <code className="admin-code">{row.promoCode}</code> : '—'}
+                    </td>
+                    <td>{row.priorityReview ? 'Yes' : '—'}</td>
+                    <td>{row.quizScore ?? '—'}</td>
+                    <td>
+                      <Badge color={statusBadgeColor(row.status)}>{row.status}</Badge>
+                    </td>
+                    <td>{formatDate(row.createdAt)}</td>
+                    <td>
+                      <Link href={detailHref} className="admin-inline-link">
+                        View →
+                      </Link>
+                      {canShowCredentialsAction(row.status) && (
+                        <>
+                          {' · '}
+                          <Link href={`${detailHref}#member-portal`} className="admin-inline-link">
+                            Credentials
+                          </Link>
+                        </>
+                      )}
+                      {(row.status === 'deposit_paid' || row.status === 'paid') && (
+                        <>
+                          {' · '}
+                          <Link href={`${detailHref}#balance-email`} className="admin-inline-link">
+                            Payments
+                          </Link>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>

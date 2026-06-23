@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import AdminApplicantDetail from '@/components/admin/AdminApplicantDetail'
 import AdminApplicantPayments from '@/components/admin/AdminApplicantPayments'
 import AdminResendCredentialsButton from '@/components/admin/AdminResendCredentialsButton'
+import { adminListHref, parseAdminApplicantFilters } from '@/lib/admin-applicant-filters'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import {
   listApplicantPayments,
@@ -15,15 +16,20 @@ import { buildMetadata } from '@/lib/metadata'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import '@/components/admin/admin.css'
 
-type PageProps = { params: Promise<{ id: string }> }
+type PageProps = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params
   return buildMetadata(`Applicant — Admin`, `Review application ${id.slice(0, 8)}`)
 }
 
-export default async function AdminApplicantPage({ params }: PageProps) {
+export default async function AdminApplicantPage({ params, searchParams }: PageProps) {
   const { id } = await params
+  const listFilters = parseAdminApplicantFilters(await searchParams)
+  const backHref = adminListHref(listFilters)
   const auth = await requireAdminApiAccess()
 
   if (!auth || 'error' in auth) {
@@ -76,7 +82,7 @@ export default async function AdminApplicantPage({ params }: PageProps) {
     <div className="admin-page">
       <div className="admin-card admin-card-wide">
         <p className="apply-eyebrow">✦ Admin ✦</p>
-        <Link href="/admin" className="admin-inline-link">← All applicants</Link>
+        <Link href={backHref} className="admin-inline-link">← All applicants</Link>
         {showCredentials ? (
           <AdminResendCredentialsButton applicantId={data.id} email={data.email} />
         ) : null}

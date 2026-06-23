@@ -41,6 +41,20 @@
   max-width: 240px;
 }
 
+.admin-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  max-width: none;
+  align-items: flex-end;
+}
+
+.admin-filter-row > div {
+  min-width: 180px;
+  flex: 1 1 180px;
+  max-width: 280px;
+}
+
 .admin-filter-select {
   margin-top: 4px;
 }

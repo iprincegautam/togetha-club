@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import AdminApplicantsTable from '@/components/admin/AdminApplicantsTable'
 import AdminAuthActions from '@/components/admin/AdminAuthActions'
@@ -59,7 +60,9 @@ export default async function AdminPage() {
             message={`${loadError}. Sign out, then sign in again with your admin account.`}
           />
         ) : (
-          <AdminApplicantsTable applicants={applicants} />
+          <Suspense fallback={<p className="admin-loading">Loading applicants…</p>}>
+            <AdminApplicantsTable applicants={applicants} />
+          </Suspense>
         )}
       </div>
     </div>
