@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { buildApplicantMatchInsight } from '@/lib/match-analysis'
+import { ensureMemberAccountForApplicant } from '@/lib/member-account'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import type { ApplicantStatus } from '@/types/applicant'
 
@@ -102,6 +103,19 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (error) {
     console.error('[PATCH applicant]', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (
+    data.email &&
+    (data.status === 'paid' || data.status === 'deposit_paid') &&
+    (data.razorpay_payment_id || updates.status)
+  ) {
+    await ensureMemberAccountForApplicant(auth.service, {
+      applicantId: data.id,
+      email: data.email,
+      name: data.name,
+      phone: data.phone,
+    })
   }
 
   return NextResponse.json({ applicant: data })

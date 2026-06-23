@@ -1,8 +1,14 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AdminApplicantDetail from '@/components/admin/AdminApplicantDetail'
+import AdminApplicantPayments from '@/components/admin/AdminApplicantPayments'
 import AdminResendCredentialsButton from '@/components/admin/AdminResendCredentialsButton'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
+import {
+  listApplicantPayments,
+  memberBalancePayUrl,
+  summarizeApplicantPayments,
+} from '@/lib/applicant-payments'
 import { canResendMemberCredentials } from '@/lib/applicant-payment'
 import { buildApplicantMatchInsight } from '@/lib/match-analysis'
 import { buildMetadata } from '@/lib/metadata'
@@ -62,6 +68,9 @@ export default async function AdminApplicantPage({ params }: PageProps) {
   }
 
   const showCredentials = canResendMemberCredentials(data)
+  const payments = await listApplicantPayments(auth.service, id)
+  const paymentSummary = summarizeApplicantPayments(payments)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
 
   return (
     <div className="admin-page">
@@ -71,6 +80,15 @@ export default async function AdminApplicantPage({ params }: PageProps) {
         {showCredentials ? (
           <AdminResendCredentialsButton applicantId={data.id} email={data.email} />
         ) : null}
+        <AdminApplicantPayments
+          applicantId={data.id}
+          applicantEmail={data.email}
+          balanceDue={data.balance_due}
+          status={data.status}
+          payments={payments}
+          totalPaidPaise={paymentSummary.totalPaidPaise}
+          payUrl={memberBalancePayUrl(siteUrl)}
+        />
         <AdminApplicantDetail applicant={data} matchInsight={matchInsight} />
       </div>
     </div>

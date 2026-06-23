@@ -21,6 +21,8 @@ import {
 } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
 import { stopNurtureSequence } from '@/lib/nurture/should-stop'
+import { ensureMemberAccountForApplicant } from '@/lib/member-account'
+import { paymentKindFromPlan, recordApplicantPayment } from '@/lib/applicant-payments'
 
 export type ClaimPaymentResult =
   | {
@@ -306,6 +308,14 @@ export async function claimRazorpayPaymentForApplicant(
     return { ok: false, error: 'Could not save payment to your booking.' }
   }
 
+  await recordApplicantPayment(service, {
+    applicantId: input.applicantId,
+    razorpayPaymentId: paymentId,
+    razorpayOrderId: payment.order_id ?? null,
+    paymentKind: paymentKindFromPlan(match.plan, false),
+    amountPaise: match.amountPaid,
+  })
+
   if (match.plan === 'full') {
     await recordPromoRedemption(service, input.applicantId)
   }
@@ -344,6 +354,13 @@ export async function claimRazorpayPaymentForApplicant(
   } catch (nurtureErr) {
     console.warn('[claimRazorpayPayment] nurture stop failed', nurtureErr)
   }
+
+  await ensureMemberAccountForApplicant(service, {
+    applicantId: input.applicantId,
+    email: applicant.email,
+    name: applicant.name,
+    phone: applicant.phone,
+  })
 
   return {
     ok: true,

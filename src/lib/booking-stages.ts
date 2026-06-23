@@ -30,18 +30,57 @@ export const BOOKING_STAGES: { id: BookingStage; label: string }[] = [
   { id: 'approved', label: 'Approved for trip' },
 ]
 
+export type BookingPipelineState = {
+  /** Last step index that is fully complete (inclusive). */
+  completedThrough: number
+  /** Active step index — may be ahead of completedThrough when action is pending. */
+  currentIndex: number
+}
+
+/** @deprecated Use bookingPipelineState — kept for callers that only need a single index. */
 export function activeStageIndex(
   status: string,
   kycStatus?: string,
-  profileComplete?: boolean
+  profileComplete?: boolean,
+  balanceDue?: number | null
 ): number {
-  if (status === 'rejected') return 4
-  if (status === 'approved') return 4
-  if (status === 'paid' && profileComplete) return 4
-  if (kycStatus === 'approved') return 4
-  if (status === 'paid' || status === 'deposit_paid') {
-    if (profileComplete || kycStatus === 'submitted') return 3
-    return status === 'paid' ? 2 : 1
+  return bookingPipelineState(status, kycStatus, profileComplete, balanceDue).currentIndex
+}
+
+export function bookingPipelineState(
+  status: string,
+  kycStatus?: string,
+  profileComplete?: boolean,
+  balanceDue?: number | null
+): BookingPipelineState {
+  const balance = balanceDue ?? 0
+
+  if (status === 'rejected') {
+    return { completedThrough: 4, currentIndex: 4 }
   }
-  return 0
+
+  if (status === 'approved' || kycStatus === 'approved') {
+    return { completedThrough: 4, currentIndex: 4 }
+  }
+
+  if (status === 'paid' && profileComplete) {
+    return { completedThrough: 4, currentIndex: 4 }
+  }
+
+  if (status === 'paid') {
+    return { completedThrough: 2, currentIndex: profileComplete ? 3 : 2 }
+  }
+
+  if (status === 'deposit_paid') {
+    if (!profileComplete) {
+      return { completedThrough: 1, currentIndex: 1 }
+    }
+    if (balance > 0) {
+      // Deposit + profile done — still owe balance; do NOT mark "Paid in full" complete.
+      return { completedThrough: 1, currentIndex: 2 }
+    }
+    return { completedThrough: 2, currentIndex: 3 }
+  }
+
+  return { completedThrough: 0, currentIndex: 0 }
 }

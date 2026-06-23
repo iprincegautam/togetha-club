@@ -3,6 +3,7 @@ import { isDevelopment } from '@/lib/is-dev'
 import { requireMemberApiAccess } from '@/lib/auth/member'
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, verifyRazorpaySignature } from '@/lib/razorpay'
+import { recordApplicantPayment } from '@/lib/applicant-payments'
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +57,14 @@ export async function POST(req: NextRequest) {
       .eq('id', applicant.id)
 
     if (updateError) throw updateError
+
+    await recordApplicantPayment(auth.service, {
+      applicantId: applicant.id,
+      razorpayPaymentId,
+      razorpayOrderId,
+      paymentKind: 'balance',
+      amountPaise: balanceDue,
+    })
 
     await recordPromoRedemption(auth.service, applicant.id)
 

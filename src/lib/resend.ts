@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { renderMemberWelcomeEmail } from '@/lib/member-welcome-email'
+import { buildBalancePaymentReminder } from '@/lib/balance-payment-email'
 
 export const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -56,6 +57,41 @@ export async function sendMemberWelcomeEmail(opts: {
     text,
     html,
   })
+}
+
+export async function sendBalancePaymentReminderEmail(opts: {
+  to: string
+  name: string
+  batchName: string
+  balanceDuePaise: number
+  amountPaidPaise: number
+  finalAmountPaise: number | null
+  departureLabel?: string | null
+}) {
+  if (!isResendConfigured() || !resend) {
+    return { ok: false as const, error: 'Email service is not configured.' }
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
+  const { subject, text, html } = buildBalancePaymentReminder({
+    ...opts,
+    siteUrl,
+  })
+
+  const result = await resend.emails.send({
+    from: 'Togetha.Club <hello@togetha.club>',
+    to: opts.to,
+    subject,
+    text,
+    html,
+  })
+
+  if (result.error) {
+    console.error('[sendBalancePaymentReminderEmail]', result.error)
+    return { ok: false as const, error: result.error.message }
+  }
+
+  return { ok: true as const, payUrl: `${siteUrl.replace(/\/$/, '')}/account/login?next=${encodeURIComponent('/account')}` }
 }
 
 export async function sendPartnerWelcomeEmail(opts: {

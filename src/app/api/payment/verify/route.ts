@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isDevelopment } from '@/lib/is-dev'
-import { provisionMemberAccount } from '@/lib/member-account'
+import { ensureMemberAccountForApplicant } from '@/lib/member-account'
 import { calculatePaymentAmounts, statusForPaymentPlan, type PaymentPlan } from '@/lib/payment-plan'
 import { recordPromoRedemption } from '@/lib/promo'
 import { isRazorpayConfigured, razorpay, verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendConfirmationEmail } from '@/lib/resend'
 import { stopNurtureSequence } from '@/lib/nurture/should-stop'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
+import { paymentKindFromPlan, recordApplicantPayment } from '@/lib/applicant-payments'
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,6 +69,21 @@ export async function POST(req: NextRequest) {
       applicantPlanRow?.status === 'deposit_paid' || applicantPlanRow?.status === 'paid'
 
     if (alreadyPaid && applicantPlanRow?.razorpay_payment_id === razorpayPaymentId) {
+      const { data: applicantForProvision } = await supabase
+        .from('applicants')
+        .select('name, email, phone')
+        .eq('id', applicantId)
+        .maybeSingle()
+
+      if (applicantForProvision?.email) {
+        await ensureMemberAccountForApplicant(supabase, {
+          applicantId,
+          email: applicantForProvision.email,
+          name: applicantForProvision.name,
+          phone: applicantForProvision.phone,
+        })
+      }
+
       return NextResponse.json({
         success: true,
         paymentPlan: applicantPlanRow.payment_plan ?? 'full',
@@ -131,7 +147,15 @@ export async function POST(req: NextRequest) {
 
     if (fetchError || !applicant) throw fetchError ?? new Error('Applicant not found')
 
-    await provisionMemberAccount(supabase, {
+    await recordApplicantPayment(supabase, {
+      applicantId,
+      razorpayPaymentId,
+      razorpayOrderId,
+      paymentKind: paymentKindFromPlan(paymentPlan),
+      amountPaise: newAmountPaid,
+    })
+
+    await ensureMemberAccountForApplicant(supabase, {
       applicantId,
       email: applicant.email,
       name: applicant.name,

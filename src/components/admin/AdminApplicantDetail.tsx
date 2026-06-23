@@ -147,7 +147,10 @@ export default function AdminApplicantDetail({ applicant, matchInsight }: Applic
           </div>
           <div><dt>Amount paid</dt><dd>{applicantAmountPaidLabel(applicant)}</dd></div>
           <div><dt>Balance due</dt><dd>{applicantBalanceDueLabel(applicant)}</dd></div>
-          <div><dt>Razorpay payment</dt><dd>{applicant.razorpay_payment_id || '—'}</dd></div>
+          <div>
+            <dt>Latest Razorpay payment</dt>
+            <dd>{applicant.razorpay_payment_id || '—'}</dd>
+          </div>
           <div><dt>Applied</dt><dd>{new Date(applicant.created_at).toLocaleString('en-IN')}</dd></div>
         </dl>
       </div>

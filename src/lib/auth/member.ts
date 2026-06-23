@@ -2,8 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServerAuthClient } from '@/lib/supabase/server'
 import type { ProfileRow } from '@/lib/auth/roles'
 
-export { activeStageIndex, bookingStageFromStatus, BOOKING_STAGES } from '@/lib/booking-stages'
-export type { BookingStage } from '@/lib/booking-stages'
+export { activeStageIndex, bookingPipelineState, bookingStageFromStatus, BOOKING_STAGES } from '@/lib/booking-stages'
+export type { BookingStage, BookingPipelineState } from '@/lib/booking-stages'
 
 export async function getMemberContext() {
   const supabase = await createServerAuthClient()

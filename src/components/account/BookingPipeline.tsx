@@ -4,10 +4,15 @@ import { BOOKING_STAGES } from '@/lib/booking-stages'
 
 interface BookingPipelineProps {
   stageIndex: number
+  completedThrough?: number
   status: string
 }
 
-export default function BookingPipeline({ stageIndex, status }: BookingPipelineProps) {
+export default function BookingPipeline({
+  stageIndex,
+  completedThrough,
+  status,
+}: BookingPipelineProps) {
   if (status === 'rejected') {
     return (
       <div className="booking-pipeline booking-pipeline-rejected">
@@ -19,10 +24,12 @@ export default function BookingPipeline({ stageIndex, status }: BookingPipelineP
     )
   }
 
+  const doneThrough = completedThrough ?? stageIndex
+
   return (
     <ol className="booking-pipeline">
       {BOOKING_STAGES.map((stage, i) => {
-        const done = i <= stageIndex
+        const done = i <= doneThrough
         const current = i === stageIndex
         return (
           <li

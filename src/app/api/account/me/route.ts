@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { activeStageIndex, bookingStageFromStatus, requireMemberApiAccess } from '@/lib/auth/member'
+import { bookingPipelineState, bookingStageFromStatus, requireMemberApiAccess } from '@/lib/auth/member'
 import { hasVerifiedPayment } from '@/lib/applicant-payment'
 import { isProfileComplete } from '@/lib/payment-claim'
 import { resolveApplicantPackagePricePaise, formatPaiseAsPackageInr } from '@/lib/package-pricing'
@@ -24,6 +24,12 @@ export async function GET() {
   const paid = hasVerifiedPayment(a)
   const profileComplete = isProfileComplete(a)
   const packagePricePaise = await resolveApplicantPackagePricePaise(auth.service, a)
+  const pipeline = bookingPipelineState(
+    a.status,
+    a.kyc_status,
+    profileComplete,
+    a.balance_due
+  )
 
   return NextResponse.json({
     profile: {
@@ -43,7 +49,9 @@ export async function GET() {
       id: a.id,
       status: a.status,
       stage: bookingStageFromStatus(a.status),
-      stageIndex: activeStageIndex(a.status, a.kyc_status, profileComplete),
+      stageIndex: pipeline.currentIndex,
+      completedThrough: pipeline.completedThrough,
+      pipelineCurrentIndex: pipeline.currentIndex,
       kycStatus: a.kyc_status,
       batchSlug: a.batch_slug,
       batchName: batch?.name ?? null,

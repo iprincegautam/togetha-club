@@ -13,6 +13,7 @@ interface AccountData {
   booking: {
     status: string
     stageIndex: number
+    completedThrough?: number
     batchName: string | null
     batchSlug: string | null
     dateChoice: string | null
@@ -94,8 +95,14 @@ export default function AccountDashboard() {
         <>
           <div className="account-panel">
             <h2 className="account-panel-title">Booking status</h2>
-            <BookingPipeline stageIndex={booking.stageIndex} status={booking.status} />
-            {booking.stageIndex >= 4 && booking.status !== 'rejected' && (
+            <BookingPipeline
+              stageIndex={booking.stageIndex}
+              completedThrough={booking.completedThrough}
+              status={booking.status}
+            />
+            {booking.stageIndex >= 4 &&
+              (booking.completedThrough ?? 0) >= 4 &&
+              booking.status !== 'rejected' && (
               <p className="account-msg" style={{ marginTop: 12 }}>
                 Your slot is confirmed for this departure. We&apos;ll email you pre-trip details
                 before you leave.
