@@ -57,6 +57,11 @@ export async function POST(req: NextRequest) {
     gender,
     date_choice: dateChoice,
     profile_completed_at: new Date().toISOString(),
+    kyc_status: 'submitted',
+  }
+
+  if (auth.applicant.status === 'paid') {
+    updates.status = 'approved'
   }
 
   const { match } = await buildApplicantMatchInsight(

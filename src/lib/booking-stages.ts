@@ -30,11 +30,17 @@ export const BOOKING_STAGES: { id: BookingStage; label: string }[] = [
   { id: 'approved', label: 'Approved for trip' },
 ]
 
-export function activeStageIndex(status: string, kycStatus?: string): number {
+export function activeStageIndex(
+  status: string,
+  kycStatus?: string,
+  profileComplete?: boolean
+): number {
   if (status === 'rejected') return 4
   if (status === 'approved') return 4
+  if (status === 'paid' && profileComplete) return 4
+  if (kycStatus === 'approved') return 4
   if (status === 'paid' || status === 'deposit_paid') {
-    if (kycStatus === 'submitted' || kycStatus === 'approved') return 3
+    if (profileComplete || kycStatus === 'submitted') return 3
     return status === 'paid' ? 2 : 1
   }
   return 0

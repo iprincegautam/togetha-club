@@ -43,7 +43,7 @@ export async function GET() {
       id: a.id,
       status: a.status,
       stage: bookingStageFromStatus(a.status),
-      stageIndex: activeStageIndex(a.status, a.kyc_status),
+      stageIndex: activeStageIndex(a.status, a.kyc_status, profileComplete),
       kycStatus: a.kyc_status,
       batchSlug: a.batch_slug,
       batchName: batch?.name ?? null,

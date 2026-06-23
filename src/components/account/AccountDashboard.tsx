@@ -95,7 +95,13 @@ export default function AccountDashboard() {
           <div className="account-panel">
             <h2 className="account-panel-title">Booking status</h2>
             <BookingPipeline stageIndex={booking.stageIndex} status={booking.status} />
-            {profileComplete && (
+            {booking.stageIndex >= 4 && booking.status !== 'rejected' && (
+              <p className="account-msg" style={{ marginTop: 12 }}>
+                Your slot is confirmed for this departure. We&apos;ll email you pre-trip details
+                before you leave.
+              </p>
+            )}
+            {profileComplete && booking.stageIndex < 4 && (
               <p className="account-msg" style={{ marginTop: 12 }}>
                 Profile complete — your quiz and batch preferences are saved.
               </p>
