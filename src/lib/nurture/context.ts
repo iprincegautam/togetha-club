@@ -1,19 +1,19 @@
 import { createHmac } from 'crypto'
 import { BATCH_META } from '@/constants/batches'
-import { QUIZ_DEPARTURE_QUESTION_ID } from '@/lib/batch-age'
+import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
 import { depositAmountForTotal } from '@/lib/payment-plan'
 import { analyzeMatchProfile } from '@/lib/match-engine'
-import { normalizeQuizAnswers } from '@/lib/quiz-normalize'
-import {
-  buildDepartureFomoCopy,
-  readDepartureFromQuiz,
-} from '@/lib/nurture/departure'
+import { buildBatchCohortTeaser } from '@/lib/match-cohort-preview'
+import { resolveDepartureUrgency } from '@/lib/nurture/departure-urgency'
+import { readDepartureFromQuiz } from '@/lib/nurture/departure'
 import {
   readMetaphorAnswer,
   readMountainsAnswer,
   teaseFromText,
 } from '@/lib/nurture/tease'
 import type { NurtureEmailContext } from '@/lib/nurture/types'
+import { QUIZ_DEPARTURE_QUESTION_ID } from '@/lib/batch-age'
+import { normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import { ROUTES } from '@/constants/routes'
 import type { MatchableBatchSlug } from '@/types/match'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -73,24 +73,6 @@ async function fetchBatchMeta(
   }
 }
 
-async function fetchNearestDeparture(
-  supabase: SupabaseClient,
-  batchSlug: MatchableBatchSlug
-): Promise<string | null> {
-  const today = new Date().toISOString().slice(0, 10)
-  const { data } = await supabase
-    .from('batch_departures')
-    .select('label')
-    .eq('batch_slug', batchSlug)
-    .eq('status', 'open')
-    .gte('departure_date', today)
-    .order('departure_date', { ascending: true })
-    .limit(1)
-    .maybeSingle()
-
-  return data?.label ?? null
-}
-
 export async function buildNurtureContext(
   supabase: SupabaseClient,
   applicant: ApplicantNurtureRow,
@@ -109,29 +91,34 @@ export async function buildNurtureContext(
 
   const metaphor = readMetaphorAnswer(answers)
   const mountains = readMountainsAnswer(answers)
-  let departure = readDepartureFromQuiz(answers)
-
-  if (departure.state === 'skipped' && applicant.date_choice?.trim()) {
-    departure = { state: 'selected', label: applicant.date_choice.trim() }
-  }
+  const quizDeparture = readDepartureFromQuiz(answers)
+  const quizLabel =
+    quizDeparture.state === 'selected'
+      ? quizDeparture.label
+      : resolveApplicantDepartureLabel(applicant.date_choice, batchSlug)
 
   const batchData = await fetchBatchMeta(supabase, batchSlug)
-  const nearestLabel =
-    departure.state === 'selected' ? null : await fetchNearestDeparture(supabase, batchSlug)
-
   const vacantBoys = Math.max(0, 12 - batchData.spotsTakenM)
   const vacantGirls = Math.max(0, 12 - batchData.spotsTakenF)
   const vacantTotal = vacantBoys + vacantGirls
 
+  const urgency = await resolveDepartureUrgency(supabase, batchSlug, {
+    quizLabel,
+    dateChoice: applicant.date_choice,
+    vacantTotal,
+    batchLabel: meta.label,
+  })
+
+  const cohortTeaser = primary
+    ? buildBatchCohortTeaser(answers, primary)
+    : {
+        likeYouCount: 6,
+        people: [],
+        urgencyLine: `Spots open on ${meta.label}`,
+      }
+
   const depositPaise = depositAmountForTotal(batchData.priceRupees * 100)
   const depositLabel = `₹${Math.round(depositPaise / 100).toLocaleString('en-IN')}`
-
-  const departureCopy = buildDepartureFomoCopy({
-    state: departure.state,
-    label: departure.label,
-    nearestLabel,
-    vacantTotal,
-  })
 
   const score = primary?.matchScore ?? applicant.quiz_score ?? 72
 
@@ -142,6 +129,7 @@ export async function buildNurtureContext(
     batchSlug,
     batchLabel: meta.label,
     batchAgeRange: meta.ageRange,
+    matchScore: score,
     fitTier: score >= 82 ? 'strong' : 'solid',
     peerArchetype: peer?.label ?? 'The Bonfire Romantic',
     peerTagline: peer?.tagline ?? 'One-on-one depth and slow burns',
@@ -156,11 +144,24 @@ export async function buildNurtureContext(
       raw: mountains.raw,
     },
     departure: {
-      state: departure.state,
-      label: departure.label,
+      state: urgency.state,
+      label: urgency.pickedLabel,
+      effectiveLabel: urgency.effectiveLabel,
       sublabel: null,
-      fomoLine: departureCopy.fomoLine,
-      ctaDateLine: departureCopy.ctaDateLine,
+      tier: urgency.tier,
+      daysUntil: urgency.daysUntil,
+      isPassed: urgency.isPassed,
+      pivotLabel: urgency.pivotLabel,
+      fomoLine: urgency.fomoLine,
+      ctaDateLine: urgency.ctaDateLine,
+      urgencyPrefix: urgency.urgencyPrefix,
+      tone: urgency.tone,
+    },
+    cohort: {
+      likeYouCount: cohortTeaser.likeYouCount,
+      people: cohortTeaser.people.slice(0, 4),
+      urgencyLine: cohortTeaser.urgencyLine,
+      moreHiddenCount: Math.max(0, cohortTeaser.likeYouCount - Math.min(4, cohortTeaser.people.length)),
     },
     vacantBoys,
     vacantGirls,

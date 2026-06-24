@@ -3,14 +3,31 @@ import {
   buildNurtureContext,
   type ApplicantNurtureRow,
 } from '@/lib/nurture/context'
+import {
+  NURTURE_SEQUENCE_KEY,
+  NURTURE_SEQUENCE_KEY_V1,
+  NURTURE_SEQUENCE_KEY_V2,
+  NURTURE_SEQUENCE_KEYS,
+} from '@/lib/nurture/constants'
+import { resolveDepartureUrgency, shouldStopAfterDepartureWindow } from '@/lib/nurture/departure-urgency'
+import { readDepartureFromQuiz } from '@/lib/nurture/departure'
+import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
 import { logSupabaseError } from '@/lib/nurture/db-log'
-import { nextSendAt } from '@/lib/nurture/schedule'
+import {
+  maxStepForSequenceKey,
+  maybePullForwardSendAt,
+  nextSendAt,
+} from '@/lib/nurture/schedule'
 import {
   applicantShouldStopNurture,
   isEmailUnsubscribed,
   stopNurtureSequence,
 } from '@/lib/nurture/should-stop'
 import { renderNurtureEmail } from '@/lib/nurture/templates'
+import type { DepartureUrgencyTier, NurtureEmailContext } from '@/lib/nurture/types'
+import { normalizeQuizAnswers } from '@/lib/quiz-normalize'
+import { BATCH_META } from '@/constants/batches'
+import type { MatchableBatchSlug } from '@/types/match'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type NurtureEnrollResult = {
@@ -23,6 +40,10 @@ export type NurtureEnrollResult = {
 function isMissingNurtureTable(error: { message?: string } | null): boolean {
   const msg = error?.message ?? ''
   return msg.includes('email_sequences') || msg.includes('email_sends') || msg.includes('does not exist')
+}
+
+function isMatchableBatch(slug: string | null): slug is MatchableBatchSlug {
+  return slug === 'batch-a' || slug === 'batch-b'
 }
 
 async function logEmailSend(
@@ -41,13 +62,46 @@ async function logEmailSend(
   logSupabaseError('email_sends insert', error)
 }
 
+async function resolveTierForApplicant(
+  supabase: SupabaseClient,
+  applicant: ApplicantNurtureRow
+): Promise<DepartureUrgencyTier> {
+  const batchSlug = isMatchableBatch(applicant.batch_slug) ? applicant.batch_slug : 'batch-a'
+  const answers = normalizeQuizAnswers(applicant.quiz_answers)
+  const quizDeparture = readDepartureFromQuiz(answers)
+  const quizLabel =
+    quizDeparture.state === 'selected'
+      ? quizDeparture.label
+      : resolveApplicantDepartureLabel(applicant.date_choice, batchSlug)
+
+  const { data } = await supabase
+    .from('batches')
+    .select('spots_taken_m, spots_taken_f')
+    .eq('slug', batchSlug)
+    .maybeSingle()
+
+  const vacantTotal =
+    Math.max(0, 12 - (data?.spots_taken_m ?? 0)) + Math.max(0, 12 - (data?.spots_taken_f ?? 0))
+
+  const urgency = await resolveDepartureUrgency(supabase, batchSlug, {
+    quizLabel,
+    dateChoice: applicant.date_choice,
+    vacantTotal,
+    batchLabel: BATCH_META[batchSlug].label,
+  })
+
+  return urgency.tier
+}
+
 export async function sendNurtureEmail(
   supabase: SupabaseClient,
   applicant: ApplicantNurtureRow,
   step: number,
-  sequenceId?: string
-): Promise<{ ok: boolean; skipped?: string; resendId?: string }> {
-  if (step < 1 || step > 5) {
+  sequenceId?: string,
+  sequenceKey: string = NURTURE_SEQUENCE_KEY_V2
+): Promise<{ ok: boolean; skipped?: string; resendId?: string; tier?: DepartureUrgencyTier; ctx?: NurtureEmailContext }> {
+  const maxStep = maxStepForSequenceKey(sequenceKey)
+  if (step < 1 || step > maxStep) {
     return { ok: false, skipped: 'invalid_step' }
   }
 
@@ -62,7 +116,7 @@ export async function sendNurtureEmail(
     return { ok: false, skipped: stopCheck.reason ?? 'paid' }
   }
 
-  let ctx
+  let ctx: NurtureEmailContext | null
   try {
     ctx = await buildNurtureContext(supabase, applicant, step)
   } catch (err) {
@@ -81,6 +135,19 @@ export async function sendNurtureEmail(
 
   if (!ctx) return { ok: false, skipped: 'no_context' }
 
+  const batchSlug = isMatchableBatch(applicant.batch_slug) ? applicant.batch_slug : 'batch-a'
+  const urgency = await resolveDepartureUrgency(supabase, batchSlug, {
+    quizLabel: ctx.departure.label,
+    dateChoice: applicant.date_choice,
+    vacantTotal: ctx.vacantTotal,
+    batchLabel: ctx.batchLabel,
+  })
+
+  if (shouldStopAfterDepartureWindow(urgency) && sequenceId) {
+    await stopNurtureSequence(supabase, applicant.id, 'manual')
+    return { ok: false, skipped: 'departure_window_closed', tier: urgency.tier, ctx }
+  }
+
   const content = renderNurtureEmail(step, ctx)
 
   if (!isResendConfigured() || !resend) {
@@ -96,7 +163,7 @@ export async function sendNurtureEmail(
       failed_at: new Date().toISOString(),
       error: 'resend_not_configured',
     })
-    return { ok: false, skipped: 'resend_not_configured' }
+    return { ok: false, skipped: 'resend_not_configured', tier: ctx.departure.tier, ctx }
   }
 
   try {
@@ -119,7 +186,7 @@ export async function sendNurtureEmail(
         failed_at: new Date().toISOString(),
         error: message,
       })
-      return { ok: false, skipped: message }
+      return { ok: false, skipped: message, tier: ctx.departure.tier, ctx }
     }
 
     await logEmailSend(supabase, {
@@ -134,9 +201,11 @@ export async function sendNurtureEmail(
       step,
       email: applicant.email,
       resendId: result.data?.id,
+      tier: ctx.departure.tier,
+      sequenceKey,
     })
 
-    return { ok: true, resendId: result.data?.id }
+    return { ok: true, resendId: result.data?.id, tier: ctx.departure.tier, ctx }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'send_failed'
     console.error('[nurture] send failed', { step, email: applicant.email, message })
@@ -148,7 +217,7 @@ export async function sendNurtureEmail(
       failed_at: new Date().toISOString(),
       error: message,
     })
-    return { ok: false, skipped: message }
+    return { ok: false, skipped: message, tier: ctx.departure.tier, ctx }
   }
 }
 
@@ -177,18 +246,20 @@ export async function enrollQuizNurture(
 
   const enrolledAt = new Date()
 
-  const { error: deleteError } = await supabase
-    .from('email_sequences')
-    .delete()
-    .eq('applicant_id', applicantId)
-    .eq('sequence_key', 'quiz_nurture_v1')
-  logSupabaseError('email_sequences delete', deleteError)
+  for (const key of NURTURE_SEQUENCE_KEYS) {
+    const { error: deleteError } = await supabase
+      .from('email_sequences')
+      .delete()
+      .eq('applicant_id', applicantId)
+      .eq('sequence_key', key)
+    logSupabaseError('email_sequences delete', deleteError)
+  }
 
   const { data: sequence, error: seqError } = await supabase
     .from('email_sequences')
     .insert({
       applicant_id: applicantId,
-      sequence_key: 'quiz_nurture_v1',
+      sequence_key: NURTURE_SEQUENCE_KEY,
       status: 'active',
       current_step: 0,
       enrolled_at: enrolledAt.toISOString(),
@@ -210,7 +281,8 @@ export async function enrollQuizNurture(
     supabase,
     applicant as ApplicantNurtureRow,
     1,
-    sequence.id
+    sequence.id,
+    NURTURE_SEQUENCE_KEY
   )
 
   if (!sendResult.ok) {
@@ -229,11 +301,13 @@ export async function enrollQuizNurture(
     }
   }
 
+  const tier = sendResult.tier ?? (await resolveTierForApplicant(supabase, applicant as ApplicantNurtureRow))
+
   const { error: updateError } = await supabase
     .from('email_sequences')
     .update({
       current_step: 1,
-      next_send_at: nextSendAt(enrolledAt, 1)?.toISOString() ?? null,
+      next_send_at: nextSendAt(enrolledAt, 1, NURTURE_SEQUENCE_KEY, tier)?.toISOString() ?? null,
     })
     .eq('id', sequence.id)
   logSupabaseError('email_sequences update', updateError)
@@ -245,18 +319,65 @@ export async function enrollQuizNurture(
   }
 }
 
-export async function processDueNurtureEmails(
-  supabase: SupabaseClient
+async function pullForwardUrgentSequences(supabase: SupabaseClient): Promise<number> {
+  const now = new Date()
+  const { data: active } = await supabase
+    .from('email_sequences')
+    .select('id, applicant_id, current_step, enrolled_at, next_send_at, sequence_key')
+    .eq('status', 'active')
+    .eq('sequence_key', NURTURE_SEQUENCE_KEY_V2)
+    .not('next_send_at', 'is', null)
+    .gt('next_send_at', now.toISOString())
+
+  let updated = 0
+
+  for (const row of active ?? []) {
+    const { data: applicant } = await supabase
+      .from('applicants')
+      .select('id, email, name, batch_slug, quiz_answers, quiz_score, date_choice, razorpay_payment_id, status')
+      .eq('id', row.applicant_id)
+      .single()
+
+    if (!applicant) continue
+
+    const tier = await resolveTierForApplicant(supabase, applicant as ApplicantNurtureRow)
+    if (tier !== 'critical' && tier !== 'urgent') continue
+
+    const pulled = maybePullForwardSendAt(
+      row.next_send_at,
+      new Date(row.enrolled_at),
+      row.current_step,
+      row.sequence_key,
+      tier,
+      now
+    )
+
+    if (pulled && pulled.toISOString() !== row.next_send_at) {
+      await supabase
+        .from('email_sequences')
+        .update({ next_send_at: pulled.toISOString() })
+        .eq('id', row.id)
+      updated += 1
+    }
+  }
+
+  return updated
+}
+
+async function processSequenceBatch(
+  supabase: SupabaseClient,
+  sequenceKey: string
 ): Promise<{ processed: number; sent: number; errors: number }> {
   const now = new Date().toISOString()
+  const maxStep = maxStepForSequenceKey(sequenceKey)
 
   const { data: due, error } = await supabase
     .from('email_sequences')
-    .select('id, applicant_id, current_step, enrolled_at')
+    .select('id, applicant_id, current_step, enrolled_at, next_send_at, sequence_key')
     .eq('status', 'active')
-    .eq('sequence_key', 'quiz_nurture_v1')
+    .eq('sequence_key', sequenceKey)
     .lte('next_send_at', now)
-    .lt('current_step', 5)
+    .lt('current_step', maxStep)
 
   if (error) {
     if (isMissingNurtureTable(error)) {
@@ -271,7 +392,7 @@ export async function processDueNurtureEmails(
 
   for (const row of due ?? []) {
     const nextStep = row.current_step + 1
-    if (nextStep > 5) continue
+    if (nextStep > maxStep) continue
 
     const { data: applicant } = await supabase
       .from('applicants')
@@ -285,17 +406,20 @@ export async function processDueNurtureEmails(
       supabase,
       applicant as ApplicantNurtureRow,
       nextStep,
-      row.id
+      row.id,
+      sequenceKey
     )
 
     if (result.ok) {
       sent += 1
       const enrolledAt = new Date(row.enrolled_at)
-      if (nextStep >= 5) {
+      const tier = result.tier ?? 'standard'
+
+      if (nextStep >= maxStep) {
         await supabase
           .from('email_sequences')
           .update({
-            current_step: 5,
+            current_step: maxStep,
             status: 'completed',
             completed_at: new Date().toISOString(),
             next_send_at: null,
@@ -306,14 +430,44 @@ export async function processDueNurtureEmails(
           .from('email_sequences')
           .update({
             current_step: nextStep,
-            next_send_at: nextSendAt(enrolledAt, nextStep)?.toISOString() ?? null,
+            next_send_at:
+              nextSendAt(enrolledAt, nextStep, sequenceKey, tier)?.toISOString() ?? null,
           })
           .eq('id', row.id)
       }
+    } else if (result.skipped === 'departure_window_closed') {
+      await supabase
+        .from('email_sequences')
+        .update({
+          status: 'stopped',
+          stop_reason: 'manual',
+          completed_at: new Date().toISOString(),
+          next_send_at: null,
+        })
+        .eq('id', row.id)
     } else {
       errors += 1
     }
   }
 
   return { processed: due?.length ?? 0, sent, errors }
+}
+
+export async function processDueNurtureEmails(
+  supabase: SupabaseClient
+): Promise<{ processed: number; sent: number; errors: number; pulledForward: number }> {
+  const pulledForward = await pullForwardUrgentSequences(supabase)
+
+  let processed = 0
+  let sent = 0
+  let errors = 0
+
+  for (const key of NURTURE_SEQUENCE_KEYS) {
+    const batch = await processSequenceBatch(supabase, key)
+    processed += batch.processed
+    sent += batch.sent
+    errors += batch.errors
+  }
+
+  return { processed, sent, errors, pulledForward }
 }

@@ -7,8 +7,9 @@ import {
   buildUnsubscribeUrl,
   type ApplicantNurtureRow,
 } from '@/lib/nurture/context'
+import { buildUrgencyCopy } from '@/lib/nurture/departure-urgency'
 import { renderNurtureEmail } from '@/lib/nurture/templates'
-import type { NurtureEmailContext } from '@/lib/nurture/types'
+import type { DepartureUrgencyTier, NurtureEmailContext } from '@/lib/nurture/types'
 import { createServiceRoleClient } from '@/lib/supabase/server'
 import type { MatchableBatchSlug } from '@/types/match'
 
@@ -23,9 +24,68 @@ function parseBatchSlug(value: string | null): MatchableBatchSlug {
   return value === 'batch-b' ? 'batch-b' : 'batch-a'
 }
 
-function mockNurtureContext(batchSlug: MatchableBatchSlug, step: number): NurtureEmailContext {
+function parseTier(value: string | null): DepartureUrgencyTier {
+  const allowed: DepartureUrgencyTier[] = [
+    'no_date',
+    'standard',
+    'warm',
+    'urgent',
+    'critical',
+    'passed',
+  ]
+  return allowed.includes(value as DepartureUrgencyTier) ? (value as DepartureUrgencyTier) : 'warm'
+}
+
+function mockCohortPeople() {
+  return [
+    {
+      id: 'preview-1',
+      displayName: 'A*** S.',
+      role: 'Product Designer',
+      orgLine: 'Lead · Swiggy',
+      vibeLabel: 'Thoughtful planner energy',
+      avatarClass: 'av-teal' as const,
+    },
+    {
+      id: 'preview-2',
+      displayName: 'R*** K.',
+      role: 'Engineering student · B.Tech · CS',
+      orgLine: 'IIT Delhi · 3rd year',
+      vibeLabel: 'Bonfire romantic energy',
+      avatarClass: 'av-rose' as const,
+    },
+    {
+      id: 'preview-3',
+      displayName: 'K*** M.',
+      role: 'Marketing Manager',
+      orgLine: 'Senior · CRED',
+      vibeLabel: 'Golden retriever energy',
+      avatarClass: 'av-gold' as const,
+    },
+  ]
+}
+
+function mockNurtureContext(
+  batchSlug: MatchableBatchSlug,
+  step: number,
+  tier: DepartureUrgencyTier
+): NurtureEmailContext {
   const meta = BATCH_META[batchSlug]
   const base = siteUrl()
+  const pickedLabel = 'Friday, 26 June 2026'
+  const daysUntil =
+    tier === 'critical' ? 2 : tier === 'urgent' ? 5 : tier === 'passed' ? -3 : 14
+  const urgency = buildUrgencyCopy({
+    tier,
+    pickedLabel,
+    effectiveLabel: tier === 'passed' ? 'Friday, 3 July 2026' : pickedLabel,
+    daysUntil: tier === 'no_date' ? null : daysUntil,
+    pivotLabel: 'Friday, 3 July 2026',
+    pivotDaysUntil: 9,
+    nearestLabel: 'Friday, 3 July 2026',
+    vacantTotal: 8,
+    batchLabel: meta.label,
+  })
 
   return {
     firstName: 'Prince',
@@ -34,6 +94,7 @@ function mockNurtureContext(batchSlug: MatchableBatchSlug, step: number): Nurtur
     batchSlug,
     batchLabel: meta.label,
     batchAgeRange: meta.ageRange,
+    matchScore: 87,
     fitTier: 'strong',
     peerArchetype: 'The Bonfire Romantic',
     peerTagline: 'One-on-one depth and slow burns',
@@ -48,16 +109,29 @@ function mockNurtureContext(batchSlug: MatchableBatchSlug, step: number): Nurtur
       raw: 'Mountains make honesty feel inevitable.',
     },
     departure: {
-      state: 'selected',
-      label: 'Friday, 4 July 2026',
+      state: tier === 'passed' ? 'passed' : tier === 'no_date' ? 'skipped' : 'selected',
+      label: tier === 'no_date' ? null : pickedLabel,
+      effectiveLabel: tier === 'passed' ? 'Friday, 3 July 2026' : pickedLabel,
       sublabel: null,
-      fomoLine: 'Your saved date — Friday, 4 July 2026 — still has open spots.',
-      ctaDateLine: 'Reserve for Friday, 4 July',
+      tier,
+      daysUntil: tier === 'no_date' ? null : daysUntil,
+      isPassed: tier === 'passed',
+      pivotLabel: tier === 'passed' ? 'Friday, 3 July 2026' : null,
+      fomoLine: urgency.fomoLine,
+      ctaDateLine: urgency.ctaDateLine,
+      urgencyPrefix: urgency.urgencyPrefix,
+      tone: urgency.tone,
     },
-    vacantBoys: 7,
-    vacantGirls: 5,
-    vacantTotal: 12,
-    depositLabel: '₹2,000',
+    cohort: {
+      likeYouCount: 8,
+      people: mockCohortPeople(),
+      urgencyLine: `Only 5 spots left for upcoming ${meta.label} departures`,
+      moreHiddenCount: 5,
+    },
+    vacantBoys: 4,
+    vacantGirls: 4,
+    vacantTotal: 8,
+    depositLabel: '₹3,000',
     unlockUrl: buildUnlockUrl('00000000-0000-4000-8000-000000000000', batchSlug, step),
     batchUrl: `${base}${ROUTES.batchDetail(batchSlug)}?src=preview`,
     unsubscribeUrl: buildUnsubscribeUrl('preview@togetha.club'),
@@ -72,7 +146,8 @@ export async function GET(req: NextRequest) {
   }
 
   const batchSlug = parseBatchSlug(req.nextUrl.searchParams.get('batch'))
-  const step = Math.min(5, Math.max(1, Number(req.nextUrl.searchParams.get('step') ?? '1') || 1))
+  const step = Math.min(6, Math.max(1, Number(req.nextUrl.searchParams.get('step') ?? '1') || 1))
+  const tier = parseTier(req.nextUrl.searchParams.get('tier'))
   const format = req.nextUrl.searchParams.get('format') === 'text' ? 'text' : 'html'
   const email = req.nextUrl.searchParams.get('email')?.trim().toLowerCase() ?? ''
 
@@ -98,7 +173,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: message }, { status: 500 })
     }
   } else {
-    ctx = mockNurtureContext(batchSlug, step)
+    ctx = mockNurtureContext(batchSlug, step, tier)
   }
 
   if (!ctx) {
