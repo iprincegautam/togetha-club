@@ -8,6 +8,7 @@ import {
 } from 'next/font/google'
 import SiteChrome from '@/components/layout/SiteChrome'
 import SiteMotion from '@/components/layout/SiteMotion'
+import MetaPixel from '@/components/seo/MetaPixel'
 import SiteJsonLd from '@/components/seo/SiteJsonLd'
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from '@/lib/metadata'
 import './globals.css'
@@ -69,6 +70,11 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
+  verification: {
+    other: {
+      'facebook-domain-verification': 'e1b3r6of6yw453zapprzcv5d1vn8y8',
+    },
+  },
 }
 
 export default function RootLayout({
@@ -81,6 +87,9 @@ export default function RootLayout({
       lang="en"
       className={`${playfairDisplay.variable} ${caveat.variable} ${libreBaskerville.variable} ${dmSans.variable}`}
     >
+      <head>
+        <MetaPixel />
+      </head>
       <body>
         <SiteJsonLd />
         <SiteChrome>
