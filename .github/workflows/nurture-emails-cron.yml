@@ -1,0 +1,23 @@
+name: Nurture email cron
+
+on:
+  schedule:
+    # Hourly — Vercel Hobby only allows daily; this triggers the same endpoint.
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  nurture-emails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger nurture cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://togetha.club' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set in GitHub repository secrets."
+            exit 1
+          fi
+          curl -fsS -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${SITE_URL}/api/cron/nurture-emails"

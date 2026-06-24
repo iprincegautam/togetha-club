@@ -387,12 +387,13 @@ async function processSequenceBatch(
     throw error
   }
 
+  let processed = 0
   let sent = 0
   let errors = 0
 
   for (const row of due ?? []) {
-    const nextStep = row.current_step + 1
-    if (nextStep > maxStep) continue
+    let currentStep = row.current_step
+    const enrolledAt = new Date(row.enrolled_at)
 
     const { data: applicant } = await supabase
       .from('applicants')
@@ -402,55 +403,87 @@ async function processSequenceBatch(
 
     if (!applicant) continue
 
-    const result = await sendNurtureEmail(
-      supabase,
-      applicant as ApplicantNurtureRow,
-      nextStep,
-      row.id,
-      sequenceKey
-    )
+    processed += 1
+    const nowDate = new Date()
 
-    if (result.ok) {
-      sent += 1
-      const enrolledAt = new Date(row.enrolled_at)
-      const tier = result.tier ?? 'standard'
+    while (currentStep < maxStep) {
+      const nextStep = currentStep + 1
+      const tier = await resolveTierForApplicant(supabase, applicant as ApplicantNurtureRow)
+      const scheduled =
+        currentStep === row.current_step && row.next_send_at
+          ? new Date(row.next_send_at)
+          : nextSendAt(enrolledAt, currentStep, sequenceKey, tier)
 
-      if (nextStep >= maxStep) {
+      if (scheduled && scheduled > nowDate) {
         await supabase
           .from('email_sequences')
           .update({
-            current_step: maxStep,
-            status: 'completed',
+            current_step: currentStep,
+            next_send_at: scheduled.toISOString(),
+          })
+          .eq('id', row.id)
+        break
+      }
+
+      const result = await sendNurtureEmail(
+        supabase,
+        applicant as ApplicantNurtureRow,
+        nextStep,
+        row.id,
+        sequenceKey
+      )
+
+      if (result.ok) {
+        sent += 1
+        currentStep = nextStep
+        const resultTier = result.tier ?? tier
+
+        if (currentStep >= maxStep) {
+          await supabase
+            .from('email_sequences')
+            .update({
+              current_step: maxStep,
+              status: 'completed',
+              completed_at: new Date().toISOString(),
+              next_send_at: null,
+            })
+            .eq('id', row.id)
+          break
+        }
+
+        const nextDue = nextSendAt(enrolledAt, currentStep, sequenceKey, resultTier)
+        if (!nextDue || nextDue > nowDate) {
+          await supabase
+            .from('email_sequences')
+            .update({
+              current_step: currentStep,
+              next_send_at: nextDue?.toISOString() ?? null,
+            })
+            .eq('id', row.id)
+          break
+        }
+
+        continue
+      }
+
+      if (result.skipped === 'departure_window_closed') {
+        await supabase
+          .from('email_sequences')
+          .update({
+            status: 'stopped',
+            stop_reason: 'manual',
             completed_at: new Date().toISOString(),
             next_send_at: null,
           })
           .eq('id', row.id)
       } else {
-        await supabase
-          .from('email_sequences')
-          .update({
-            current_step: nextStep,
-            next_send_at:
-              nextSendAt(enrolledAt, nextStep, sequenceKey, tier)?.toISOString() ?? null,
-          })
-          .eq('id', row.id)
+        errors += 1
       }
-    } else if (result.skipped === 'departure_window_closed') {
-      await supabase
-        .from('email_sequences')
-        .update({
-          status: 'stopped',
-          stop_reason: 'manual',
-          completed_at: new Date().toISOString(),
-          next_send_at: null,
-        })
-        .eq('id', row.id)
-    } else {
-      errors += 1
+      break
     }
   }
 
-  return { processed: due?.length ?? 0, sent, errors }
+  return { processed, sent, errors }
 }
 
 export async function processDueNurtureEmails(
