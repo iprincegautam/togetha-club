@@ -58,6 +58,24 @@ function formatDiscount(type: string, value: number) {
   return `₹${value.toLocaleString('en-IN')} off`
 }
 
+interface PromoEditForm {
+  discountValue: string
+  commissionAmount: string
+  maxUses: string
+  grantsPriority: boolean
+  active: boolean
+}
+
+function promoToEditForm(p: PromoRow): PromoEditForm {
+  return {
+    discountValue: String(p.discountValue),
+    commissionAmount: String(p.commissionAmount),
+    maxUses: p.maxUses !== null ? String(p.maxUses) : '',
+    grantsPriority: p.grantsPriority,
+    active: p.active,
+  }
+}
+
 export default function AdminAffiliatesDashboard() {
   const [influencers, setInfluencers] = useState<InfluencerStat[]>([])
   const [promoCodes, setPromoCodes] = useState<PromoRow[]>([])
@@ -66,6 +84,8 @@ export default function AdminAffiliatesDashboard() {
   const [error, setError] = useState('')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [actionMsg, setActionMsg] = useState<string | null>(null)
+  const [editingPromoId, setEditingPromoId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<PromoEditForm | null>(null)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -98,6 +118,63 @@ export default function AdminAffiliatesDashboard() {
       load()
     } catch {
       setActionMsg('Could not update redemption status')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const startEditPromo = (p: PromoRow) => {
+    setEditingPromoId(p.id)
+    setEditForm(promoToEditForm(p))
+    setActionMsg(null)
+  }
+
+  const cancelEditPromo = () => {
+    setEditingPromoId(null)
+    setEditForm(null)
+  }
+
+  const savePromo = async (id: string) => {
+    if (!editForm) return
+    setUpdatingId(id)
+    setActionMsg(null)
+    try {
+      const res = await fetch(`/api/admin/promo-codes/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          discountValue: Number(editForm.discountValue),
+          commissionAmount: Number(editForm.commissionAmount),
+          maxUses: editForm.maxUses ? Number(editForm.maxUses) : null,
+          grantsPriority: editForm.grantsPriority,
+          active: editForm.active,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Update failed')
+      setActionMsg(`Updated promo code`)
+      cancelEditPromo()
+      load()
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Could not update promo code')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const deletePromo = async (p: PromoRow) => {
+    if (!confirm(`Delete promo code ${p.code}? This cannot be undone.`)) return
+    setUpdatingId(p.id)
+    setActionMsg(null)
+    try {
+      const res = await fetch(`/api/admin/promo-codes/${p.id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Delete failed')
+      setActionMsg(`Deleted ${p.code}`)
+      if (editingPromoId === p.id) cancelEditPromo()
+      load()
+    } catch (err) {
+      setActionMsg(err instanceof Error ? err.message : 'Could not delete promo code')
     } finally {
       setUpdatingId(null)
     }
@@ -237,32 +314,140 @@ export default function AdminAffiliatesDashboard() {
                 <th>Uses</th>
                 <th>Priority</th>
                 <th>Active</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {promoCodes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="admin-empty">
+                  <td colSpan={8} className="admin-empty">
                     No promo codes yet.
                   </td>
                 </tr>
               ) : (
-                promoCodes.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <code className="admin-code">{p.code}</code>
-                    </td>
-                    <td>{p.influencerName}</td>
-                    <td>{formatDiscount(p.discountType, p.discountValue)}</td>
-                    <td>{formatPrice(p.commissionAmount / 100)}</td>
-                    <td>
-                      {p.usesCount}
-                      {p.maxUses !== null ? ` / ${p.maxUses}` : ''}
-                    </td>
-                    <td>{p.grantsPriority ? 'Yes' : '—'}</td>
-                    <td>{p.active ? 'Yes' : 'No'}</td>
-                  </tr>
-                ))
+                promoCodes.map((p) =>
+                  editingPromoId === p.id && editForm ? (
+                    <tr key={p.id}>
+                      <td colSpan={8}>
+                        <form
+                          className="admin-form-grid"
+                          style={{ padding: '12px 0' }}
+                          onSubmit={(e) => {
+                            e.preventDefault()
+                            savePromo(p.id)
+                          }}
+                        >
+                          <p className="admin-muted" style={{ gridColumn: '1 / -1', margin: 0 }}>
+                            Editing <code className="admin-code">{p.code}</code> · {p.influencerName}
+                          </p>
+                          <label className="admin-field">
+                            <span>Discount (INR)</span>
+                            <input
+                              className="apply-input"
+                              type="number"
+                              required
+                              value={editForm.discountValue}
+                              onChange={(e) =>
+                                setEditForm({ ...editForm, discountValue: e.target.value })
+                              }
+                            />
+                          </label>
+                          <label className="admin-field">
+                            <span>Commission (paise)</span>
+                            <input
+                              className="apply-input"
+                              type="number"
+                              required
+                              value={editForm.commissionAmount}
+                              onChange={(e) =>
+                                setEditForm({ ...editForm, commissionAmount: e.target.value })
+                              }
+                            />
+                          </label>
+                          <label className="admin-field">
+                            <span>Max uses (optional)</span>
+                            <input
+                              className="apply-input"
+                              type="number"
+                              min={1}
+                              value={editForm.maxUses}
+                              onChange={(e) => setEditForm({ ...editForm, maxUses: e.target.value })}
+                              placeholder="Unlimited"
+                            />
+                          </label>
+                          <label className="admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <input
+                              type="checkbox"
+                              checked={editForm.grantsPriority}
+                              onChange={(e) =>
+                                setEditForm({ ...editForm, grantsPriority: e.target.checked })
+                              }
+                            />
+                            <span>Grants priority</span>
+                          </label>
+                          <label className="admin-field" style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <input
+                              type="checkbox"
+                              checked={editForm.active}
+                              onChange={(e) => setEditForm({ ...editForm, active: e.target.checked })}
+                            />
+                            <span>Active</span>
+                          </label>
+                          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 12 }}>
+                            <button
+                              type="submit"
+                              className="admin-btn"
+                              disabled={updatingId === p.id}
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-link-btn"
+                              disabled={updatingId === p.id}
+                              onClick={cancelEditPromo}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={p.id}>
+                      <td>
+                        <code className="admin-code">{p.code}</code>
+                      </td>
+                      <td>{p.influencerName}</td>
+                      <td>{formatDiscount(p.discountType, p.discountValue)}</td>
+                      <td>{formatPrice(p.commissionAmount / 100)}</td>
+                      <td>
+                        {p.usesCount}
+                        {p.maxUses !== null ? ` / ${p.maxUses}` : ''}
+                      </td>
+                      <td>{p.grantsPriority ? 'Yes' : '—'}</td>
+                      <td>{p.active ? 'Yes' : 'No'}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="admin-link-btn"
+                          disabled={updatingId === p.id}
+                          onClick={() => startEditPromo(p)}
+                        >
+                          Edit
+                        </button>{' '}
+                        <button
+                          type="button"
+                          className="admin-link-btn admin-danger"
+                          disabled={updatingId === p.id}
+                          onClick={() => deletePromo(p)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                )
               )}
             </tbody>
           </table>
