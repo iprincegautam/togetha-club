@@ -50,23 +50,16 @@ If accounts return, MCP is connected.
 
 ## Custom conversions (Events Manager)
 
-Pixel events are fired from code (`src/lib/meta-pixel.ts`). **Custom conversions** in Ads Manager filter those standard events.
+Pixel events are fired from code (`src/lib/meta-pixel.ts`). Each step sets `?stage=` on the URL so Meta can match **URL rules** in the Events Manager UI.
 
-When creating **TC · Match Result Shown** (and similar):
+**Do not use “All URL traffic” + `content_name`** — that only matches PageView-style hits and misses Lead / InitiateCheckout / Purchase.
 
-| Field | Value |
-|-------|--------|
-| Standard event | **Lead** (not “All URL traffic”) |
-| Rule | Event parameter **`content_name`** **is** **`Match Result Shown`** |
-
-Do **not** use URL `contains /match` — quiz, lead gate, and results all share the same URL.
-
-| Custom conversion | Standard event | Parameter rule |
-|-------------------|------------------|----------------|
-| TC · Quiz Started | ViewContent | `content_name` is `Quiz Started` |
-| TC · Match Result Shown | Lead | `content_name` is `Match Result Shown` |
-| TC · Payment Initiated | InitiateCheckout | `content_name` is `Batch Slot Deposit` |
-| TC · Slot Confirmed | Purchase | `content_name` is `Batch Slot Deposit` |
+| Custom conversion | Standard event | URL rule |
+|-------------------|----------------|----------|
+| TC · Quiz Started | ViewContent | URL contains `stage=quiz-started` |
+| TC · Match Result Shown | **Lead** | URL contains `stage=match-result` |
+| TC · Payment Initiated | **InitiateCheckout** | URL contains `stage=checkout` |
+| TC · Slot Confirmed | **Purchase** | URL contains `confirmation` |
 
 Fire each event on the site once before expecting it in **Test events**.
 

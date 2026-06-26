@@ -11,6 +11,20 @@ type PendingMetaPurchase = {
   valueInRupees: number
 }
 
+export type FunnelStage = 'quiz-started' | 'match-result' | 'checkout' | 'confirmed'
+
+/** Update URL with ?stage= so Meta custom conversions can match URL rules. */
+export function setFunnelStageUrl(stage: FunnelStage): void {
+  if (typeof window === 'undefined') return
+  try {
+    const url = new URL(window.location.href)
+    url.searchParams.set('stage', stage)
+    window.history.replaceState(window.history.state, '', url.toString())
+  } catch {
+    // Ignore invalid URLs in embedded contexts.
+  }
+}
+
 /** Fire a Meta Pixel standard event (no-op if pixel is not loaded). */
 export function trackMetaEvent(
   event: string,
@@ -22,6 +36,7 @@ export function trackMetaEvent(
 
 /** TC · Quiz Started — first active intent on question 1. */
 export function trackQuizStarted(): void {
+  setFunnelStageUrl('quiz-started')
   trackMetaEvent('ViewContent', {
     content_name: 'Quiz Started',
     content_category: 'matchmaking_quiz',
@@ -30,6 +45,7 @@ export function trackQuizStarted(): void {
 
 /** TC · Match Result Shown — result screen mounts after preview API responds. */
 export function trackMatchResultShown(): void {
+  setFunnelStageUrl('match-result')
   trackMetaEvent('Lead', {
     content_name: 'Match Result Shown',
     content_category: 'batch_match',
@@ -40,6 +56,7 @@ export function trackMatchResultShown(): void {
 
 /** TC · Payment Initiated — Razorpay checkout modal opens (batch slot deposit). */
 export function trackPaymentInitiated(valueInRupees: number): void {
+  setFunnelStageUrl('checkout')
   trackMetaEvent('InitiateCheckout', {
     value: valueInRupees,
     currency: 'INR',
@@ -86,6 +103,8 @@ export function trackPurchaseWithConfirmationBackup(
 /** URL backup on /confirmation — Meta dedupes via transaction_id. */
 export function trackPendingPurchaseOnConfirmationPage(): void {
   if (typeof sessionStorage === 'undefined') return
+
+  setFunnelStageUrl('confirmed')
 
   const raw = sessionStorage.getItem(PURCHASE_SESSION_KEY)
   if (!raw) return
