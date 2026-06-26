@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import QuizSection from '@/components/home/QuizSection'
 import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
@@ -11,6 +11,7 @@ import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
 import { clearQuizLead, hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
 import { ensureNurtureEmail } from '@/lib/quiz-lead'
+import { trackMatchResultShown } from '@/lib/meta-pixel'
 import { calculateQuizResult } from '@/lib/utils'
 import type { MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
@@ -28,6 +29,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const [quizKey, setQuizKey] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers | null>(null)
   const [analysis, setAnalysis] = useState<MatchAnalysis | null>(null)
+  const matchResultTrackedRef = useRef(false)
 
   const quizResult = useMemo(
     () => (answers ? calculateQuizResult(answers) : null),
@@ -42,6 +44,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
       clearQuizLead()
       setAnswers(null)
       setAnalysis(null)
+      matchResultTrackedRef.current = false
       setMode('quiz')
       setQuizKey((key) => key + 1)
       setBooted(true)
@@ -95,9 +98,16 @@ export default function MatchLabClient({ initialBatch }: Props) {
     clearQuizLead()
     setAnswers(null)
     setAnalysis(null)
+    matchResultTrackedRef.current = false
     setMode('quiz')
     setQuizKey((key) => key + 1)
   }, [])
+
+  useEffect(() => {
+    if (mode !== 'results' || !answers || !analysis || matchResultTrackedRef.current) return
+    matchResultTrackedRef.current = true
+    trackMatchResultShown()
+  }, [mode, answers, analysis])
 
   const handleQuizComplete = useCallback((saved: QuizAnswers) => {
     setAnswers(saved)

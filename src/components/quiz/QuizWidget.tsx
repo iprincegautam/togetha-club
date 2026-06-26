@@ -9,6 +9,7 @@ import {
   QUIZ_DEPARTURE_QUESTION_ID,
 } from '@/lib/batch-age'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
+import { trackQuizStarted } from '@/lib/meta-pixel'
 import { loadQuizAnswers } from '@/lib/quiz-storage'
 import { useQuiz } from '@/hooks/useQuiz'
 import QuizResult from '@/components/quiz/QuizResult'
@@ -44,6 +45,13 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
   const [departureLoading, setDepartureLoading] = useState(false)
   const resultRef = useRef<HTMLDivElement>(null)
   const completionNotifiedRef = useRef(false)
+  const quizStartedTrackedRef = useRef(false)
+
+  const trackQuizStartedOnce = () => {
+    if (quizStartedTrackedRef.current || cur !== 0) return
+    quizStartedTrackedRef.current = true
+    trackQuizStarted()
+  }
 
   const question = QUIZ_QUESTIONS[cur]
   const pct = Math.round(((cur + 1) / totalQuestions) * 100)
@@ -119,7 +127,28 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
   }
 
   const pickDeparture = (label: string) => {
+    trackQuizStartedOnce()
     setText(QUIZ_DEPARTURE_QUESTION_ID, label)
+  }
+
+  const handlePick = (questionId: number, optionIndex: number) => {
+    trackQuizStartedOnce()
+    pick(questionId, optionIndex)
+  }
+
+  const handleSetRange = (questionId: number, value: number) => {
+    trackQuizStartedOnce()
+    setRange(questionId, value)
+  }
+
+  const handleSetText = (questionId: number, value: string) => {
+    if (value.length > 0) trackQuizStartedOnce()
+    setText(questionId, value)
+  }
+
+  const handleSetAge = (questionId: number, value: string) => {
+    if (value.replace(/\D/g, '').length > 0) trackQuizStartedOnce()
+    setAge(questionId, value)
   }
 
   return (
@@ -160,7 +189,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
                       key={opt}
                       type="button"
                       className={`qopt${selected ? ' selected' : ''}`.trim()}
-                      onClick={() => pick(question.id, i)}
+                      onClick={() => handlePick(question.id, i)}
                     >
                       {selected && <span className="qopt-star">✦ </span>}
                       {opt}
@@ -179,7 +208,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
                   min={1}
                   max={10}
                   value={(ans[question.id] as number) ?? 7}
-                  onChange={(e) => setRange(question.id, parseInt(e.target.value, 10))}
+                  onChange={(e) => handleSetRange(question.id, parseInt(e.target.value, 10))}
                 />
                 <div className="qrange-lbls">
                   <span>{question.min}</span>
@@ -194,7 +223,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
                 rows={4}
                 placeholder={question.ph}
                 value={(ans[question.id] as string) ?? ''}
-                onChange={(e) => setText(question.id, e.target.value)}
+                onChange={(e) => handleSetText(question.id, e.target.value)}
               />
             )}
 
@@ -235,7 +264,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
                   className="qinput qage-input"
                   placeholder={question.ph}
                   value={String(ans[question.id] ?? '')}
-                  onChange={(e) => setAge(question.id, e.target.value)}
+                  onChange={(e) => handleSetAge(question.id, e.target.value)}
                 />
                 <p className="qage-hint">
                   GenZ Edition · ages {BATCH_AGE_LIMITS['batch-a'].label} · Millennial Edition · ages{' '}

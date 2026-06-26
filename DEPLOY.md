@@ -114,7 +114,38 @@ Use **Test** keys locally until you are ready for real charges.
 
 ---
 
-## 4. Environment variables
+## 4. Meta Pixel (ads tracking)
+
+### Get your Pixel ID
+
+1. Open [Meta Events Manager](https://business.facebook.com/events_manager)
+2. **Data sources** → select your pixel (e.g. **Togetha.club**)
+3. **Settings** → copy **Pixel ID** (numeric, e.g. `1039108298548706`)
+
+### Add to `.env.local` (local dev)
+
+```bash
+NEXT_PUBLIC_META_PIXEL_ID=1039108298548706
+```
+
+Restart `npm run dev` after saving — Next.js reads env vars only at startup.
+
+### Add to Vercel (production)
+
+1. Vercel project → **Settings** → **Environment Variables**
+2. Add `NEXT_PUBLIC_META_PIXEL_ID` with your Pixel ID for **Production** (and **Preview** if you want tracking on preview deploys)
+3. **Redeploy** — `NEXT_PUBLIC_*` vars are baked in at build time
+
+The base pixel loads from `src/components/seo/MetaPixel.tsx` and fires **PageView** on every page. Custom funnel events (Quiz Started, Match Result, etc.) are added separately in the frontend code.
+
+### Verify
+
+- Browser DevTools → Network → filter `fbevents` — you should see `connect.facebook.net/en_US/fbevents.js`
+- Events Manager → **Test events** — visit the site and confirm **PageView** appears
+
+---
+
+## 5. Environment variables
 
 Copy `.env.example` to `.env.local` and fill all values:
 
@@ -136,10 +167,11 @@ Required at build time (app throws if missing):
 Optional:
 
 - `NEXT_PUBLIC_WHATSAPP_URL` — confirmation page CTA (has fallback)
+- `NEXT_PUBLIC_META_PIXEL_ID` — Meta Events Manager → Data sources → your pixel → Settings → Pixel ID (enables PageView + custom conversion events)
 
 ---
 
-## 5. Local smoke test
+## 6. Local smoke test
 
 ```bash
 cd togetha-club
@@ -163,19 +195,19 @@ Verify in Supabase:
 
 ---
 
-## 6. Deploy to Vercel
+## 7. Deploy to Vercel
 
 1. Push repo to GitHub
 2. [Vercel](https://vercel.com) → **Add New Project** → import repo
 3. Set **Root Directory** to `togetha-club`
-4. Add all env vars from section 4 for **Production** and **Preview**
+4. Add all env vars from section 5 for **Production** and **Preview**
 5. Set `NEXT_PUBLIC_SITE_URL` to your production domain (e.g. `https://togetha.club`)
 6. Deploy and confirm build logs show no `Missing env var` errors
 7. Add custom domain under **Settings → Domains**
 
 ---
 
-## 7. Production smoke test
+## 8. Production smoke test
 
 Run the same flow as section 5 on the live URL:
 

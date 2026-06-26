@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
@@ -9,6 +9,7 @@ import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
 import { BATCH_AGE_LIMITS, parseQuizAge } from '@/lib/batch-age'
 import { ensureNurtureEmail } from '@/lib/quiz-lead'
 import { hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
+import { trackMatchResultShown } from '@/lib/meta-pixel'
 import { ROUTES } from '@/constants/routes'
 import type { QuizAnswers, QuizResult as QuizResultType } from '@/types/quiz'
 
@@ -24,6 +25,14 @@ const BATCH_LABELS: Record<QuizResultType['batchRecommendation'], string> = {
 
 export default function QuizResult({ result, answers }: QuizResultProps) {
   const [unlocked, setUnlocked] = useState(() => hasCompletedQuizLead())
+  const matchResultTrackedRef = useRef(false)
+
+  useEffect(() => {
+    if (!unlocked) return
+    if (matchResultTrackedRef.current) return
+    matchResultTrackedRef.current = true
+    trackMatchResultShown()
+  }, [unlocked])
 
   useEffect(() => {
     if (!unlocked) return

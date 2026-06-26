@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { trackPaymentInitiated, trackPurchaseWithConfirmationBackup } from '@/lib/meta-pixel'
 
 export interface PreparedOrder {
   orderId: string
@@ -97,19 +98,21 @@ export default function RazorpayButton({
 
     if (isDevOrder) {
       setPaying(true)
+      const devPaymentId = `dev_payment_${Date.now()}`
       try {
         const res = await fetch('/api/payment/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             razorpayOrderId: orderId,
-            razorpayPaymentId: `dev_payment_${Date.now()}`,
+            razorpayPaymentId: devPaymentId,
             razorpaySignature: 'dev',
             applicantId,
           }),
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error || 'Payment verification failed.')
+        trackPurchaseWithConfirmationBackup(amount / 100, devPaymentId)
         onSuccess({ paymentPlan: data.paymentPlan ?? paymentPlan })
       } catch (err) {
         onError(err instanceof Error ? err.message : 'Payment verification failed.')
@@ -159,6 +162,8 @@ export default function RazorpayButton({
             throw new Error(data.error || 'Payment verification failed.')
           }
 
+          trackPurchaseWithConfirmationBackup(amount / 100, response.razorpay_payment_id)
+
           onSuccess({
             paymentPlan: data.paymentPlan ?? paymentPlan,
           })
@@ -173,6 +178,7 @@ export default function RazorpayButton({
       },
     })
 
+    trackPaymentInitiated(amount / 100)
     rzp.open()
   }
 

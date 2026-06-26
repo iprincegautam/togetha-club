@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ConfirmationConversionTracker from '@/components/seo/ConfirmationConversionTracker'
 import StampCircle from '@/components/ui/StampCircle'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
@@ -46,6 +47,7 @@ export default async function ConfirmationPage({
 
   return (
     <div className="apply-page confirm-page">
+      <ConfirmationConversionTracker />
       <StampCircle
         text={<>Paid<br />✦<br />2026</>}
         color="var(--teal-stamp)"

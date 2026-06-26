@@ -89,6 +89,7 @@ Copy `.env.example` → `.env.local` and fill every value:
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Prod | Same as `RAZORPAY_KEY_ID` (client checkout) |
 | `RESEND_API_KEY` | Prod | Resend API key |
 | `NEXT_PUBLIC_WHATSAPP_URL` | No | Confirmation page WhatsApp CTA |
+| `NEXT_PUBLIC_META_PIXEL_ID` | Ads | Meta Pixel ID for PageView and funnel events |
 
 Never commit `.env.local`.
 
