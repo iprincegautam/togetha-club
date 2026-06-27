@@ -15,6 +15,9 @@ export type SupportPermission = (typeof SUPPORT_PERMISSIONS)[number]
 
 export type SupportViewScope = 'assigned_only' | 'all'
 
+/** New support staff see all applicants unless admin chooses assigned-only. */
+export const DEFAULT_SUPPORT_VIEW_SCOPE: SupportViewScope = 'all'
+
 export const DEFAULT_SUPPORT_PERMISSIONS: SupportPermission[] = [
   'applicants.view',
   'applicants.notes',

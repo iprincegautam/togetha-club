@@ -17,7 +17,7 @@ Permissions are stored in `support_permissions` and managed from **Admin → Sup
 
 1. Sign in to **Admin** (`/admin/login`).
 2. Open **Support staff** in the sidebar.
-3. Enter name, email, view scope, and permission checkboxes.
+3. Enter name, email, view scope (defaults to **all applicants**), and permission checkboxes.
 4. Click **Create support login →** — Resend emails a temporary password to their inbox.
 5. Share the login URL: `https://togetha.club/support/login`
 6. On first login they must set a personal password at `/support/change-password`.
@@ -35,11 +35,12 @@ Grant **Approve profile / KYC**, **Waitlist**, or **DM annotations** explicitly 
 
 ## Applicant assignment
 
-On **Admin → Applicants → [detail]**, use **Support assignment** to assign a lead to a staff member.
+On **Admin → Applicants → [detail]**, use **Support assignment** to assign a lead to a staff member (optional when scope is **all**).
 
-- Staff with **assigned only** scope see only their assigned applicants.
-- Staff with **all** scope see the full applicant list (same data, limited actions).
-- Direct logins provisioned by support are auto-assigned to the provisioning staff member.
+- **Default:** staff see **all** applicants.
+- Set **assigned only** at provision time to restrict visibility to assigned leads.
+- **Edit** any team member from the table to change name, scope, permissions, or active status.
+- Direct logins provisioned by support are still auto-assigned to the provisioning staff member for tracking.
 
 ## Support staff day-to-day workflow
 

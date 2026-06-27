@@ -21,6 +21,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.viewScope !== undefined) {
     input.viewScope = body.viewScope === 'all' ? 'all' : 'assigned_only'
   }
+  if (body.fullName !== undefined) {
+    input.fullName = String(body.fullName)
+  }
   if (body.isActive !== undefined) {
     input.isActive = Boolean(body.isActive)
   }

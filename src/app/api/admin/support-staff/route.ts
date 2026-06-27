@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { listSupportStaff, provisionSupportAccount } from '@/lib/support-account'
-import { isSupportPermission, type SupportViewScope } from '@/lib/support/permissions'
+import { isSupportPermission, DEFAULT_SUPPORT_VIEW_SCOPE, type SupportViewScope } from '@/lib/support/permissions'
 
 export async function GET() {
   const auth = await requireAdminApiAccess()
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}))
   const email = String(body.email ?? '').trim()
   const fullName = String(body.fullName ?? body.name ?? '').trim()
-  const viewScope = (body.viewScope ?? 'assigned_only') as SupportViewScope
+  const viewScope = (body.viewScope ?? DEFAULT_SUPPORT_VIEW_SCOPE) as SupportViewScope
   const permissions = Array.isArray(body.permissions)
     ? body.permissions.filter(isSupportPermission)
     : undefined

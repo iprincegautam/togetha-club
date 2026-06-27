@@ -3,6 +3,7 @@ import { findAuthUserIdByEmail, generateTemporaryPassword } from '@/lib/member-a
 import { sendSupportWelcomeEmail } from '@/lib/resend'
 import {
   DEFAULT_SUPPORT_PERMISSIONS,
+  DEFAULT_SUPPORT_VIEW_SCOPE,
   type SupportPermission,
   type SupportViewScope,
 } from '@/lib/support/permissions'
@@ -94,7 +95,7 @@ export async function provisionSupportAccount(
     return { ok: false, error: profileError.message }
   }
 
-  const viewScope = input.viewScope ?? 'assigned_only'
+  const viewScope = input.viewScope ?? DEFAULT_SUPPORT_VIEW_SCOPE
   const { error: staffError } = await service.from('support_staff').upsert(
     {
       profile_id: userId,
@@ -140,12 +141,21 @@ export async function updateSupportStaff(
   service: SupabaseClient,
   profileId: string,
   input: {
+    fullName?: string
     viewScope?: SupportViewScope
     isActive?: boolean
     permissions?: SupportPermission[]
     grantedBy?: string
   }
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (input.fullName !== undefined) {
+    const { error: profileError } = await service
+      .from('profiles')
+      .update({ full_name: input.fullName.trim() || null })
+      .eq('id', profileId)
+    if (profileError) return { ok: false, error: profileError.message }
+  }
+
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (input.viewScope !== undefined) updates.view_scope = input.viewScope
   if (input.isActive !== undefined) updates.is_active = input.isActive
