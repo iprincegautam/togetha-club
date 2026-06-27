@@ -20,7 +20,7 @@ async function fetchAllApplicantRows(
 
     if (pageResult.error) throw pageResult.error
 
-    const page = (pageResult.data ?? []) as ApplicantDbRow[]
+    const page = (pageResult.data ?? []) as unknown as ApplicantDbRow[]
     rows.push(...page)
     if (page.length < APPLICANTS_PAGE_SIZE) break
   }
