@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
 import {
+  adminApplicantHref,
   filterAdminApplicants,
   filtersToSearchParams,
   parseAdminApplicantFilters,
@@ -39,7 +40,17 @@ function canShowCredentialsAction(status: ApplicantStatus): boolean {
 
 interface ApplicantOpsListProps {
   applicants: ApplicantOpsRow[]
-  detailHref: (id: string, filters: AdminApplicantFilters) => string
+  /** Build applicant detail links inside this client component (avoid passing functions from RSC). */
+  variant?: 'admin' | 'support'
+}
+
+function applicantDetailHref(
+  variant: 'admin' | 'support',
+  id: string,
+  filters: AdminApplicantFilters
+): string {
+  if (variant === 'admin') return adminApplicantHref(id, filters)
+  return `/support/applicants/${id}`
 }
 
 const STATUS_OPTIONS: { value: ApplicantStatus | 'all'; label: string }[] = [
@@ -72,7 +83,10 @@ function formatDate(iso: string) {
   })
 }
 
-export default function ApplicantOpsList({ applicants, detailHref }: ApplicantOpsListProps) {
+export default function ApplicantOpsList({
+  applicants,
+  variant = 'admin',
+}: ApplicantOpsListProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -295,7 +309,7 @@ export default function ApplicantOpsList({ applicants, detailHref }: ApplicantOp
               </tr>
             ) : (
               filtered.map((row) => {
-                const href = detailHref(row.id, filters)
+                const href = applicantDetailHref(variant, row.id, filters)
                 return (
                   <tr key={row.id}>
                     <td>

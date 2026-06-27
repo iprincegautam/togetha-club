@@ -51,10 +51,7 @@ export default async function SupportApplicantsPage() {
           <p className="apply-error">{loadError}</p>
         ) : (
           <Suspense fallback={<p className="admin-loading">Loading applicants…</p>}>
-            <ApplicantOpsList
-              applicants={applicants}
-              detailHref={(id) => ROUTES.supportApplicant(id)}
-            />
+            <ApplicantOpsList applicants={applicants} variant="support" />
           </Suspense>
         )}
       </div>
