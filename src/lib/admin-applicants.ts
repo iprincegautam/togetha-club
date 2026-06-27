@@ -2,6 +2,32 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
 import { mapApplicantRow, type ApplicantDbRow } from '@/lib/applicants'
 
+const APPLICANTS_PAGE_SIZE = 1000
+
+async function fetchAllApplicantRows(
+  service: SupabaseClient,
+  select: string
+): Promise<ApplicantDbRow[]> {
+  const rows: ApplicantDbRow[] = []
+
+  for (let from = 0; ; from += APPLICANTS_PAGE_SIZE) {
+    const to = from + APPLICANTS_PAGE_SIZE - 1
+    const pageResult = await service
+      .from('applicants')
+      .select(select)
+      .order('created_at', { ascending: false })
+      .range(from, to)
+
+    if (pageResult.error) throw pageResult.error
+
+    const page = (pageResult.data ?? []) as unknown as ApplicantDbRow[]
+    rows.push(...page)
+    if (page.length < APPLICANTS_PAGE_SIZE) break
+  }
+
+  return rows
+}
+
 export async function fetchAdminApplicants(service: SupabaseClient) {
   const fullSelect = `
     id,
@@ -20,18 +46,19 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
     promo_codes ( code )
   `
 
-  const full = await service
-    .from('applicants')
-    .select(fullSelect)
-    .order('created_at', { ascending: false })
+  let rows: ApplicantDbRow[] = []
+  let fetchError: Error | null = null
 
-  let rows: ApplicantDbRow[] | null = (full.data ?? null) as ApplicantDbRow[] | null
-  let fetchError = full.error
+  try {
+    rows = await fetchAllApplicantRows(service, fullSelect)
+  } catch (err) {
+    fetchError = err as Error
+  }
 
   if (fetchError) {
-    const fallback = await service
-      .from('applicants')
-      .select(
+    try {
+      rows = await fetchAllApplicantRows(
+        service,
         `
         id,
         name,
@@ -44,14 +71,15 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
         batches ( name, slug )
       `
       )
-      .order('created_at', { ascending: false })
-    rows = (fallback.data ?? null) as ApplicantDbRow[] | null
-    fetchError = fallback.error
+      fetchError = null
+    } catch (err) {
+      fetchError = err as Error
+    }
   }
 
   if (fetchError) throw fetchError
 
-  return (rows ?? []).map((row) => {
+  return rows.map((row) => {
     const mapped = mapApplicantRow(row)
     return {
       ...mapped,
