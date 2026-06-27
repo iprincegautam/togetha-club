@@ -1,6 +1,10 @@
-export type UserRole = 'super_admin' | 'ops' | 'member' | 'influencer'
+export type UserRole = 'super_admin' | 'ops' | 'support' | 'member' | 'influencer'
 
 export const ADMIN_ROLES: UserRole[] = ['super_admin', 'ops']
+
+export function isSupportRole(role: string | null | undefined): boolean {
+  return role === 'support'
+}
 
 export interface ProfileRow {
   id: string

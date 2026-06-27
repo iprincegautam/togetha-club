@@ -2,12 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isInternTrackSlug } from '@/content/careers/roles'
 import { userHasPartnerAccess } from '@/lib/auth/partner'
-import { isBootstrapAdminEmail, userHasAdminAccess } from '@/lib/auth/roles'
+import { isBootstrapAdminEmail, userHasAdminAccess, isAdminRole } from '@/lib/auth/roles'
+import { userHasSupportAccess } from '@/lib/auth/support'
 import {
   ACCOUNT_AUTH_PATHS,
   ACCOUNT_SETUP_PATHS,
   ADMIN_AUTH_PATHS,
   PARTNER_AUTH_PATHS,
+  SUPPORT_AUTH_PATHS,
+  SUPPORT_SETUP_PATHS,
 } from '@/lib/portal-path'
 
 function careersRedirect(request: NextRequest): NextResponse | null {
@@ -41,7 +44,8 @@ function isPortalAuthPage(pathname: string): boolean {
     ACCOUNT_AUTH_PATHS.has(pathname) ||
     ACCOUNT_SETUP_PATHS.has(pathname) ||
     PARTNER_AUTH_PATHS.has(pathname) ||
-    ADMIN_AUTH_PATHS.has(pathname)
+    ADMIN_AUTH_PATHS.has(pathname) ||
+    SUPPORT_AUTH_PATHS.has(pathname)
   )
 }
 
@@ -50,9 +54,11 @@ function needsPortalAuth(pathname: string): boolean {
     pathname.startsWith('/admin') ||
     pathname.startsWith('/account') ||
     pathname.startsWith('/partner') ||
+    pathname.startsWith('/support') ||
     pathname.startsWith('/api/admin') ||
     pathname.startsWith('/api/account') ||
     pathname.startsWith('/api/partner') ||
+    pathname.startsWith('/api/support') ||
     pathname === '/api/auth/signout'
   )
 }
@@ -241,6 +247,95 @@ export async function middleware(request: NextRequest) {
       partnerUrl.pathname = '/partner'
       partnerUrl.search = ''
       return NextResponse.redirect(partnerUrl)
+    }
+  }
+
+  // ── Support routes ──
+  const isSupportPublic = SUPPORT_AUTH_PATHS.has(pathname)
+  const isSupportSetup = SUPPORT_SETUP_PATHS.has(pathname)
+  const isSupportLogin = pathname === '/support/login'
+  const isSupport = pathname.startsWith('/support')
+
+  if (isSupport && !isSupportPublic && !session) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/support/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (isSupportSetup && !session) {
+    const loginUrl = request.nextUrl.clone()
+    loginUrl.pathname = '/support/login'
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  if (isSupport && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, password_change_required')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (isAdminRole(profile?.role) || isBootstrapAdminEmail(session.user.email)) {
+      if (!isSupportLogin) {
+        const adminUrl = request.nextUrl.clone()
+        adminUrl.pathname = '/admin'
+        adminUrl.search = ''
+        return NextResponse.redirect(adminUrl)
+      }
+    } else if (!isSupportPublic) {
+      const { data: staff } = await supabase
+        .from('support_staff')
+        .select('is_active')
+        .eq('profile_id', session.user.id)
+        .maybeSingle()
+
+      if (!userHasSupportAccess(profile, staff)) {
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = '/support/login'
+        loginUrl.searchParams.set('error', 'forbidden')
+        return NextResponse.redirect(loginUrl)
+      }
+
+      if (
+        profile?.password_change_required &&
+        pathname !== '/support/change-password'
+      ) {
+        const changeUrl = request.nextUrl.clone()
+        changeUrl.pathname = '/support/change-password'
+        changeUrl.search = ''
+        return NextResponse.redirect(changeUrl)
+      }
+    }
+  }
+
+  if (isSupportLogin && session) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, password_change_required')
+      .eq('id', session.user.id)
+      .maybeSingle()
+
+    if (isAdminRole(profile?.role) || isBootstrapAdminEmail(session.user.email)) {
+      const adminUrl = request.nextUrl.clone()
+      adminUrl.pathname = '/admin'
+      return NextResponse.redirect(adminUrl)
+    }
+
+    const { data: staff } = await supabase
+      .from('support_staff')
+      .select('is_active')
+      .eq('profile_id', session.user.id)
+      .maybeSingle()
+
+    if (userHasSupportAccess(profile, staff)) {
+      const supportUrl = request.nextUrl.clone()
+      supportUrl.pathname = profile?.password_change_required
+        ? '/support/change-password'
+        : '/support'
+      supportUrl.search = ''
+      return NextResponse.redirect(supportUrl)
     }
   }
 

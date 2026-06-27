@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import AdminApplicantAssignment from '@/components/admin/AdminApplicantAssignment'
 import AdminApplicantDetail from '@/components/admin/AdminApplicantDetail'
 import AdminApplicantPayments from '@/components/admin/AdminApplicantPayments'
 import AdminResendCredentialsButton from '@/components/admin/AdminResendCredentialsButton'
 import { adminListHref, parseAdminApplicantFilters } from '@/lib/admin-applicant-filters'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
+import { listSupportStaff } from '@/lib/support-account'
 import {
   listApplicantPayments,
   memberBalancePayUrl,
@@ -78,6 +80,19 @@ export default async function AdminApplicantPage({ params, searchParams }: PageP
   const paymentSummary = summarizeApplicantPayments(payments)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
 
+  let supportStaffOptions: { profileId: string; fullName: string | null; email: string; isActive: boolean }[] = []
+  try {
+    const staffRows = await listSupportStaff(auth.service)
+    supportStaffOptions = staffRows.map((row) => ({
+      profileId: row.profile_id,
+      fullName: row.profile?.full_name ?? null,
+      email: row.profile?.email ?? '',
+      isActive: row.is_active,
+    }))
+  } catch (err) {
+    console.error('[admin applicant support staff]', err)
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-card admin-card-wide">
@@ -96,6 +111,11 @@ export default async function AdminApplicantPage({ params, searchParams }: PageP
           payments={payments}
           totalPaidPaise={paymentSummary.totalPaidPaise}
           payUrl={memberBalancePayUrl(siteUrl)}
+        />
+        <AdminApplicantAssignment
+          applicantId={data.id}
+          assignedSupportId={data.assigned_support_id ?? null}
+          staff={supportStaffOptions}
         />
         <AdminApplicantDetail applicant={data} matchInsight={matchInsight} />
       </div>

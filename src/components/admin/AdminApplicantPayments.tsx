@@ -23,6 +23,8 @@ interface AdminApplicantPaymentsProps {
   payments: AdminPaymentRow[]
   totalPaidPaise: number
   payUrl: string
+  apiBase?: '/api/admin' | '/api/support'
+  canSendBalanceLink?: boolean
 }
 
 const KIND_LABELS: Record<ApplicantPaymentKind, string> = {
@@ -52,6 +54,8 @@ export default function AdminApplicantPayments({
   payments,
   totalPaidPaise,
   payUrl,
+  apiBase = '/api/admin',
+  canSendBalanceLink = true,
 }: AdminApplicantPaymentsProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
@@ -75,7 +79,7 @@ export default function AdminApplicantPayments({
   useEffect(() => {
     setPreviewLoading(true)
     setPreviewError(null)
-    fetch(`/api/admin/applicants/${applicantId}/send-balance-link`)
+    fetch(`${apiBase}/applicants/${applicantId}/send-balance-link`)
       .then((r) => r.json())
       .then((json) => {
         if (json.error) {
@@ -98,7 +102,7 @@ export default function AdminApplicantPayments({
       .finally(() => {
         setPreviewLoading(false)
       })
-  }, [applicantId])
+  }, [applicantId, apiBase])
 
   const balance = balanceDue ?? 0
   const paid = amountPaid ?? 0
@@ -149,7 +153,7 @@ export default function AdminApplicantPayments({
     setSending(true)
     setMessage(null)
 
-    const res = await fetch(`/api/admin/applicants/${applicantId}/send-balance-link`, {
+    const res = await fetch(`${apiBase}/applicants/${applicantId}/send-balance-link`, {
       method: 'POST',
     })
     const json = await res.json()
@@ -291,7 +295,7 @@ export default function AdminApplicantPayments({
             <button
               type="button"
               className="admin-btn"
-              disabled={sending || previewLoading || Boolean(sendBlockReason)}
+              disabled={sending || previewLoading || Boolean(sendBlockReason) || !canSendBalanceLink}
               onClick={sendBalanceEmail}
             >
               {sending ? 'Sending…' : 'Email balance payment link'}

@@ -9,11 +9,12 @@ import { getPortalNav, type PortalNavItem } from '@/lib/portal-nav-config'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
 type PortalShellProps = {
-  variant: 'member' | 'partner' | 'admin'
+  variant: 'member' | 'partner' | 'admin' | 'support'
   brand: string
   homeHref: string
   signOutHref: string
   children: React.ReactNode
+  supportPermissions?: import('@/lib/support/permissions').SupportPermission[]
 }
 
 function navItemActive(pathname: string, item: PortalNavItem): boolean {
@@ -30,10 +31,18 @@ export default function PortalShell({
   homeHref,
   signOutHref,
   children,
+  supportPermissions,
 }: PortalShellProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const baseNav = useMemo(() => getPortalNav(variant), [variant])
+  const permissionSet = useMemo(
+    () => (supportPermissions ? new Set(supportPermissions) : undefined),
+    [supportPermissions]
+  )
+  const baseNav = useMemo(
+    () => getPortalNav(variant, permissionSet),
+    [variant, permissionSet]
+  )
   const [badges, setBadges] = useState<Record<string, number>>({})
   const [onboarding, setOnboarding] = useState({ mouSigned: true, panVerified: true })
   const [unread, setUnread] = useState(0)

@@ -5,11 +5,13 @@ import { useState } from 'react'
 type AdminResendCredentialsButtonProps = {
   applicantId: string
   email: string
+  apiPath?: string
 }
 
 export default function AdminResendCredentialsButton({
   applicantId,
   email,
+  apiPath,
 }: AdminResendCredentialsButtonProps) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
@@ -27,9 +29,10 @@ export default function AdminResendCredentialsButton({
     setTemporaryPassword(null)
 
     try {
-      const res = await fetch(`/api/admin/applicants/${applicantId}/resend-credentials`, {
-        method: 'POST',
-      })
+      const res = await fetch(
+        apiPath ?? `/api/admin/applicants/${applicantId}/resend-credentials`,
+        { method: 'POST' }
+      )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Resend failed')
       setMessage(`Credentials emailed to ${json.email}`)

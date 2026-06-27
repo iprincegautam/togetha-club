@@ -96,6 +96,24 @@ export async function sendBalancePaymentReminderEmail(opts: {
   return { ok: true as const, payUrl: `${siteUrl.replace(/\/$/, '')}/account/login?next=${encodeURIComponent('/account')}` }
 }
 
+export async function sendSupportWelcomeEmail(opts: {
+  to: string
+  name: string
+  loginUrl: string
+  temporaryPassword: string
+}) {
+  if (!isResendConfigured() || !resend) return null
+
+  const text = `Hi ${opts.name},\n\nYour Togetha.Club support portal is ready.\n\nLog in: ${opts.loginUrl}\nEmail: ${opts.to}\nTemporary password: ${opts.temporaryPassword}\n\nChange your password after first login.\n\nUse the portal to guide applicants through booking — view leads, provision logins, and send payment links.\n\n— Togetha.Club`
+
+  return resend.emails.send({
+    from: 'Togetha.Club <hello@togetha.club>',
+    to: opts.to,
+    subject: `✦ Your Togetha.Club support portal`,
+    text,
+  })
+}
+
 export async function sendPartnerWelcomeEmail(opts: {
   to: string
   name: string

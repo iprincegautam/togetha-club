@@ -10,10 +10,12 @@ import '@/components/auth/auth.css'
 type AccountChangePasswordFormProps = {
   /** First login after payment — skip current password field. */
   firstLogin?: boolean
+  successRoute?: string
 }
 
 export default function AccountChangePasswordForm({
   firstLogin = false,
+  successRoute,
 }: AccountChangePasswordFormProps) {
   const router = useRouter()
   const [currentPassword, setCurrentPassword] = useState('')
@@ -71,7 +73,7 @@ export default function AccountChangePasswordForm({
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Could not update password.')
 
-      router.push(firstLogin ? ROUTES.account : ROUTES.accountSettings)
+      router.push(successRoute ?? (firstLogin ? ROUTES.account : ROUTES.accountSettings))
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not update password.')

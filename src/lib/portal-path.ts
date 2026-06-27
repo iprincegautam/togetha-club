@@ -1,9 +1,10 @@
-/** Member, partner, and admin app areas — no marketing site chrome. */
+/** Member, partner, admin, and support app areas — no marketing site chrome. */
 export function isPortalPath(pathname: string): boolean {
   return (
     pathname.startsWith('/account') ||
     pathname.startsWith('/partner') ||
-    pathname.startsWith('/admin')
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/support')
   )
 }
 
@@ -27,6 +28,13 @@ export const PARTNER_AUTH_PATHS = new Set([
 
 export const ADMIN_AUTH_PATHS = new Set(['/admin/login'])
 
+export const SUPPORT_AUTH_PATHS = new Set([
+  '/support/login',
+  '/support/change-password',
+])
+
+export const SUPPORT_SETUP_PATHS = new Set(['/support/change-password'])
+
 export function isAccountAuthPath(pathname: string): boolean {
   return ACCOUNT_AUTH_PATHS.has(pathname)
 }
@@ -37,4 +45,8 @@ export function isPartnerAuthPath(pathname: string): boolean {
 
 export function isAdminAuthPath(pathname: string): boolean {
   return ADMIN_AUTH_PATHS.has(pathname)
+}
+
+export function isSupportAuthPath(pathname: string): boolean {
+  return SUPPORT_AUTH_PATHS.has(pathname)
 }

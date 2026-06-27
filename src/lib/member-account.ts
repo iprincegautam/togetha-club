@@ -116,7 +116,9 @@ export async function provisionMemberAccount(
     phone: input.phone,
     applicant_id: input.applicantId,
     role:
-      linkedProfile?.role === 'super_admin' || linkedProfile?.role === 'ops'
+      linkedProfile?.role === 'super_admin' ||
+      linkedProfile?.role === 'ops' ||
+      linkedProfile?.role === 'support'
         ? linkedProfile.role
         : 'member',
     password_change_required: isNewUser,
@@ -302,7 +304,7 @@ export type AdminProvisionResult =
 /** Admin: create direct-lead applicant and email portal login + temp password (before payment). */
 export async function adminProvisionMemberLogin(
   service: SupabaseClient,
-  input: { name: string; email: string; phone: string }
+  input: { name: string; email: string; phone: string; assignedSupportId?: string | null }
 ): Promise<AdminProvisionResult> {
   const email = input.email.trim().toLowerCase()
   const name = input.name.trim()
@@ -345,6 +347,12 @@ export async function adminProvisionMemberLogin(
       return { ok: false, error: createError?.message ?? 'Could not create applicant' }
     }
     applicantId = created.id
+    if (input.assignedSupportId) {
+      await service
+        .from('applicants')
+        .update({ assigned_support_id: input.assignedSupportId })
+        .eq('id', applicantId)
+    }
   } else {
     await service
       .from('applicants')
@@ -354,6 +362,7 @@ export async function adminProvisionMemberLogin(
         lead_source: 'direct',
         original_amount: packagePricePaise,
         final_amount: packagePricePaise,
+        ...(input.assignedSupportId ? { assigned_support_id: input.assignedSupportId } : {}),
       })
       .eq('id', applicantId)
   }

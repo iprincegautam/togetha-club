@@ -28,6 +28,10 @@ export interface ApplicantDbRow {
   created_at: string
   priority_review?: boolean
   lead_source?: string | null
+  assigned_support_id?: string | null
+  profile_completed_at?: string | null
+  kyc_status?: string | null
+  balance_due?: number | null
   batches: BatchRelation
   promo_codes?: PromoRelation
 }
