@@ -2,6 +2,7 @@ import HeroSection from '@/components/home/HeroSection'
 import BatchPreviewSection from '@/components/home/BatchPreviewSection'
 import HomeVideoTestimonialsSection from '@/components/home/HomeVideoTestimonialsSection'
 import HomeClosingCta from '@/components/home/HomeClosingCta'
+import { fetchBatchDepartureShortLists } from '@/lib/batches'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
 import type { Batch, BatchStatus } from '@/types/batch'
@@ -65,12 +66,16 @@ async function fetchBatches(): Promise<BatchPreview[]> {
 }
 
 export default async function HomePage() {
-  const batches = await fetchBatches()
+  const supabase = await tryCreateServerSupabaseClient()
+  const [batches, departureShortLists] = await Promise.all([
+    fetchBatches(),
+    fetchBatchDepartureShortLists(supabase),
+  ])
 
   return (
     <>
       <HeroSection />
-      <BatchPreviewSection batches={batches} />
+      <BatchPreviewSection batches={batches} departureShortLists={departureShortLists} />
       <HomeVideoTestimonialsSection />
       <HomeClosingCta />
     </>

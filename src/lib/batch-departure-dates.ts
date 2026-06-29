@@ -4,6 +4,7 @@ export type DepartureDateOption = {
   label: string
   sublabel: string
   soldOut?: boolean
+  departureDate?: string
 }
 
 /** First Friday departure in the new weekly schedule. */
@@ -96,5 +97,26 @@ export function getFallbackDateOptions(batchSlug: string): DepartureDateOption[]
     .map((d) => ({
       label: d.label,
       sublabel: d.sublabel,
+      departureDate: d.departure_date,
     }))
+}
+
+export function formatShortDepartureDate(departureDate: string): string {
+  const date = parseDateOnly(departureDate)
+  return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+}
+
+export function formatShortDepartureListFromDates(dates: string[]): string {
+  return dates.map(formatShortDepartureDate).join(', ')
+}
+
+export function visibleDepartureShortList(batchSlug: string, asOf?: Date): string {
+  const dates = generateFridayDepartures()
+    .filter((d) => isDepartureVisible(d.departure_date, VISIBLE_DEPARTURE_WEEKS, asOf ?? todayDateOnly()))
+    .map((d) => d.departure_date)
+  return formatShortDepartureListFromDates(dates)
+}
+
+export function buildBatchTripMetaLine(shortDates: string): string {
+  return `Manali · Kasol · Sissu · 5N/6D · ${shortDates}`
 }

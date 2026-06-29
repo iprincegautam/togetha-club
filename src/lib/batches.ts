@@ -1,5 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { filterVisibleDepartures, getFallbackDateOptions } from '@/lib/batch-departure-dates'
+import {
+  filterVisibleDepartures,
+  formatShortDepartureListFromDates,
+  getFallbackDateOptions,
+  visibleDepartureShortList,
+} from '@/lib/batch-departure-dates'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import type { BatchStatus } from '@/types/batch'
 
@@ -36,6 +41,7 @@ export interface DateOption {
   label: string
   sublabel: string
   soldOut?: boolean
+  departureDate?: string
 }
 
 export function mapDepartureToDateOption(row: BatchDepartureRow): DateOption {
@@ -46,6 +52,7 @@ export function mapDepartureToDateOption(row: BatchDepartureRow): DateOption {
     label: row.label,
     sublabel: row.sublabel ?? '',
     soldOut: row.status === 'sold_out' || mFull || fFull,
+    departureDate: row.departure_date ?? undefined,
   }
 }
 
@@ -92,6 +99,22 @@ export async function fetchAllBatchDepartures(
     slugs.map(async (slug) => [slug, await fetchBatchDepartures(supabase, slug)] as const)
   )
   return Object.fromEntries(entries)
+}
+
+function shortListFromDateOptions(options: DateOption[], batchSlug: string): string {
+  const dates = options.map((o) => o.departureDate).filter((d): d is string => Boolean(d))
+  if (dates.length) return formatShortDepartureListFromDates(dates)
+  return visibleDepartureShortList(batchSlug)
+}
+
+export async function fetchBatchDepartureShortLists(
+  supabase: SupabaseClient | null
+): Promise<Record<string, string>> {
+  const departureMap = await fetchAllBatchDepartures(supabase)
+  const slugs = ['batch-a', 'batch-b'] as const
+  return Object.fromEntries(
+    slugs.map((slug) => [slug, shortListFromDateOptions(departureMap[slug] ?? [], slug)])
+  )
 }
 
 export async function fetchBatchesForAdmin(service: SupabaseClient): Promise<BatchRow[]> {

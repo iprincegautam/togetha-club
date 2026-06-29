@@ -1,7 +1,10 @@
 import Reveal from '@/components/ui/Reveal'
 import Link from 'next/link'
 import SectionLabel from '@/components/ui/SectionLabel'
+import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
+import { BATCH_AGE_LIMITS } from '@/lib/batch-age'
+import { buildBatchTripMetaLine } from '@/lib/batch-departure-dates'
 import { formatPrice } from '@/lib/utils'
 import type { Batch, BatchStatus } from '@/types/batch'
 
@@ -12,35 +15,38 @@ type BatchPreview = Pick<
 
 interface BatchPreviewSectionProps {
   batches: BatchPreview[]
+  departureShortLists: Record<string, string>
 }
 
 const BATCH_DISPLAY: Record<
   string,
   {
-    genBadge: string
-    statusBadge: string
     statusClass: string
-    meta: string
     priceClass: string
     ctaClass: string
   }
 > = {
   'batch-a': {
-    genBadge: 'GenZ · 20–27',
-    statusBadge: '✦ Spots Open',
     statusClass: 'tb-teal',
-    meta: 'Manali · Kasol · Sissu · 5N/6D · Jun 13, Jun 27, Jul 11, Jul 25',
     priceClass: '',
     ctaClass: '',
   },
   'batch-b': {
-    genBadge: 'Millennial · 28–38',
-    statusBadge: '♡ Spots Open',
     statusClass: 'tb-rose',
-    meta: 'Manali · Kasol · Sissu · 5N/6D · Jun 27, Jul 11, Jul 25',
     priceClass: 'tpc-price-rose',
     ctaClass: 'tpc-cta-rose',
   },
+}
+
+function genBadgeForSlug(slug: string): string {
+  if (slug === 'batch-a') {
+    return `GenZ · ${BATCH_AGE_LIMITS['batch-a'].label}`
+  }
+  if (slug === 'batch-b') {
+    return `Millennial · ${BATCH_AGE_LIMITS['batch-b'].label}`
+  }
+  const meta = BATCH_META[slug as keyof typeof BATCH_META]
+  return meta?.label ?? slug
 }
 
 function SpotsRow({ takenM, takenF }: { takenM: number; takenF: number }) {
@@ -158,7 +164,10 @@ function statusLabel(status: BatchStatus): string {
   }
 }
 
-export default function BatchPreviewSection({ batches }: BatchPreviewSectionProps) {
+export default function BatchPreviewSection({
+  batches,
+  departureShortLists,
+}: BatchPreviewSectionProps) {
   const ordered = ['batch-a', 'batch-b']
     .map((slug) => batches.find((b) => b.slug === slug))
     .filter((b): b is BatchPreview => b !== undefined)
@@ -178,6 +187,8 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
           {ordered.map((batch) => {
             const display = BATCH_DISPLAY[batch.slug] ?? BATCH_DISPLAY['batch-a']
             const Visual = batch.slug === 'batch-b' ? BatchBVisual : BatchAVisual
+            const shortDates = departureShortLists[batch.slug] ?? ''
+            const meta = buildBatchTripMetaLine(shortDates)
 
             return (
               <Link
@@ -190,13 +201,13 @@ export default function BatchPreviewSection({ batches }: BatchPreviewSectionProp
                 </div>
                 <div className="tpc-body">
                   <div className="tpc-badges">
-                    <span className="tb tb-dark">{display.genBadge}</span>
+                    <span className="tb tb-dark">{genBadgeForSlug(batch.slug)}</span>
                     <span className={`tb ${display.statusClass}`}>
                       {statusLabel(batch.status)}
                     </span>
                   </div>
                   <div className="tpc-title">{batch.name}</div>
-                  <div className="tpc-meta">{display.meta}</div>
+                  <div className="tpc-meta">{meta}</div>
                   {batch.price !== null && (
                     <div className={`tpc-price ${display.priceClass}`}>
                       {formatPrice(batch.price)}
