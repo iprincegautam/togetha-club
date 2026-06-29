@@ -23,6 +23,7 @@ export interface ApplicantDbRow {
   gender: string | null
   batch_slug: string | null
   date_choice?: string | null
+  quiz_answers?: unknown
   quiz_score: number | null
   status: string
   created_at: string
@@ -34,6 +35,7 @@ export interface ApplicantDbRow {
   balance_due?: number | null
   batches: BatchRelation
   promo_codes?: PromoRelation
+  batch_departures?: { label: string } | { label: string }[] | null
 }
 
 export function mapApplicantRow(row: ApplicantDbRow) {

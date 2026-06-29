@@ -1,5 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
+import {
+  parseBatchDepartureRelation,
+  resolveApplicantDepartureLabel,
+} from '@/lib/applicant-departure'
 import { mapApplicantRow, type ApplicantDbRow } from '@/lib/applicants'
 import { applySupportApplicantScope } from '@/lib/support/applicant-scope'
 import type { SupportViewScope } from '@/lib/support/permissions'
@@ -23,8 +26,10 @@ const APPLICANT_SELECT = `
   profile_completed_at,
   kyc_status,
   balance_due,
+  quiz_answers,
   batches ( name, slug ),
-  promo_codes ( code )
+  promo_codes ( code ),
+  batch_departures ( label )
 `
 
 async function fetchScopedRows(
@@ -67,7 +72,11 @@ export async function fetchSupportApplicants(
     return {
       ...mapped,
       assignedSupportId: row.assigned_support_id ?? null,
-      departureLabel: resolveApplicantDepartureLabel(row.date_choice, row.batch_slug),
+      departureLabel: resolveApplicantDepartureLabel(row.date_choice, row.batch_slug, {
+        departureLabel: parseBatchDepartureRelation(row.batch_departures),
+        quizAnswers: row.quiz_answers,
+        bookedAt: row.profile_completed_at ?? row.created_at,
+      }),
       profileCompletedAt: row.profile_completed_at ?? null,
       kycStatus: row.kyc_status ?? null,
       balanceDue: row.balance_due ?? null,

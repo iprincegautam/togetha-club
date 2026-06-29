@@ -34,7 +34,8 @@ export async function getMemberContext() {
     .select(
       `
       *,
-      batches ( name, slug, price )
+      batches ( name, slug, price ),
+      batch_departures ( label, departure_date )
     `
     )
     .eq('id', profile.applicant_id)

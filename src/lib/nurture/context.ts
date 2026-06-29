@@ -1,6 +1,9 @@
 import { createHmac } from 'crypto'
 import { BATCH_META } from '@/constants/batches'
-import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
+import {
+  parseBatchDepartureRelation,
+  resolveApplicantDepartureLabel,
+} from '@/lib/applicant-departure'
 import { depositAmountForTotal } from '@/lib/payment-plan'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { buildBatchCohortTeaser } from '@/lib/match-cohort-preview'
@@ -27,6 +30,9 @@ export type ApplicantNurtureRow = {
   quiz_score: number | null
   date_choice: string | null
   razorpay_payment_id: string | null
+  profile_completed_at?: string | null
+  created_at?: string | null
+  batch_departures?: { label: string } | { label: string }[] | null
 }
 
 function siteUrl(): string {
@@ -95,7 +101,11 @@ export async function buildNurtureContext(
   const quizLabel =
     quizDeparture.state === 'selected'
       ? quizDeparture.label
-      : resolveApplicantDepartureLabel(applicant.date_choice, batchSlug)
+      : resolveApplicantDepartureLabel(applicant.date_choice, batchSlug, {
+          departureLabel: parseBatchDepartureRelation(applicant.batch_departures),
+          quizAnswers: applicant.quiz_answers,
+          bookedAt: applicant.profile_completed_at ?? applicant.created_at,
+        })
 
   const batchData = await fetchBatchMeta(supabase, batchSlug)
   const vacantBoys = Math.max(0, 12 - batchData.spotsTakenM)

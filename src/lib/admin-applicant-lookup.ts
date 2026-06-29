@@ -47,6 +47,7 @@ export async function findApplicantByIdOrEmail(
 export const APPLICANT_SELECT_FOR_BALANCE = `
   id, email, name, status, balance_due, amount_paid, final_amount,
   original_amount, discount_amount, payment_plan, kyc_status,
-  date_choice, batch_slug,
-  batches ( name )
+  date_choice, batch_slug, profile_completed_at, created_at, quiz_answers,
+  batches ( name ),
+  batch_departures ( label )
 `

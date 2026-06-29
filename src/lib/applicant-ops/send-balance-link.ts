@@ -5,7 +5,10 @@ import {
 } from '@/lib/applicant-booking-amounts'
 import { listApplicantPayments, memberBalancePayUrl, summarizeApplicantPayments } from '@/lib/applicant-payments'
 import { buildBalancePaymentReminder } from '@/lib/balance-payment-email'
-import { getBatchDateOptions } from '@/constants/batches'
+import {
+  parseBatchDepartureRelation,
+  resolveApplicantDeparture,
+} from '@/lib/applicant-departure'
 import { canAdminSendBalanceReminder } from '@/lib/applicant-kyc'
 import {
   APPLICANT_SELECT_FOR_BALANCE,
@@ -40,13 +43,16 @@ export async function loadApplicantForBalance(service: SupabaseClient, idOrEmail
 
   const batch = Array.isArray(applicant.batches) ? applicant.batches[0] : applicant.batches
   const batchName = batch?.name ?? applicant.batch_slug ?? 'your Togetha trip'
-  const slug = applicant.batch_slug ?? ''
-  const dateIndex = applicant.date_choice ? Number(applicant.date_choice) : null
-  const dateOptions = getBatchDateOptions(slug)
-  const departureLabel =
-    dateIndex !== null && !Number.isNaN(dateIndex)
-      ? dateOptions[dateIndex]?.label ?? applicant.date_choice
-      : applicant.date_choice
+  const departureJoin = Array.isArray(applicant.batch_departures)
+    ? applicant.batch_departures[0]
+    : applicant.batch_departures
+  const { label: departureLabel } = resolveApplicantDeparture({
+    dateChoice: applicant.date_choice,
+    batchSlug: applicant.batch_slug,
+    departureLabel: parseBatchDepartureRelation(departureJoin),
+    quizAnswers: applicant.quiz_answers,
+    bookedAt: applicant.profile_completed_at ?? applicant.created_at,
+  })
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://togetha.club'
   const payUrl = memberBalancePayUrl(siteUrl)

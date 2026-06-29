@@ -1,5 +1,6 @@
-import { getBatchDateOptions } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
+
+export { resolveApplicantDepartureLabel } from '@/lib/applicant-departure'
 import type { ApplicantStatus } from '@/types/applicant'
 
 export type LeadFilter = 'all' | 'quiz_leads' | 'callable'
@@ -47,20 +48,6 @@ export const DEFAULT_ADMIN_APPLICANT_FILTERS: AdminApplicantFilters = {
   name: '',
   email: '',
   date: '',
-}
-
-export function resolveApplicantDepartureLabel(
-  dateChoice: string | null | undefined,
-  batchSlug: string | null | undefined
-): string | null {
-  if (!dateChoice?.trim()) return null
-  const slug = batchSlug ?? ''
-  const dateIndex = Number(dateChoice)
-  if (!Number.isNaN(dateIndex) && slug) {
-    const options = getBatchDateOptions(slug)
-    return options[dateIndex]?.label ?? dateChoice
-  }
-  return dateChoice
 }
 
 export function searchParamsToUrlSearchParams(

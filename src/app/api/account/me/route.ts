@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server'
 import { bookingPipelineState, bookingStageFromStatus, requireMemberApiAccess } from '@/lib/auth/member'
 import { hasVerifiedPayment } from '@/lib/applicant-payment'
 import { isProfileComplete } from '@/lib/payment-claim'
+import { resolveApplicantDeparture, parseBatchDepartureRelation } from '@/lib/applicant-departure'
 import { resolveApplicantPackagePricePaise, formatPaiseAsPackageInr } from '@/lib/package-pricing'
 import { bookingPackageLabelFromApplicant } from '@/lib/applicant-booking-amounts'
 import { canMemberPayBalance, isProfileKycApproved } from '@/lib/applicant-kyc'
-import { getBatchDateOptions } from '@/constants/batches'
 
 export async function GET() {
   const auth = await requireMemberApiAccess()
@@ -15,13 +15,16 @@ export async function GET() {
 
   const a = auth.applicant
   const batch = Array.isArray(a.batches) ? a.batches[0] : a.batches
-  const dateIndex = a.date_choice ? Number(a.date_choice) : null
-  const slug = a.batch_slug ?? ''
-  const dateOptions = getBatchDateOptions(slug)
-  const dateLabel =
-    dateIndex !== null && !Number.isNaN(dateIndex)
-      ? dateOptions[dateIndex]?.label ?? a.date_choice
-      : a.date_choice
+  const departureJoin = Array.isArray(a.batch_departures)
+    ? a.batch_departures[0]
+    : a.batch_departures
+  const { label: dateLabel } = resolveApplicantDeparture({
+    dateChoice: a.date_choice,
+    batchSlug: a.batch_slug,
+    departureLabel: parseBatchDepartureRelation(departureJoin),
+    quizAnswers: a.quiz_answers,
+    bookedAt: a.profile_completed_at ?? a.created_at,
+  })
 
   const paid = hasVerifiedPayment(a)
   const profileComplete = isProfileComplete(a)

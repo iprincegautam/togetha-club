@@ -16,6 +16,7 @@ import {
   validateRazorpayKeyConfiguration,
 } from '@/lib/razorpay'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
+import { resolveDepartureForPersist } from '@/lib/applicant-departure'
 
 const VALID_SLUGS = ['batch-a', 'batch-b']
 
@@ -117,12 +118,15 @@ export async function POST(req: NextRequest) {
 
     const { chargeNow, balanceDue, totalDue } = calculatePaymentAmounts(finalAmount, plan)
 
+    const departureFields = await resolveDepartureForPersist(supabase, batchSlug, dateChoice)
+
     const baseUpdate = {
       name: name.trim(),
       phone: phone.trim(),
       gender,
       batch_slug: batchSlug,
-      date_choice: String(dateChoice),
+      date_choice: departureFields.date_choice,
+      departure_id: departureFields.departure_id,
     }
 
     const extendedUpdate = {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireMemberApiAccess } from '@/lib/auth/member'
 import { hasVerifiedPayment } from '@/lib/applicant-payment'
+import { resolveDepartureForPersist } from '@/lib/applicant-departure'
 import { buildApplicantMatchInsight } from '@/lib/match-analysis'
 import { answersToCompatibilityVector } from '@/lib/match-engine'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
@@ -47,6 +48,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Choose a departure date.' }, { status: 400 })
   }
 
+  const departureFields = await resolveDepartureForPersist(auth.service, batchSlug, dateChoice)
+
   const vector = answersToCompatibilityVector(answers)
 
   const updates: Record<string, unknown> = {
@@ -55,7 +58,8 @@ export async function POST(req: NextRequest) {
     compatibility_vector: vector,
     batch_slug: batchSlug,
     gender,
-    date_choice: dateChoice,
+    date_choice: departureFields.date_choice,
+    departure_id: departureFields.departure_id,
     profile_completed_at: new Date().toISOString(),
     kyc_status: 'submitted',
   }

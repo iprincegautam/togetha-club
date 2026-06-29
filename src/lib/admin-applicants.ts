@@ -1,5 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { resolveApplicantDepartureLabel } from '@/lib/admin-applicant-filters'
+import {
+  parseBatchDepartureRelation,
+  resolveApplicantDepartureLabel,
+} from '@/lib/applicant-departure'
 import { mapApplicantRow, type ApplicantDbRow } from '@/lib/applicants'
 
 const APPLICANTS_PAGE_SIZE = 1000
@@ -37,13 +40,16 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
     gender,
     batch_slug,
     date_choice,
+    profile_completed_at,
+    quiz_answers,
     quiz_score,
     status,
     created_at,
     priority_review,
     lead_source,
     batches ( name, slug ),
-    promo_codes ( code )
+    promo_codes ( code ),
+    batch_departures ( label )
   `
 
   let rows: ApplicantDbRow[] = []
@@ -81,9 +87,16 @@ export async function fetchAdminApplicants(service: SupabaseClient) {
 
   return rows.map((row) => {
     const mapped = mapApplicantRow(row)
+    const departureJoin = (row as ApplicantDbRow & {
+      batch_departures?: { label: string } | { label: string }[] | null
+    }).batch_departures
     return {
       ...mapped,
-      departureLabel: resolveApplicantDepartureLabel(row.date_choice, row.batch_slug),
+      departureLabel: resolveApplicantDepartureLabel(row.date_choice, row.batch_slug, {
+        departureLabel: parseBatchDepartureRelation(departureJoin),
+        quizAnswers: row.quiz_answers,
+        bookedAt: row.profile_completed_at ?? row.created_at,
+      }),
     }
   })
 }

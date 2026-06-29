@@ -21,9 +21,13 @@
     "annotations:judge": "node scripts/judge-annotations.mjs",
     "annotations:auto": "node scripts/auto-annotate-dms.mjs",
     "annotations:pipeline": "node scripts/run-llm-annotation-pipeline.mjs",
+    "annotations:bot-report": "node scripts/judge-instagram-export-report.mjs",
+    "support:handoff-playbook": "node scripts/generate-support-handoff-playbook.mjs",
+    "support:handoff-pdf": "python3 scripts/export-playbook-pdf.py",
     "smoke": "bash scripts/smoke-test.sh",
     "check:pipeline": "node scripts/check-booking-pipeline.mjs",
-    "check:endpoints": "node scripts/check-kyc-endpoints.mjs"
+    "check:endpoints": "node scripts/check-kyc-endpoints.mjs",
+    "db:backfill:departures": "node scripts/backfill-applicant-departures.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
