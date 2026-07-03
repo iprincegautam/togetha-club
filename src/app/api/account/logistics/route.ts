@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isApprovedForTrip, requireMemberApiAccess } from '@/lib/auth/member'
-import { isProfileComplete } from '@/lib/payment-claim'
+import { requireMemberApiAccess } from '@/lib/auth/member'
 
 export async function GET() {
   const auth = await requireMemberApiAccess()
@@ -10,20 +9,17 @@ export async function GET() {
 
   const applicant = auth.applicant as {
     status: string
-    kyc_status?: string
-    balance_due?: number | null
+    amount_paid?: number | null
     departure_id: string | null
   }
 
-  const profileComplete = isProfileComplete(auth.applicant)
-  const approved = isApprovedForTrip(
-    applicant.status,
-    applicant.kyc_status,
-    profileComplete,
-    applicant.balance_due
-  )
+  // Logistics shares a real guide's phone number with the member, so it requires
+  // an explicit admin sign-off (status === 'approved', set from the applicant Review
+  // panel) — not just an inferred "looks confirmed" state like My Booking uses.
+  const paidAtLeastDeposit = (applicant.amount_paid ?? 0) > 0
+  const adminApproved = applicant.status === 'approved'
 
-  if (!approved || !applicant.departure_id) {
+  if (!adminApproved || !paidAtLeastDeposit || !applicant.departure_id) {
     return NextResponse.json({ available: false, logistics: null })
   }
 

@@ -6,7 +6,6 @@ export {
   activeStageIndex,
   bookingPipelineState,
   bookingStageFromStatus,
-  isApprovedForTrip,
   BOOKING_STAGES,
 } from '@/lib/booking-stages'
 export type { BookingStage, BookingPipelineState } from '@/lib/booking-stages'

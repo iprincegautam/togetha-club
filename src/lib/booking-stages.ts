@@ -43,26 +43,6 @@ export type BookingPipelineState = {
   stepStates: BookingStepState[]
 }
 
-/**
- * Whether the member has reached "Approved for trip" in the pipeline shown on My booking —
- * NOT the same as `status === 'approved'`. A member is trip-confirmed once deposit/paid +
- * profile complete + KYC clear, even if `status` is still literally 'deposit_paid' (balance
- * optional until departure). Excludes 'rejected', which also lands on step index 4 visually
- * but means the opposite. Use this instead of comparing `status` directly wherever a page
- * needs to know "is this member cleared to see trip-confirmed info" (e.g. logistics).
- */
-export function isApprovedForTrip(
-  status: string,
-  kycStatus?: string,
-  profileComplete?: boolean,
-  balanceDue?: number | null
-): boolean {
-  if (status === 'rejected') return false
-  const approvedStepState = bookingPipelineState(status, kycStatus, profileComplete, balanceDue)
-    .stepStates[4]
-  return approvedStepState === 'done' || approvedStepState === 'current'
-}
-
 function pipeline(
   stepStates: BookingStepState[],
   currentIndex: number
