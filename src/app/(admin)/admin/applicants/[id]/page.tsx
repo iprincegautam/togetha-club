@@ -6,6 +6,7 @@ import AdminApplicantPayments from '@/components/admin/AdminApplicantPayments'
 import AdminResendCredentialsButton from '@/components/admin/AdminResendCredentialsButton'
 import { adminListHref, parseAdminApplicantFilters } from '@/lib/admin-applicant-filters'
 import { requireAdminApiAccess } from '@/lib/auth/admin'
+import { ROUTES } from '@/constants/routes'
 import { listSupportStaff } from '@/lib/support-account'
 import {
   listApplicantPayments,
@@ -98,6 +99,15 @@ export default async function AdminApplicantPage({ params, searchParams }: PageP
       <div className="admin-card admin-card-wide">
         <p className="apply-eyebrow">✦ Admin ✦</p>
         <Link href={backHref} className="admin-inline-link">← All applicants</Link>
+        {data.batch_slug ? (
+          <Link
+            href={ROUTES.adminBatchDepartures(data.batch_slug)}
+            className="admin-inline-link"
+            style={{ marginLeft: 16 }}
+          >
+            Manage {data.batch_slug} departures & logistics →
+          </Link>
+        ) : null}
         {showCredentials ? (
           <AdminResendCredentialsButton applicantId={data.id} email={data.email} />
         ) : null}

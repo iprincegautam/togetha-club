@@ -14,6 +14,7 @@ export type PortalNavItem = {
 const MEMBER_PORTAL_NAV: readonly PortalNavItem[] = [
   { href: ROUTES.account, label: 'My booking' },
   { href: ROUTES.accountItinerary, label: 'Itinerary' },
+  { href: ROUTES.accountLogistics, label: 'Logistics' },
   { href: ROUTES.accountPayments, label: 'Payments' },
   { href: ROUTES.accountProfile, label: 'Profile' },
   { href: ROUTES.accountSettings, label: 'Settings' },

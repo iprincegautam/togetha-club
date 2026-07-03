@@ -48,6 +48,7 @@ export const ROUTES = {
   accountSettings: '/account/settings',
   accountPayments: '/account/payments',
   accountItinerary: '/account/itinerary',
+  accountLogistics: '/account/logistics',
   accountCompleteProfile: '/account/complete-profile',
   partner: '/partner',
   partnerBookings: '/partner/bookings',
