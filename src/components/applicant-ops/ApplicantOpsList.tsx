@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useCallback, useMemo, useState } from 'react'
 import Badge from '@/components/ui/Badge'
 import {
+  DEFAULT_ADMIN_APPLICANT_FILTERS,
   adminApplicantHref,
   filterAdminApplicants,
   filtersToSearchParams,
@@ -87,30 +88,31 @@ export default function ApplicantOpsList({
   applicants,
   variant = 'admin',
 }: ApplicantOpsListProps) {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const filters = useMemo(
-    () => parseAdminApplicantFilters(searchParams),
-    [searchParams]
+  // Filters are applied entirely client-side against the already-fetched `applicants`
+  // list, so we keep them in local state and only mirror the URL via history.replaceState
+  // (for shareable/back links). Using next/navigation's router.replace here would trigger
+  // a full server round-trip that re-fetches every applicant on every keystroke/click.
+  const [filters, setFilters] = useState<AdminApplicantFilters>(() =>
+    parseAdminApplicantFilters(searchParams)
   )
 
   const [nameDraft, setNameDraft] = useState(filters.name)
   const [emailDraft, setEmailDraft] = useState(filters.email)
 
-  useEffect(() => {
-    setNameDraft(filters.name)
-    setEmailDraft(filters.email)
-  }, [filters.name, filters.email])
-
   const updateFilters = useCallback(
-    (next: Partial<typeof filters>) => {
-      const merged = { ...filters, ...next }
-      const query = filtersToSearchParams(merged).toString()
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    (next: Partial<AdminApplicantFilters>) => {
+      setFilters((prev) => {
+        const merged = { ...prev, ...next }
+        const query = filtersToSearchParams(merged).toString()
+        const url = query ? `${pathname}?${query}` : pathname
+        window.history.replaceState(null, '', url)
+        return merged
+      })
     },
-    [filters, pathname, router]
+    [pathname]
   )
 
   const applyTextFilters = () => {
@@ -272,7 +274,8 @@ export default function ApplicantOpsList({
               onClick={() => {
                 setNameDraft('')
                 setEmailDraft('')
-                router.replace(pathname, { scroll: false })
+                setFilters(DEFAULT_ADMIN_APPLICANT_FILTERS)
+                window.history.replaceState(null, '', pathname)
               }}
             >
               Clear filters
