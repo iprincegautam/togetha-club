@@ -48,6 +48,7 @@ const ADMIN_PORTAL_NAV: readonly PortalNavItem[] = [
   { href: ROUTES.adminContent, label: 'Content review', badgeKey: 'content-review' },
   { href: ROUTES.adminAnnotate, label: 'DM annotations', match: 'prefix' },
   { href: ROUTES.adminPayouts, label: 'Payouts' },
+  { href: ROUTES.adminFinance, label: 'Finance', match: 'prefix' },
   { href: ROUTES.adminNotifications, label: 'Notifications' },
 ]
 

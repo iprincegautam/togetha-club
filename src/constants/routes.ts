@@ -25,6 +25,7 @@ export const ROUTES = {
   adminOverview: '/admin/overview',
   adminContent: '/admin/content',
   adminPayouts: '/admin/payouts',
+  adminFinance: '/admin/finance',
   adminNotifications: '/admin/notifications',
   adminLogin: '/admin/login',
   adminProvisionMember: '/admin/provision-member',
