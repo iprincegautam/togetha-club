@@ -4,6 +4,7 @@ import {
   formatShortDepartureListFromDates,
   getFallbackDateOptions,
   visibleDepartureShortList,
+  VISIBLE_DEPARTURE_WEEKS,
 } from '@/lib/batch-departure-dates'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import type { BatchStatus } from '@/types/batch'
@@ -80,7 +81,7 @@ export async function fetchBatchDepartures(
       return fallbackDateOptions(batchSlug)
     }
 
-    const visible = filterVisibleDepartures(data as BatchDepartureRow[])
+    const visible = filterVisibleDepartures(data as BatchDepartureRow[], VISIBLE_DEPARTURE_WEEKS, batchSlug)
     if (!visible.length) {
       return fallbackDateOptions(batchSlug)
     }

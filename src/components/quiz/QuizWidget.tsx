@@ -255,7 +255,7 @@ export default function QuizWidget({
                     )
                   })}
                 {!departureLoading && departureDates.length === 0 && (
-                  <p className="qsub">No departures in the next 6 weeks — check back soon.</p>
+                  <p className="qsub">No open departures left in this launch window — check back soon.</p>
                 )}
               </div>
             )}

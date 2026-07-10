@@ -1,8 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getBatchDateOptions } from '@/constants/batches'
 import {
+  ALTERNATING_SCHEDULE_START,
   generateFridayDepartures,
   isDepartureVisible,
+  SEEDED_DEPARTURE_WEEKS,
   VISIBLE_DEPARTURE_WEEKS,
 } from '@/lib/batch-departure-dates'
 import { fetchBatchDepartures } from '@/lib/batches'
@@ -22,8 +24,8 @@ export function isNumericDateChoice(dateChoice: string): boolean {
 }
 
 export function dateLabelOptionsAt(batchSlug: string, asOf: Date): { label: string; sublabel: string }[] {
-  return generateFridayDepartures()
-    .filter((d) => isDepartureVisible(d.departure_date, VISIBLE_DEPARTURE_WEEKS, asOf))
+  return generateFridayDepartures(ALTERNATING_SCHEDULE_START, SEEDED_DEPARTURE_WEEKS, batchSlug)
+    .filter((d) => isDepartureVisible(d.departure_date, VISIBLE_DEPARTURE_WEEKS, asOf, batchSlug))
     .map((d) => ({ label: d.label, sublabel: d.sublabel }))
 }
 
