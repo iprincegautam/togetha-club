@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { normalizePromoCode, resolvePromoDiscount } from '@/lib/promo'
+import { batchPriceFallbackPaise } from '@/lib/batch-price-fallbacks'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
-const VALID_SLUGS = ['batch-a', 'batch-b']
+const VALID_SLUGS = ['batch-a', 'batch-b', 'batch-d', 'batch-e']
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       amountPaise = batch.price * 100
     }
     if (!amountPaise) {
-      amountPaise = batchSlug === 'batch-b' ? 2299900 : 1899900
+      amountPaise = batchPriceFallbackPaise(batchSlug)
     }
 
     if (!supabase) {

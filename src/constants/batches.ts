@@ -3,7 +3,7 @@ export const BATCH_META = {
     color: 'var(--teal-stamp)',
     accentColor: 'var(--teal-light)',
     label: 'GenZ Edition',
-    tagline: 'Loud. Chaotic. Beautiful.',
+    tagline: 'Electric. Real. Yours.',
     ageRange: '18–25',
   },
   'batch-b': {
@@ -19,6 +19,20 @@ export const BATCH_META = {
     label: 'Mystery Edition',
     tagline: "We're not telling you where it is.",
     ageRange: 'TBD',
+  },
+  'batch-d': {
+    color: 'var(--gold)',
+    accentColor: 'var(--gold-light)',
+    label: 'GenZ Edition',
+    tagline: 'City of Lakes. Verified singles. Show up.',
+    ageRange: '18–25',
+  },
+  'batch-e': {
+    color: 'var(--rose)',
+    accentColor: 'var(--rose-light)',
+    label: 'Millennial Edition',
+    tagline: 'City of Lakes. Verified singles. Show up.',
+    ageRange: '26–36',
   },
 } as const
 

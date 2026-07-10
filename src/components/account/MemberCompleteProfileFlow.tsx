@@ -7,7 +7,9 @@ import DatePicker from '@/components/batches/DatePicker'
 import QuizWidget from '@/components/quiz/QuizWidget'
 import { BATCH_META } from '@/constants/batches'
 import { ROUTES } from '@/constants/routes'
+import { BOOKABLE_BATCH_SLUGS, getDestinationForBatch } from '@/constants/destinations'
 import { primaryBatchForAge, parseQuizAge } from '@/lib/batch-age'
+import type { MatchableBatchSlug } from '@/types/match'
 import type { DateOption } from '@/lib/batches'
 import { calculateQuizResult } from '@/lib/utils'
 import type { QuizAnswers, QuizResult } from '@/types/quiz'
@@ -19,7 +21,7 @@ export default function MemberCompleteProfileFlow() {
   const [step, setStep] = useState<Step>('quiz')
   const [answers, setAnswers] = useState<QuizAnswers | null>(null)
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null)
-  const [batchSlug, setBatchSlug] = useState<'batch-a' | 'batch-b'>('batch-a')
+  const [batchSlug, setBatchSlug] = useState<MatchableBatchSlug>('batch-a')
   const [gender, setGender] = useState<'m' | 'f' | null>(null)
   const [dateChoice, setDateChoice] = useState<number | null>(null)
   const [dateOptions, setDateOptions] = useState<DateOption[]>([])
@@ -35,12 +37,13 @@ export default function MemberCompleteProfileFlow() {
   }, [batchSlug, step])
 
   const handleQuizComplete = (completedAnswers: QuizAnswers) => {
-    const computed = calculateQuizResult(completedAnswers)
+    const destination = getDestinationForBatch(batchSlug) ?? 'himalayan'
+    const computed = calculateQuizResult(completedAnswers, destination)
     setAnswers(completedAnswers)
     setQuizResult(computed)
     const age = parseQuizAge(completedAnswers)
-    const recommended = age !== null ? primaryBatchForAge(age) : null
-    if (recommended === 'batch-a' || recommended === 'batch-b') {
+    const recommended = age !== null ? primaryBatchForAge(age, destination) : null
+    if (recommended) {
       setBatchSlug(recommended)
     }
     setStep('booking')
@@ -118,7 +121,7 @@ export default function MemberCompleteProfileFlow() {
         <div className="apply-field">
           <span className="apply-label">Batch</span>
           <div className="gender-options">
-            {(['batch-a', 'batch-b'] as const).map((slug) => (
+            {BOOKABLE_BATCH_SLUGS.map((slug) => (
               <button
                 key={slug}
                 type="button"

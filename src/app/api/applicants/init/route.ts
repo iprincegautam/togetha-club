@@ -109,7 +109,8 @@ export async function POST(req: NextRequest) {
       payload.quiz_answers = answers
       payload.quiz_score = typeof score === 'number' ? score : null
       payload.compatibility_vector = answersToCompatibilityVector(answers)
-      if (batchRecommendation) payload.batch_slug = batchRecommendation
+      // Prefer the apply-page batch slug over quiz recommendation so Udaipur
+      // checkout cannot be rewritten to a Himalayan edition.
     }
 
     protectExistingQuizFields(payload, existing, answers, score)

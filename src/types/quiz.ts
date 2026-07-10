@@ -15,11 +15,11 @@ export interface QuizAnswers {
   [questionId: number]: number | string
 }
 
-import type { BatchMatchResult } from '@/types/match'
+import type { BatchMatchResult, MatchableBatchSlug } from '@/types/match'
 
 export interface QuizResult {
   score: number
-  batchRecommendation: 'batch-a' | 'batch-b'
+  batchRecommendation: MatchableBatchSlug
   isHighMatch: boolean
   batchMatches?: BatchMatchResult[]
 }

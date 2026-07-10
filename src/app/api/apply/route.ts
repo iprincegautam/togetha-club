@@ -15,10 +15,12 @@ import {
   razorpay,
   validateRazorpayKeyConfiguration,
 } from '@/lib/razorpay'
+import { isBookableBatchSlug } from '@/constants/destinations'
+import { batchPriceFallbackPaise } from '@/lib/batch-price-fallbacks'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 import { resolveDepartureForPersist } from '@/lib/applicant-departure'
 
-const VALID_SLUGS = ['batch-a', 'batch-b']
+const VALID_SLUGS = ['batch-a', 'batch-b', 'batch-d', 'batch-e']
 
 function devOrderResponse(
   applicantId: string,
@@ -69,7 +71,7 @@ export async function POST(req: NextRequest) {
     const supabase = tryCreateServiceRoleClient()
     if (!supabase) {
       if (isDevelopment()) {
-        const fallbackTotal = batchSlug === 'batch-b' ? 2299900 : 1899900
+        const fallbackTotal = batchPriceFallbackPaise(batchSlug)
         const { chargeNow, balanceDue, totalDue } = calculatePaymentAmounts(
           fallbackTotal,
           plan
@@ -157,7 +159,7 @@ export async function POST(req: NextRequest) {
     if (
       applicantRow &&
       hasQuizAnswers(applicantRow.quiz_answers) &&
-      (batchSlug === 'batch-a' || batchSlug === 'batch-b')
+      isBookableBatchSlug(batchSlug)
     ) {
       const { match } = await buildApplicantMatchInsight(
         supabase,

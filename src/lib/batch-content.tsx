@@ -16,6 +16,14 @@ import {
   BATCH_B_ITINERARY,
   BATCH_B_NOT_INCLUDED,
 } from '@/lib/batch-trip-data'
+import {
+  BATCH_D_INCLUDES,
+  BATCH_D_ITINERARY,
+  BATCH_D_NOT_INCLUDED,
+  BATCH_E_INCLUDES,
+  BATCH_E_ITINERARY,
+  BATCH_E_NOT_INCLUDED,
+} from '@/lib/batch-trip-data-udaipur'
 import { VIBE_GLYPH } from '@/constants/brand-glyphs'
 
 const BATCH_A_VIBE_CARDS: VibeCardData[] = [
@@ -182,6 +190,78 @@ import { getFallbackDateOptions } from '@/lib/batch-departure-dates'
 
 const BATCH_A_DATES = getFallbackDateOptions('batch-a')
 const BATCH_B_DATES = getFallbackDateOptions('batch-b')
+const BATCH_D_DATES = getFallbackDateOptions('batch-d')
+const BATCH_E_DATES = getFallbackDateOptions('batch-e')
+
+const UDAIPUR_VIBE_CARDS: VibeCardData[] = [
+  {
+    icon: VIBE_GLYPH.ease,
+    title: 'Safe by Design',
+    desc: 'Always 12 women and 12 men, ID-verified before confirmation, and single-gender room sharing.',
+  },
+  {
+    icon: VIBE_GLYPH.depth,
+    title: 'Matched, Not Random',
+    desc: 'Every person completes the compatibility quiz before joining the verified group of 24.',
+  },
+  {
+    icon: VIBE_GLYPH.unscripted,
+    title: 'No Pressure',
+    desc: 'Join what you want, skip what you do not. No forced games, staged reveals, or compatibility scores.',
+  },
+  {
+    icon: VIBE_GLYPH.night,
+    title: 'A Better First Night',
+    desc: 'The hosted Bollywood house party gets everyone laughing together without anyone having to perform.',
+  },
+]
+
+const UDAIPUR_POLICIES: PolicyData[] = [
+  {
+    title: '✓ Verified batch',
+    text: 'Every batch is exactly 12 women and 12 men. Everyone is ID-verified before confirmation.',
+  },
+  {
+    title: '✓ Rooms & hosts',
+    text: 'Room sharing is single-gender. Trained Togetha trip captains are with the group day and night.',
+  },
+  {
+    title: '✓ Your choice',
+    text: 'Participation is optional. We never force a match, stage a reveal, or promise romance.',
+  },
+  {
+    title: '— Cancellation & refunds',
+    text: 'Your booking amount reserves the seat; the balance is due at least 7 days before departure. Read the cancellation and refund policy before paying.',
+  },
+]
+
+const UDAIPUR_FAQ = [
+  {
+    question: 'Is it actually safe — who is on the trip?',
+    answer:
+      "Every batch is exactly 12 women and 12 men, and everyone is ID-verified before they're confirmed. You never share a room across genders, trained trip captains are with the group day and night, and every stay and venue is vetted by us.",
+  },
+  {
+    question: "I'm introverted — is this still for me?",
+    answer:
+      "Yes. Everything is structured so nobody has to perform, there is real free time, and participation is always optional. The lakes, fort, and small group moments do a lot of the work.",
+  },
+  {
+    question: "What if I don't meet anyone romantically?",
+    answer:
+      "You still spend three days in Udaipur with 23 interesting, verified singles who chose to show up. Romance is possible, never guaranteed — and that is intentional.",
+  },
+  {
+    question: 'Can I come with a friend?',
+    answer:
+      'Yes — each person books their own seat. We may not always room or group you together because the point is to meet the other 22 people rather than stay in a bubble.',
+  },
+  {
+    question: 'How do I book, and what about refunds?',
+    answer:
+      'Take the quiz, pick your weekend, and reserve your seat with the booking amount. The balance is due at least 7 days before departure. Read the full cancellation and refund terms before you pay.',
+  },
+]
 
 function buildBatchATabs() {
   return [
@@ -298,12 +378,109 @@ function buildBatchBTabs() {
   ]
 }
 
+function buildBatchDTabs() {
+  return [
+    {
+      id: 'itinerary',
+      label: 'Day-by-Day',
+      content: (
+        <ItineraryTab
+          title="3 days — Gurugram · Udaipur · Kumbhalgarh."
+          days={BATCH_D_ITINERARY}
+        />
+      ),
+    },
+    {
+      id: 'whats-in',
+      label: "What's Included",
+      content: (
+        <IncludesTab
+          label="In the box"
+          title="Everything’s handled. You just show up."
+          items={BATCH_D_INCLUDES}
+          notIncluded={BATCH_D_NOT_INCLUDED}
+        />
+      ),
+    },
+    {
+      id: 'vibe',
+      label: 'The Vibe',
+      content: (
+        <VibeTab
+          label="What this actually is"
+          title="Not a dating app. Not a random group tour."
+          intro={`Take a short compatibility quiz, get matched into a balanced batch of 24 verified singles, and spend three days in the City of Lakes with people you are genuinely likely to click with.\n\nNo swiping, no ghosting, no performing for a profile — just real people in a real place, with everything planned for you.`}
+          cards={UDAIPUR_VIBE_CARDS}
+        />
+      ),
+    },
+    {
+      id: 'policy',
+      label: 'Policies',
+      content: (
+        <PolicyTab label="The honest bit" title="Safe by design, not as an afterthought." policies={UDAIPUR_POLICIES} />
+      ),
+    },
+  ]
+}
+
+function buildBatchETabs() {
+  return [
+    {
+      id: 'itinerary',
+      label: 'Day-by-Day',
+      content: (
+        <ItineraryTab
+          title="3 days — Gurugram · Udaipur · Kumbhalgarh."
+          days={BATCH_E_ITINERARY}
+          roseAccent
+        />
+      ),
+    },
+    {
+      id: 'whats-in',
+      label: "What's Included",
+      content: (
+        <IncludesTab
+          label="What’s included"
+          title="Everything’s handled. You just show up."
+          items={BATCH_E_INCLUDES}
+          notIncluded={BATCH_E_NOT_INCLUDED}
+        />
+      ),
+    },
+    {
+      id: 'vibe',
+      label: 'The Vibe',
+      content: (
+        <VibeTab
+          label="What this actually is"
+          title="Not a dating app. Not a random group tour."
+          intro={`Take a short compatibility quiz, get matched into a balanced batch of 24 verified singles, and spend three days in the City of Lakes with people you are genuinely likely to click with.\n\nNo swiping, no ghosting, no performing for a profile — just real people in a real place, with everything planned for you.`}
+          cards={UDAIPUR_VIBE_CARDS}
+        />
+      ),
+    },
+    {
+      id: 'policy',
+      label: 'Policies',
+      content: (
+        <PolicyTab label="The honest bit" title="Safe by design, not as an afterthought." policies={UDAIPUR_POLICIES} />
+      ),
+    },
+  ]
+}
+
 export function buildBatchTabs(slug: string) {
   switch (slug) {
     case 'batch-a':
       return buildBatchATabs()
     case 'batch-b':
       return buildBatchBTabs()
+    case 'batch-d':
+      return buildBatchDTabs()
+    case 'batch-e':
+      return buildBatchETabs()
     default:
       return []
   }
@@ -315,9 +492,13 @@ export function buildBatchFaq(slug: string) {
       return BATCH_A_FAQ
     case 'batch-b':
       return BATCH_B_FAQ
+    case 'batch-d':
+      return UDAIPUR_FAQ
+    case 'batch-e':
+      return UDAIPUR_FAQ
     default:
       return []
   }
 }
 
-export { BATCH_A_DATES, BATCH_B_DATES }
+export { BATCH_A_DATES, BATCH_B_DATES, BATCH_D_DATES, BATCH_E_DATES }

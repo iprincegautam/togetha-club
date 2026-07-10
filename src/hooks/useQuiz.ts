@@ -2,11 +2,12 @@
 
 import { useCallback, useState } from 'react'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
+import type { DestinationSlug } from '@/constants/destinations'
 import { saveQuizAnswers } from '@/lib/quiz-storage'
 import { calculateQuizResult } from '@/lib/utils'
 import type { QuizAnswers, QuizResult } from '@/types/quiz'
 
-export function useQuiz() {
+export function useQuiz(destination: DestinationSlug = 'himalayan') {
   const [cur, setCur] = useState(0)
   const [ans, setAns] = useState<QuizAnswers>({})
   const [phase, setPhase] = useState<'quiz' | 'result'>('quiz')
@@ -50,12 +51,12 @@ export function useQuiz() {
       setAns(updatedAns)
     }
 
-    const computed = calculateQuizResult(updatedAns)
+    const computed = calculateQuizResult(updatedAns, destination)
     saveQuizAnswers(updatedAns)
     setResult(computed)
     setPhase('result')
     return computed
-  }, [cur, ans, totalQuestions])
+  }, [cur, ans, totalQuestions, destination])
 
   const goBack = useCallback(() => {
     if (cur > 0) {

@@ -2,7 +2,7 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'What exactly is Togetha.Club?',
     answer:
-      "India's first matchmaking travel club for verified singles. Take the quiz, book your slot for the Friday you want, pay on the website, and show up for a 6-day Himalayan trip with 24 people (12 boys, 12 girls). Our AI matches you into the cohort where you're most likely to connect. It's not a dating app. It's a real trip with real people.",
+      "India's first matchmaking travel club for verified singles. Take the quiz, book your slot for the Friday you want, pay on the website, and show up for a trip with 24 people (12 women, 12 men). Choose Himalayan (Manali · Kasol · Sissu, 5N/6D) or Udaipur · Kumbhalgarh (2N/3D) — each with GenZ and Millennial editions. Our AI matches you into the cohort where you're most likely to connect.",
   },
   {
     question: 'How does the AI matching work?',
@@ -10,19 +10,19 @@ export const HOME_FAQ_ITEMS = [
       'You take a 12-question compatibility quiz (age first, then personality). Your answers become a 12-dimension profile — communication style, values, emotional availability, and more. We use that to recommend your best batch and estimate fit with the kind of people already moving toward each departure. Full preview on Our AI before you apply.',
   },
   {
-    question: 'What are Batch A and Batch B?',
+    question: 'What destinations and editions are available?',
     answer:
-      'Batch A — GenZ Edition is for ages 18–25. Batch B — Millennial Edition is for ages 26–36. Same route (Manali → Kasol → Sissu), same 12+12 balance, slightly different energy and price point. Your age decides which band you belong in.',
+      'Two destinations: Himalayan Love Trail (Manali · Kasol · Sissu) and Udaipur Love Trail (Udaipur · Kumbhalgarh). Each has a GenZ Edition (ages 18–25) and Millennial Edition (ages 26–36). Same 12+12 balance, same quiz-first flow — slightly different energy and price by edition.',
   },
   {
     question: 'How do I book my spot?',
     answer:
-      'Take the 12-question quiz, pick Batch A or B and your Friday departure, then pay on togetha.club to lock your slot. Once payment goes through, you\'re in — 12 boys and 12 girls on the same trip, AI-matched from your quiz.',
+      'Take the 12-question quiz, pick your destination and edition, choose your Friday departure, then pay on togetha.club to lock your slot. Once payment goes through, you\'re in — 12 women and 12 men on the same trip, AI-matched from your quiz.',
   },
   {
-    question: 'Is this safe? Who actually goes on these trips?',
+    question: 'Is this safe? I\'m a woman thinking about coming solo.',
     answer:
-      'Every batch is exactly 12 boys and 12 girls. Everyone on the trip is verified. Trip leaders and partner properties are vetted. You\'re not meeting random strangers from the internet — you\'re meeting singles who booked the same experience you did.',
+      'This is built for exactly that. Every batch is 12 women and 12 men — no exceptions. Every participant is identity-verified before they join. We have female trip leads available on request. Accommodation is in private or shared-gender rooms at vetted properties — never mixed dorms. Before departure, all women in the batch are added to a women-only WhatsApp group so you\'re not arriving as a stranger. If anything feels off at any point on the trip, our team is reachable 24/7. You are not alone on this trip — you have 11 other women who showed up for the same reason.',
   },
   {
     question: "What if I don't find a romantic connection?",

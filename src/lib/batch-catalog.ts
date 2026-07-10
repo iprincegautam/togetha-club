@@ -1,13 +1,24 @@
+import { BOOKABLE_BATCH_SLUGS } from '@/constants/destinations'
+import { BATCH_PRICE_FALLBACK_RUPEES } from '@/lib/batch-price-fallbacks'
 import type { Batch, BatchStatus } from '@/types/batch'
+import type { MatchableBatchSlug } from '@/types/match'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 
 export type BatchCatalogRow = Pick<Batch, 'slug' | 'name' | 'price' | 'status'>
 
-export const FALLBACK_BATCHES: BatchCatalogRow[] = [
-  { slug: 'batch-a', name: 'The Himalayan Love Trail — A', price: 18999, status: 'open' },
-  { slug: 'batch-b', name: 'The Himalayan Love Trail — B', price: 22999, status: 'open' },
-  { slug: 'batch-c', name: 'The Himalayan Love Trail — C', price: null, status: 'coming_soon' },
-]
+export const FALLBACK_BATCHES: BatchCatalogRow[] = BOOKABLE_BATCH_SLUGS.map((slug) => ({
+  slug,
+  name:
+    slug === 'batch-a'
+      ? 'The Himalayan Love Trail — A'
+      : slug === 'batch-b'
+        ? 'The Himalayan Love Trail — B'
+        : slug === 'batch-d'
+          ? 'The Udaipur Love Trail — D'
+          : 'The Udaipur Love Trail — E',
+  price: BATCH_PRICE_FALLBACK_RUPEES[slug as MatchableBatchSlug],
+  status: 'open' as const,
+}))
 
 export async function fetchBatchesCatalog(): Promise<BatchCatalogRow[]> {
   try {
@@ -17,7 +28,7 @@ export async function fetchBatchesCatalog(): Promise<BatchCatalogRow[]> {
     const { data, error } = await supabase
       .from('batches')
       .select('slug, name, price, status')
-      .in('slug', ['batch-a', 'batch-b', 'batch-c'])
+      .in('slug', [...BOOKABLE_BATCH_SLUGS])
       .order('slug')
 
     if (error || !data?.length) {

@@ -27,6 +27,7 @@ import { renderNurtureEmail } from '@/lib/nurture/templates'
 import type { DepartureUrgencyTier, NurtureEmailContext } from '@/lib/nurture/types'
 import { normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import { BATCH_META } from '@/constants/batches'
+import { isBookableBatchSlug } from '@/constants/destinations'
 import type { MatchableBatchSlug } from '@/types/match'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -43,7 +44,7 @@ function isMissingNurtureTable(error: { message?: string } | null): boolean {
 }
 
 function isMatchableBatch(slug: string | null): slug is MatchableBatchSlug {
-  return slug === 'batch-a' || slug === 'batch-b'
+  return isBookableBatchSlug(slug ?? '')
 }
 
 async function logEmailSend(

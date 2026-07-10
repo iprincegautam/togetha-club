@@ -18,7 +18,7 @@ const STEPS = [
     num: '02',
     icon: HOW_IT_WORKS_GLYPH.ai,
     title: 'Book your slot',
-    desc: 'Pick your Friday departure, pay on the website, and lock your spot. 12 boys and 12 girls — gender balance guaranteed.',
+    desc: 'Pick your Friday departure, pay on the website, and lock your spot. 12 women and 12 men — gender balance guaranteed.',
     action: 'batches' as const,
   },
   {

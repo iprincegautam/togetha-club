@@ -10,12 +10,12 @@ export default function HowItWorksHero() {
           Quiz → book → <span className="hiw-hero-accent">mountains.</span>
         </h1>
         <p className="hiw-hero-sub">
-          Take the quiz, pick your Friday, pay on the website — then show up with 12 boys and 12
-          girls for 3 nights across Manali, Sissu, and Kasol.
+          Take the quiz, pick your Friday, pay on the website — then show up with 12 women and 12
+          men for 3 nights across Manali, Sissu, and Kasol.
         </p>
         <div className="hiw-hero-btns">
-          <Link href={ROUTES.match} className="btn-p">
-            Take the Quiz →
+          <Link href={ROUTES.batches} className="btn-p">
+            Choose your destination →
           </Link>
           <Link href={ROUTES.batches} className="btn-o">
             See open batches

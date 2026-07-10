@@ -2,10 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { calculateDiscount, normalizePromoCode, type DiscountType } from '@/lib/promo'
 import { calculatePaymentAmounts, type PaymentPlan } from '@/lib/payment-plan'
 
-const OPEN_BATCH_SLUGS = ['batch-a', 'batch-b'] as const
-
-/** Offline fallback when DB is unavailable (rupees). */
-const FALLBACK_OPEN_BATCH_PRICES_RUPEES = [18999, 22999]
+import { BATCH_PRICE_FALLBACK_RUPEES } from '@/lib/batch-price-fallbacks'
 
 /** Built-in coupon codes for direct sales (max 10% off package). */
 export const DIRECT_SALE_COUPONS: Record<
@@ -16,8 +13,10 @@ export const DIRECT_SALE_COUPONS: Record<
   MAX: { discountType: 'percent', discountValue: 10, label: 'Maximum 10% off' },
 }
 
+const OPEN_BATCH_SLUGS = ['batch-a', 'batch-b', 'batch-d', 'batch-e'] as const
+
 function fallbackPackagePricePaise(): number {
-  return Math.max(...FALLBACK_OPEN_BATCH_PRICES_RUPEES) * 100
+  return Math.max(...Object.values(BATCH_PRICE_FALLBACK_RUPEES)) * 100
 }
 
 /** Load package price in paise from `batches.price` (rupees × 100). */

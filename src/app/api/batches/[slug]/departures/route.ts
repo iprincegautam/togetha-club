@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isBookableBatchSlug } from '@/constants/destinations'
 import { fetchBatchDepartures } from '@/lib/batches'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 
@@ -9,7 +10,7 @@ type RouteContext = {
 export async function GET(_request: Request, context: RouteContext) {
   const { slug } = await context.params
 
-  if (slug !== 'batch-a' && slug !== 'batch-b') {
+  if (!isBookableBatchSlug(slug)) {
     return NextResponse.json({ error: 'Invalid batch' }, { status: 400 })
   }
 

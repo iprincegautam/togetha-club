@@ -41,8 +41,8 @@ export default function AISection() {
             <p className="ai-body">
               We don&apos;t just look at who you are. We look at who you need to be around.
             </p>
-            <a href={ROUTES.match} className="apply-submit" style={{ display: 'inline-block', marginTop: 8 }}>
-              Try the AI Match Lab →
+            <a href={ROUTES.batches} className="apply-submit" style={{ display: 'inline-block', marginTop: 8 }}>
+              Choose your destination →
             </a>
             <div className="ai-traits">
               {TRAITS.map((trait) => (

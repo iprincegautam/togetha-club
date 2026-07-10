@@ -14,12 +14,11 @@ export default function HomeClosingCta() {
           Ready to find your <span className="t">batch?</span>
         </h2>
         <p className="home-closing-sub">
-          Two minutes on the quiz. One week in the mountains. Start with compatibility — we handle
-          the rest.
+          Pick Himalayan or Udaipur first — then take the quiz to check your fit and lock a Friday.
         </p>
         <div className="home-closing-btns">
-          <Link href={ROUTES.match} className="btn-p">
-            Take the Compatibility Quiz →
+          <Link href={ROUTES.batches} className="btn-p">
+            Choose your destination →
           </Link>
           <Link href={ROUTES.howItWorks} className="btn-o">
             How it works

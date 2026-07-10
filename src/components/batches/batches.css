@@ -1328,9 +1328,9 @@
 
 .batches-catalog-track {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
-  max-width: 1100px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -1419,6 +1419,72 @@
 
 .batches-catalog-cta:hover {
   transform: translate(-1px, -1px);
+}
+
+.batches-catalog-secondary {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+  text-decoration: none;
+}
+
+.batches-catalog-secondary:hover {
+  color: var(--batch-accent, var(--teal-stamp));
+}
+
+.destination-switcher {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 0 24px;
+}
+
+.destination-switcher-label {
+  font-family: var(--font-family-caveat);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink-mid);
+  margin: 0 0 10px;
+}
+
+.destination-switcher-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.destination-switcher-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: var(--warm-white);
+  text-decoration: none;
+  color: var(--ink);
+  border-top: 3px solid var(--batch-accent, var(--teal-stamp));
+  transition: transform 0.15s ease;
+}
+
+.destination-switcher-card.active {
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.destination-switcher-title {
+  font-family: var(--font-playfair);
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.destination-switcher-stops {
+  font-family: var(--font-baskerville);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-mid);
 }
 
 .batches-catalog-foot {

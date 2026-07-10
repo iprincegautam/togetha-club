@@ -8,8 +8,10 @@ import { submitQuizLead, type QuizLeadSource } from '@/lib/quiz-lead'
 import type { QuizAnswers } from '@/types/quiz'
 
 const BATCH_LABELS: Record<string, string> = {
-  'batch-a': 'GenZ Edition (Batch A)',
-  'batch-b': 'Millennial Edition (Batch B)',
+  'batch-a': 'Himalayan — GenZ Edition',
+  'batch-b': 'Himalayan — Millennial Edition',
+  'batch-d': 'Udaipur — GenZ Edition',
+  'batch-e': 'Udaipur — Millennial Edition',
 }
 
 type Props = {
@@ -114,9 +116,9 @@ export default function QuizLeadCapture({
           <p className="quiz-lead-score-lbl">AI compatibility score</p>
           <p className="quiz-lead-teaser-copy">
             Strong fit for <strong>{batchLabel}</strong> · ages{' '}
-            {batchRecommendation === 'batch-b'
-              ? BATCH_AGE_LIMITS['batch-b'].label
-              : BATCH_AGE_LIMITS['batch-a'].label}
+            {(BATCH_AGE_LIMITS[batchRecommendation as keyof typeof BATCH_AGE_LIMITS] ??
+              BATCH_AGE_LIMITS['batch-a']
+            ).label}
           </p>
         </div>
       )}

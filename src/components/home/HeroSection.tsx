@@ -9,7 +9,7 @@ export default function HeroSection() {
       <div className="hero-stamps hero-stamps--desktop" aria-hidden="true">
         <div className="hero-stamp-wrap anim-stamp-drift" style={{ top: 100, left: 60 }}>
           <StampCircle
-            text={<>India&apos;s<br />First ♡<br />Love Trip</>}
+            text={<>Real<br />People<br />♡ Real</>}
             color="var(--rose)"
             size={125}
             rotation={-15}
@@ -35,7 +35,7 @@ export default function HeroSection() {
           style={{ bottom: 130, left: 120 }}
         >
           <StampCircle
-            text={<>Manali<br />Kasol<br />Sissu</>}
+            text={<>Himalayan<br />+ Udaipur<br />✦</>}
             color="var(--gold)"
             size={88}
             rotation={-8}
@@ -73,7 +73,7 @@ export default function HeroSection() {
 
         <div className="hero-stamps hero-stamps--mobile" aria-hidden="true">
           <StampCircle
-            text={<>India&apos;s<br />First ♡<br />Love Trip</>}
+            text={<>Real<br />People<br />♡ Real</>}
             color="var(--rose)"
             size={88}
             rotation={-12}
@@ -98,17 +98,20 @@ export default function HeroSection() {
           <span className="ht-gold">travelers.</span>
         </h1>
         <p className="hero-sub">
-          Take the quiz, book your slot, pay online — then 6 days in the Himalayas with 12 boys and
-          12 girls, AI-matched.
+          Pick Himalayan (Manali · Kasol · Sissu) or Udaipur · Kumbhalgarh, take the quiz, then book
+          your slot with 12 women and 12 men — AI-matched.
         </p>
         <div className="hero-btns">
-          <Link href={ROUTES.match} className="btn-p">
-            Take the Quiz →
+          <Link href={ROUTES.batches} className="btn-p">
+            Choose your destination →
           </Link>
-          <Link href={ROUTES.batches} className="btn-o">
-            See Batches
+          <Link href={ROUTES.howItWorks} className="btn-o">
+            How it works
           </Link>
         </div>
+        <p className="hero-trust">
+          ✦ Verified profiles &nbsp;·&nbsp; Female trip leads &nbsp;·&nbsp; Identity-screened cohort
+        </p>
       </div>
 
       <div className="hero-scene anim-float-delay-1">

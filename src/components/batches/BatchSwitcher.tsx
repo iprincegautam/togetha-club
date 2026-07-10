@@ -3,6 +3,12 @@
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { BATCH_META } from '@/constants/batches'
+import {
+  DESTINATIONS,
+  getDestinationForBatch,
+  getEditionSlugsForDestination,
+  type DestinationSlug,
+} from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import { withPromoQuery } from '@/lib/promo'
 import { formatPrice } from '@/lib/utils'
@@ -29,8 +35,19 @@ function statusLabel(status: BatchCatalogRow['status']): string {
   }
 }
 
+function editionLabel(slug: string, destination: DestinationSlug): string {
+  if (slug === getEditionSlugsForDestination(destination)[0]) {
+    return `${DESTINATIONS[destination].shortTitle} — GenZ`
+  }
+  return `${DESTINATIONS[destination].shortTitle} — Millennial`
+}
+
 export default function BatchSwitcher({ batches, currentSlug, promoCode }: BatchSwitcherProps) {
   const trackRef = useRef<HTMLDivElement>(null)
+  const destination = getDestinationForBatch(currentSlug)
+  const visibleBatches = destination
+    ? batches.filter((batch) => getEditionSlugsForDestination(destination).includes(batch.slug as never))
+    : batches
 
   useEffect(() => {
     const track = trackRef.current
@@ -41,11 +58,13 @@ export default function BatchSwitcher({ batches, currentSlug, promoCode }: Batch
     }
   }, [currentSlug])
 
+  if (!destination) return null
+
   return (
-    <nav className="batch-switcher" aria-label="Choose batch">
-      <p className="batch-switcher-label">All batches — swipe to compare</p>
+    <nav className="batch-switcher" aria-label="Choose edition">
+      <p className="batch-switcher-label">{DESTINATIONS[destination].title} — swipe to compare editions</p>
       <div className="batch-switcher-track" ref={trackRef} role="list">
-        {batches.map((batch) => {
+        {visibleBatches.map((batch) => {
           const meta = BATCH_META[batch.slug as keyof typeof BATCH_META]
           const active = batch.slug === currentSlug
           const accent = meta?.color ?? 'var(--teal-stamp)'
@@ -60,11 +79,7 @@ export default function BatchSwitcher({ batches, currentSlug, promoCode }: Batch
               aria-current={active ? 'page' : undefined}
             >
               <span className="batch-switcher-edition">{meta?.label ?? batch.slug}</span>
-              <span className="batch-switcher-name">
-                {batch.slug === 'batch-a' && 'Love Trail — A'}
-                {batch.slug === 'batch-b' && 'Love Trail — B'}
-                {batch.slug === 'batch-c' && 'Mystery Edition'}
-              </span>
+              <span className="batch-switcher-name">{editionLabel(batch.slug, destination)}</span>
               <span className="batch-switcher-meta">
                 {batch.price != null ? formatPrice(batch.price) : 'TBA'} · {statusLabel(batch.status)}
               </span>

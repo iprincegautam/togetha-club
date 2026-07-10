@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       grants_priority: Boolean(body.grantsPriority),
       max_uses: body.maxUses ? Number(body.maxUses) : null,
       active: body.active !== false,
-      batch_slugs: body.batchSlugs?.length ? body.batchSlugs : ['batch-a', 'batch-b'],
+      batch_slugs: body.batchSlugs?.length ? body.batchSlugs : ['batch-a', 'batch-b', 'batch-d', 'batch-e'],
     })
     .select('*')
     .single()

@@ -1,3 +1,5 @@
+import type { DestinationSlug } from '@/constants/destinations'
+import { getEditionSlugsForDestination } from '@/constants/destinations'
 import type { MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -11,6 +13,8 @@ export const BATCH_AGE_LIMITS: Record<
 > = {
   'batch-a': { min: 18, max: 25, label: '18–25' },
   'batch-b': { min: 26, max: 36, label: '26–36' },
+  'batch-d': { min: 18, max: 25, label: '18–25' },
+  'batch-e': { min: 26, max: 36, label: '26–36' },
 }
 
 export function parseQuizAge(answers: QuizAnswers): number | null {
@@ -40,9 +44,20 @@ export function getEligibleBatchesForAge(age: number): MatchableBatchSlug[] {
   )
 }
 
-export function primaryBatchForAge(age: number): MatchableBatchSlug | null {
+export function primaryBatchForAge(
+  age: number,
+  destination?: DestinationSlug
+): MatchableBatchSlug | null {
   const eligible = getEligibleBatchesForAge(age)
-  return eligible[0] ?? null
+  if (!eligible.length) return null
+
+  if (destination) {
+    const [genz, millennial] = getEditionSlugsForDestination(destination)
+    if (eligible.includes(genz)) return genz
+    if (eligible.includes(millennial)) return millennial
+  }
+
+  return eligible[0]
 }
 
 export function ageNoteForBatch(age: number, batchSlug: MatchableBatchSlug): string | null {

@@ -7,7 +7,7 @@ import { answersToCompatibilityVector } from '@/lib/match-engine'
 import { hasQuizAnswers, normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import type { QuizAnswers } from '@/types/quiz'
 
-const VALID_SLUGS = ['batch-a', 'batch-b'] as const
+const VALID_SLUGS = ['batch-a', 'batch-b', 'batch-d', 'batch-e'] as const
 
 export async function POST(req: NextRequest) {
   const auth = await requireMemberApiAccess()

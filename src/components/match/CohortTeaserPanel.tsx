@@ -3,6 +3,11 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { BATCH_META } from '@/constants/batches'
+import {
+  getEditionSlugsForDestination,
+  isMillennialEdition,
+  type DestinationSlug,
+} from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import { buildCohortTeasers } from '@/lib/match-cohort-preview'
 import type { BatchMatchResult, MatchableBatchSlug } from '@/types/match'
@@ -12,11 +17,16 @@ type Props = {
   answers: QuizAnswers
   batchMatches: BatchMatchResult[]
   initialBatch?: MatchableBatchSlug
+  destination?: DestinationSlug
 }
 
-const BATCH_ORDER: MatchableBatchSlug[] = ['batch-a', 'batch-b']
-
-export default function CohortTeaserPanel({ answers, batchMatches, initialBatch }: Props) {
+export default function CohortTeaserPanel({
+  answers,
+  batchMatches,
+  initialBatch,
+  destination = 'himalayan',
+}: Props) {
+  const batchOrder = getEditionSlugsForDestination(destination)
   const recommended =
     batchMatches.find((batch) => batch.recommended)?.batchSlug ??
     batchMatches[0]?.batchSlug ??
@@ -32,7 +42,8 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
 
   if (!teaser || !activeMatch) return null
 
-  const accent = selectedBatch === 'batch-b' ? 'rose' : 'teal'
+  const accent = isMillennialEdition(selectedBatch) ? 'rose' : 'teal'
+  const productHref = ROUTES.batchDetail(selectedBatch)
 
   return (
     <div className="cohort-teaser">
@@ -53,7 +64,7 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
       </div>
 
       <div className="match-batch-tabs">
-        {BATCH_ORDER.map((slug) => {
+        {batchOrder.map((slug) => {
           const batch = batchMatches.find((row) => row.batchSlug === slug)
           const rowTeaser = teasers[slug]
           if (!batch || !rowTeaser) return null
@@ -88,6 +99,29 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
 
       {activeMatch.ageNote && <p className="match-age-note">{activeMatch.ageNote}</p>}
 
+      <div className="apply-match-preview cohort-match-stats">
+        <div className="apply-match-grid">
+          <div>
+            <div className="apply-match-score">{activeMatch.matchScore}%</div>
+            <div className="apply-match-label">Batch fit</div>
+          </div>
+          <div>
+            <div className="apply-match-score">{activeMatch.placementChance}%</div>
+            <div className="apply-match-label">Placement chance</div>
+          </div>
+          {activeMatch.cohortMatchPercent != null && (
+            <div>
+              <div className="apply-match-score">{activeMatch.cohortMatchPercent}%</div>
+              <div className="apply-match-label">
+                Cohort overlap
+                {activeMatch.cohortSampleSize ? ` (${activeMatch.cohortSampleSize})` : ''}
+              </div>
+            </div>
+          )}
+        </div>
+        {activeMatch.aiNarrative && <p className="apply-match-copy">{activeMatch.aiNarrative}</p>}
+      </div>
+
       <div className="cohort-people-grid">
         {teaser.people.map((person) => (
           <div key={person.id} className="cohort-person-card">
@@ -112,7 +146,7 @@ export default function CohortTeaserPanel({ answers, batchMatches, initialBatch 
 
       <div className="cohort-teaser-actions">
         <Link
-          href={ROUTES.batchDetail(selectedBatch)}
+          href={productHref}
           className={`rfbtn cohort-apply-btn${accent === 'rose' ? ' rose' : ''}`}
         >
           Book your slot →

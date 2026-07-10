@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
 import { BATCH_META } from '@/constants/batches'
+import { isMillennialEdition } from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import type { BatchMatchResult, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
@@ -16,8 +17,6 @@ type Props = {
   fetchLive?: boolean
 }
 
-const BATCH_ORDER: MatchableBatchSlug[] = ['batch-a', 'batch-b']
-
 export default function MatchPreviewPanel({
   answers,
   batchMatches,
@@ -25,6 +24,10 @@ export default function MatchPreviewPanel({
   showApplyLink = true,
   fetchLive = true,
 }: Props) {
+  const batchOrder =
+    batchMatches.length > 0
+      ? batchMatches.map((batch) => batch.batchSlug)
+      : (['batch-a', 'batch-b'] as MatchableBatchSlug[])
   const recommended =
     batchMatches.find((batch) => batch.recommended)?.batchSlug ??
     batchMatches[0]?.batchSlug ??
@@ -62,7 +65,7 @@ export default function MatchPreviewPanel({
   const active = liveMatch ?? fallback
   if (!active) return null
 
-  const accent = selectedBatch === 'batch-b' ? 'rose' : 'teal'
+  const accent = isMillennialEdition(selectedBatch) ? 'rose' : 'teal'
 
   return (
     <div className="match-preview">
@@ -76,7 +79,7 @@ export default function MatchPreviewPanel({
       </div>
 
       <div className="match-batch-tabs">
-        {BATCH_ORDER.map((slug) => {
+        {batchOrder.map((slug) => {
           const batch = batchMatches.find((row) => row.batchSlug === slug)
           if (!batch) return null
           const meta = BATCH_META[slug]

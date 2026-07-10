@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Badge from '@/components/ui/Badge'
-import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
 import { BATCH_AGE_LIMITS, parseQuizAge } from '@/lib/batch-age'
+import { getDestinationForBatch, isMillennialEdition } from '@/constants/destinations'
+import type { MatchableBatchSlug } from '@/types/match'
 import { ensureNurtureEmail } from '@/lib/quiz-lead'
 import { hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
 import { trackMatchResultShown } from '@/lib/meta-pixel'
@@ -18,14 +19,17 @@ interface QuizResultProps {
   answers: QuizAnswers
 }
 
-const BATCH_LABELS: Record<QuizResultType['batchRecommendation'], string> = {
-  'batch-a': 'Batch A — GenZ Edition',
-  'batch-b': 'Batch B — Millennial Edition',
+const BATCH_LABELS: Record<MatchableBatchSlug, string> = {
+  'batch-a': 'Himalayan — GenZ Edition',
+  'batch-b': 'Himalayan — Millennial Edition',
+  'batch-d': 'Udaipur — GenZ Edition',
+  'batch-e': 'Udaipur — Millennial Edition',
 }
 
 export default function QuizResult({ result, answers }: QuizResultProps) {
   const [unlocked, setUnlocked] = useState(() => hasCompletedQuizLead())
   const matchResultTrackedRef = useRef(false)
+  const destination = getDestinationForBatch(result.batchRecommendation) ?? 'himalayan'
 
   useEffect(() => {
     if (!unlocked) return
@@ -43,7 +47,7 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
     )
   }, [unlocked])
 
-  const badgeColor = result.batchRecommendation === 'batch-b' ? 'rose' : 'teal'
+  const badgeColor = isMillennialEdition(result.batchRecommendation) ? 'rose' : 'teal'
   const userAge = parseQuizAge(answers)
   const recommendedMatch = result.batchMatches?.find(
     (batch) => batch.batchSlug === result.batchRecommendation
@@ -58,9 +62,7 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
   const description =
     userAge !== null
       ? `You're ${userAge}. ${BATCH_LABELS[result.batchRecommendation]} is for ages ${
-          result.batchRecommendation === 'batch-a'
-            ? BATCH_AGE_LIMITS['batch-a'].label
-            : BATCH_AGE_LIMITS['batch-b'].label
+          BATCH_AGE_LIMITS[result.batchRecommendation].label
         }.`
       : result.isHighMatch
         ? "Your answers suggest you're emotionally available, self-aware, and exactly the kind of person our algorithm places at the centre of a batch."
@@ -92,25 +94,18 @@ export default function QuizResult({ result, answers }: QuizResultProps) {
       <p className="res-desc">{description}</p>
 
       {result.batchMatches && result.batchMatches.length > 0 && (
-        <>
-          <CohortTeaserPanel
-            answers={answers}
-            batchMatches={result.batchMatches}
-            initialBatch={result.batchRecommendation}
-          />
-          <MatchPreviewPanel
-            answers={answers}
-            batchMatches={result.batchMatches}
-            initialBatch={result.batchRecommendation}
-            showApplyLink={false}
-          />
-        </>
+        <CohortTeaserPanel
+          answers={answers}
+          batchMatches={result.batchMatches}
+          initialBatch={result.batchRecommendation}
+          destination={destination}
+        />
       )}
 
       <div className="quiz-result-link">
         <Link href={ROUTES.batchDetail(result.batchRecommendation)}>View batch &amp; book →</Link>
         <span className="quiz-result-sep"> · </span>
-        <Link href={ROUTES.batches}>Compare all batches →</Link>
+        <Link href={ROUTES.batches}>Compare all destinations →</Link>
       </div>
     </div>
   )

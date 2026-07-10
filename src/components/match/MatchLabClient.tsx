@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import QuizSection from '@/components/home/QuizSection'
 import QuizLeadCapture from '@/components/quiz/QuizLeadCapture'
-import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
+import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import { BATCH_META } from '@/constants/batches'
+import { DESTINATIONS, getDestinationForBatch, isDestinationSlug, type DestinationSlug } from '@/constants/destinations'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
 import { clearQuizLead, hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
@@ -18,12 +19,18 @@ import type { QuizAnswers } from '@/types/quiz'
 
 type Props = {
   initialBatch?: MatchableBatchSlug
+  initialDestination?: DestinationSlug
 }
 
 type MatchLabMode = 'quiz' | 'lead' | 'results'
 
-export default function MatchLabClient({ initialBatch }: Props) {
+export default function MatchLabClient({ initialBatch, initialDestination }: Props) {
   const searchParams = useSearchParams()
+  const destination: DestinationSlug =
+    initialDestination ??
+    (isDestinationSlug(searchParams.get('destination') ?? '')
+      ? (searchParams.get('destination') as DestinationSlug)
+      : getDestinationForBatch(initialBatch ?? '') ?? 'himalayan')
   const [booted, setBooted] = useState(false)
   const [mode, setMode] = useState<MatchLabMode>('quiz')
   const [quizKey, setQuizKey] = useState(0)
@@ -32,8 +39,8 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const matchResultTrackedRef = useRef(false)
 
   const quizResult = useMemo(
-    () => (answers ? calculateQuizResult(answers) : null),
-    [answers]
+    () => (answers ? calculateQuizResult(answers, destination) : null),
+    [answers, destination]
   )
 
   useEffect(() => {
@@ -73,7 +80,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
     fetch('/api/match/preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers, includeNarrative: true }),
+      body: JSON.stringify({ answers, includeNarrative: true, destination }),
       signal: controller.signal,
     })
       .then((r) => r.json())
@@ -83,15 +90,15 @@ export default function MatchLabClient({ initialBatch }: Props) {
           setAnalysis(json.analysis)
           return
         }
-        setAnalysis(analyzeMatchProfile(answers))
+        setAnalysis(analyzeMatchProfile(answers, destination))
       })
       .catch((err) => {
         if (controller.signal.aborted || err?.name === 'AbortError') return
-        setAnalysis(analyzeMatchProfile(answers))
+        setAnalysis(analyzeMatchProfile(answers, destination))
       })
 
     return () => controller.abort()
-  }, [answers, mode])
+  }, [answers, destination, mode])
 
   const retakeQuiz = useCallback(() => {
     clearQuizAnswers()
@@ -112,7 +119,6 @@ export default function MatchLabClient({ initialBatch }: Props) {
   const handleQuizComplete = useCallback((saved: QuizAnswers) => {
     setAnswers(saved)
     setAnalysis(null)
-    // Always gate results behind lead capture after a fresh quiz run.
     setMode('lead')
   }, [])
 
@@ -140,13 +146,19 @@ export default function MatchLabClient({ initialBatch }: Props) {
   if (mode === 'quiz') {
     return (
       <div className="match-lab">
-        {initialBatch && (
+        {(initialBatch || initialDestination) && (
           <p className="match-lab-note match-lab-note-top">
-            You opened this from {BATCH_META[initialBatch].label}. Complete the quiz and we&apos;ll
-            pre-select that batch in your preview.
+            {initialBatch
+              ? `You opened this from ${BATCH_META[initialBatch].label}. Complete the quiz and we'll pre-select that edition in your preview.`
+              : `You opened this for ${DESTINATIONS[destination].title}. Complete the quiz and we'll compare GenZ vs Millennial editions.`}
           </p>
         )}
-        <QuizSection key={quizKey} delegateResults onComplete={handleQuizComplete} />
+        <QuizSection
+          key={quizKey}
+          delegateResults
+          destination={destination}
+          onComplete={handleQuizComplete}
+        />
       </div>
     )
   }
@@ -178,9 +190,9 @@ export default function MatchLabClient({ initialBatch }: Props) {
     <div className="match-lab">
       <div className="match-lab-intro">
         <p className="match-preview-eyebrow">✦ AI Match Lab</p>
-        <h1 className="match-lab-title">Your batch compatibility preview</h1>
+        <h1 className="match-lab-title">Your {DESTINATIONS[destination].shortTitle} compatibility preview</h1>
         <p className="match-lab-sub">
-          Switch batches to compare fit. Scores blend your quiz profile with real applicant data already
+          Switch editions to compare fit. Scores blend your quiz profile with real applicant data already
           in each batch pipeline.
         </p>
         <button type="button" className="match-secondary-link" onClick={retakeQuiz}>
@@ -191,6 +203,7 @@ export default function MatchLabClient({ initialBatch }: Props) {
         answers={answers}
         batchMatches={analysis.batches}
         initialBatch={initialBatch}
+        destination={destination}
       />
       <MatchPreviewPanel
         answers={answers}

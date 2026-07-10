@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import DatePicker from '@/components/batches/DatePicker'
 import GenderSelector from '@/components/batches/GenderSelector'
 import RazorpayButton from '@/components/apply/RazorpayButton'
-import ApplyMatchPreview from '@/components/match/ApplyMatchPreview'
 import { ROUTES } from '@/constants/routes'
+import { readDepartureFromQuiz } from '@/lib/nurture/departure'
 import {
   calculatePaymentAmounts,
   depositAmountForTotal,
@@ -14,6 +14,7 @@ import {
   type PaymentPlan,
 } from '@/lib/payment-plan'
 import { calculateQuizResult, formatPaise } from '@/lib/utils'
+import { getDestinationForBatch } from '@/constants/destinations'
 import { normalizeIndianPhone } from '@/lib/phone'
 import { loadQuizLead } from '@/lib/quiz-lead-storage'
 import { loadQuizAnswers } from '@/lib/quiz-storage'
@@ -40,6 +41,45 @@ interface ApplyFormProps {
   applicantId?: string
   initialPromoCode?: string
   previewStep?: 2 | 3
+  initialDateIndex?: number
+}
+
+function resolveInitialDateChoice(
+  dateOptions: { label: string }[],
+  initialDateIndex?: number
+): number | null {
+  if (
+    initialDateIndex != null &&
+    initialDateIndex >= 0 &&
+    initialDateIndex < dateOptions.length
+  ) {
+    return initialDateIndex
+  }
+
+  const answers = loadQuizAnswers()
+  if (answers) {
+    const { label } = readDepartureFromQuiz(answers)
+    if (label) {
+      const idx = dateOptions.findIndex((option) => option.label === label)
+      if (idx >= 0) return idx
+    }
+  }
+
+  return dateOptions.length ? 0 : null
+}
+
+function isCompleteQuizLead(lead: NonNullable<ReturnType<typeof loadQuizLead>>): boolean {
+  return Boolean(
+    lead.applicantId &&
+      lead.name?.trim() &&
+      lead.email?.includes('@') &&
+      lead.phone?.trim()
+  )
+}
+
+function readSavedLead(isPreview: boolean) {
+  if (isPreview || typeof window === 'undefined') return null
+  return loadQuizLead()
 }
 
 export default function ApplyForm({
@@ -54,6 +94,7 @@ export default function ApplyForm({
   applicantId: initialApplicantId = '',
   initialPromoCode = '',
   previewStep,
+  initialDateIndex,
 }: ApplyFormProps) {
   const router = useRouter()
   const isPreview = Boolean(previewStep)
@@ -70,15 +111,27 @@ export default function ApplyForm({
       }
     : null
 
-  const [step, setStep] = useState<1 | 2 | 3>(previewStep ?? 1)
-  const [name, setName] = useState(initialName || (isPreview ? 'Preview User' : ''))
-  const [email, setEmail] = useState(initialEmail || (isPreview ? 'preview@togetha.club' : ''))
-  const [phone, setPhone] = useState(isPreview ? '9876543210' : '')
+  const [step, setStep] = useState<1 | 2 | 3>(() => previewStep ?? 1)
+  const [name, setName] = useState(() => {
+    const lead = readSavedLead(isPreview)
+    return initialName || lead?.name || (isPreview ? 'Preview User' : '')
+  })
+  const [email, setEmail] = useState(() => {
+    const lead = readSavedLead(isPreview)
+    return initialEmail || lead?.email || (isPreview ? 'preview@togetha.club' : '')
+  })
+  const [phone, setPhone] = useState(() => {
+    const lead = readSavedLead(isPreview)
+    return lead?.phone || (isPreview ? '9876543210' : '')
+  })
   const [gender, setGender] = useState<'m' | 'f' | null>(isPreview ? 'm' : null)
-  const [dateChoice, setDateChoice] = useState<number | null>(0)
-  const [applicantId, setApplicantId] = useState(
-    initialApplicantId || (isPreview ? 'preview-applicant-id' : '')
+  const [dateChoice, setDateChoice] = useState<number | null>(() =>
+    resolveInitialDateChoice(dateOptions, initialDateIndex)
   )
+  const [applicantId, setApplicantId] = useState(() => {
+    const lead = readSavedLead(isPreview)
+    return initialApplicantId || lead?.applicantId || (isPreview ? 'preview-applicant-id' : '')
+  })
   const [totalDue, setTotalDue] = useState(
     isPreview && previewStep === 3 ? previewOriginal - previewDiscount : batchPrice * 100
   )
@@ -99,11 +152,20 @@ export default function ApplyForm({
     if (isPreview) return
     const lead = loadQuizLead()
     if (!lead) return
+
     if (!initialName && lead.name) setName(lead.name)
     if (!initialEmail && lead.email) setEmail(lead.email)
     if (lead.phone) setPhone(lead.phone)
     if (!initialApplicantId && lead.applicantId) setApplicantId(lead.applicantId)
-  }, [initialName, initialEmail, initialApplicantId, isPreview])
+
+    if (!previewStep && isCompleteQuizLead(lead)) {
+      setStep(2)
+    }
+
+    const resolvedDate = resolveInitialDateChoice(dateOptions, initialDateIndex)
+    if (resolvedDate !== null) setDateChoice(resolvedDate)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only lead bootstrap
+  }, [])
 
   const validatePromo = useCallback(
     async (code: string): Promise<PromoPreview | null> => {
@@ -152,11 +214,14 @@ export default function ApplyForm({
   }, [initialPromoCode, validatePromo, isPreview])
 
   const ensureApplicantId = async (): Promise<string | null> => {
+    const savedLead = loadQuizLead()
+    const resolvedName = name.trim() || savedLead?.name?.trim() || ''
+    const resolvedEmail = (email.trim() || savedLead?.email || '').toLowerCase()
+    const resolvedPhone = phone.trim() || savedLead?.phone || ''
+
     if (applicantId) return applicantId
 
-    const normalizedEmail = email.trim().toLowerCase()
-    const savedLead = loadQuizLead()
-    if (savedLead?.applicantId && savedLead.email === normalizedEmail) {
+    if (savedLead?.applicantId && resolvedEmail && savedLead.email.toLowerCase() === resolvedEmail) {
       setApplicantId(savedLead.applicantId)
       return savedLead.applicantId
     }
@@ -164,19 +229,21 @@ export default function ApplyForm({
     const storedAnswers = loadQuizAnswers()
     const quizPayload: Record<string, unknown> = {}
     if (storedAnswers) {
-      const result = calculateQuizResult(storedAnswers)
+      const destination = getDestinationForBatch(batchSlug) ?? 'himalayan'
+      const result = calculateQuizResult(storedAnswers, destination)
       quizPayload.answers = storedAnswers
       quizPayload.score = result.score
-      quizPayload.batchRecommendation = result.batchRecommendation
+      // Keep the apply-page edition — do not let quiz recommendation overwrite it.
+      quizPayload.batchRecommendation = batchSlug
     }
 
     const res = await fetch('/api/applicants/init', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: name.trim(),
-        email: normalizedEmail,
-        phone: normalizeIndianPhone(phone),
+        name: resolvedName,
+        email: resolvedEmail,
+        phone: normalizeIndianPhone(resolvedPhone),
         batchSlug,
         ...quizPayload,
       }),
@@ -272,19 +339,22 @@ export default function ApplyForm({
     const id = applicantId || (await ensureApplicantId())
     if (!id) throw new Error('Application profile not found.')
 
+    const savedLead = loadQuizLead()
+    const payload = {
+      applicantId: id,
+      name: name.trim() || savedLead?.name?.trim() || '',
+      phone: phone.trim() || savedLead?.phone || '',
+      gender,
+      batchSlug,
+      dateChoice,
+      promoCode: appliedPromo?.code ?? undefined,
+      paymentPlan,
+    }
+
     const res = await fetch('/api/apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        applicantId: id,
-        name: name.trim(),
-        phone: phone.trim(),
-        gender,
-        batchSlug,
-        dateChoice,
-        promoCode: appliedPromo?.code ?? undefined,
-        paymentPlan,
-      }),
+      body: JSON.stringify(payload),
     })
 
     const data = await res.json()
@@ -457,10 +527,6 @@ export default function ApplyForm({
 
       {step === 3 && (
         <>
-          {(batchSlug === 'batch-a' || batchSlug === 'batch-b') && !isPreview && (
-            <ApplyMatchPreview batchSlug={batchSlug} />
-          )}
-
           <div className="apply-review">
             <div className="apply-review-row">
               <span>Name</span>

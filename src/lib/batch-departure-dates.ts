@@ -1,5 +1,35 @@
 import { wednesdayAfterFriday, parseDateOnly, formatDateOnly } from '@/lib/partner-trip-dates'
 
+const UDAIPUR_BATCH_SLUGS = new Set(['batch-d', 'batch-e'])
+
+function isUdaipurBatch(batchSlug?: string): boolean {
+  return Boolean(batchSlug && UDAIPUR_BATCH_SLUGS.has(batchSlug))
+}
+
+function returnDateForBatch(departure: Date, batchSlug?: string): Date {
+  const returnDate = new Date(departure)
+  if (isUdaipurBatch(batchSlug)) {
+    returnDate.setDate(departure.getDate() + 4)
+    return returnDate
+  }
+  return wednesdayAfterFriday(departure)
+}
+
+function durationLabelForBatch(batchSlug?: string): string {
+  return isUdaipurBatch(batchSlug) ? '2N/3D' : '5N/6D'
+}
+
+function formatReturnSublabel(returnDate: Date, batchSlug?: string): string {
+  const day = returnDate.toLocaleDateString('en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+  const duration = durationLabelForBatch(batchSlug)
+  const suffix = isUdaipurBatch(batchSlug) ? ' early morning' : ''
+  return `Returns ${day}${suffix} · ${duration}`
+}
+
 export type DepartureDateOption = {
   label: string
   sublabel: string
@@ -25,15 +55,6 @@ function formatDepartureLabel(friday: Date): string {
   })
 }
 
-function formatReturnSublabel(wednesday: Date): string {
-  const day = wednesday.toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-  return `Returns ${day} · 5N/6D`
-}
-
 export type GeneratedDeparture = {
   label: string
   sublabel: string
@@ -44,7 +65,8 @@ export type GeneratedDeparture = {
 
 export function generateFridayDepartures(
   startDate: string = BATCH_DEPARTURE_START,
-  count: number = SEEDED_DEPARTURE_WEEKS
+  count: number = SEEDED_DEPARTURE_WEEKS,
+  batchSlug?: string
 ): GeneratedDeparture[] {
   const friday = parseDateOnly(startDate)
   if (friday.getDay() !== 5) {
@@ -55,10 +77,10 @@ export function generateFridayDepartures(
   for (let i = 0; i < count; i++) {
     const departure = new Date(friday)
     departure.setDate(friday.getDate() + i * 7)
-    const returnDate = wednesdayAfterFriday(departure)
+    const returnDate = returnDateForBatch(departure, batchSlug)
     out.push({
       label: formatDepartureLabel(departure),
-      sublabel: formatReturnSublabel(returnDate),
+      sublabel: formatReturnSublabel(returnDate, batchSlug),
       departure_date: formatDateOnly(departure),
       return_date: formatDateOnly(returnDate),
       sort_order: i + 1,
@@ -92,7 +114,7 @@ export function filterVisibleDepartures<T extends { departure_date?: string | nu
 }
 
 export function getFallbackDateOptions(batchSlug: string): DepartureDateOption[] {
-  return generateFridayDepartures()
+  return generateFridayDepartures(BATCH_DEPARTURE_START, SEEDED_DEPARTURE_WEEKS, batchSlug)
     .filter((d) => isDepartureVisible(d.departure_date))
     .map((d) => ({
       label: d.label,
@@ -111,7 +133,7 @@ export function formatShortDepartureListFromDates(dates: string[]): string {
 }
 
 export function visibleDepartureShortList(batchSlug: string, asOf?: Date): string {
-  const dates = generateFridayDepartures()
+  const dates = generateFridayDepartures(BATCH_DEPARTURE_START, SEEDED_DEPARTURE_WEEKS, batchSlug)
     .filter((d) => isDepartureVisible(d.departure_date, VISIBLE_DEPARTURE_WEEKS, asOf ?? todayDateOnly()))
     .map((d) => d.departure_date)
   return formatShortDepartureListFromDates(dates)
@@ -119,4 +141,8 @@ export function visibleDepartureShortList(batchSlug: string, asOf?: Date): strin
 
 export function buildBatchTripMetaLine(shortDates: string): string {
   return `Manali · Kasol · Sissu · 5N/6D · ${shortDates}`
+}
+
+export function buildUdaipurTripMetaLine(shortDates: string): string {
+  return `Udaipur · Kumbhalgarh · 2N/3D · ${shortDates}`
 }

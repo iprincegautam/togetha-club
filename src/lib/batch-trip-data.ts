@@ -1,6 +1,14 @@
 import type { IncludeItem, ItineraryDay } from '@/components/batches/BatchTabPanels'
 import { INCLUDE_GLYPH } from '@/constants/brand-glyphs'
 import type { MatchableBatchSlug } from '@/types/match'
+import {
+  BATCH_D_INCLUDES,
+  BATCH_D_ITINERARY,
+  BATCH_D_NOT_INCLUDED,
+  BATCH_E_INCLUDES,
+  BATCH_E_ITINERARY,
+  BATCH_E_NOT_INCLUDED,
+} from '@/lib/batch-trip-data-udaipur'
 
 /** Shared exclusions — aligned with operational trip PDF. */
 export const TRIP_NOT_INCLUDED = [
@@ -279,6 +287,18 @@ export function getBatchTripDetails(batchSlug: MatchableBatchSlug): BatchTripDet
         includes: BATCH_B_INCLUDES,
         notIncluded: BATCH_B_NOT_INCLUDED,
       }
+    case 'batch-d':
+      return {
+        itinerary: BATCH_D_ITINERARY,
+        includes: BATCH_D_INCLUDES,
+        notIncluded: BATCH_D_NOT_INCLUDED,
+      }
+    case 'batch-e':
+      return {
+        itinerary: BATCH_E_ITINERARY,
+        includes: BATCH_E_INCLUDES,
+        notIncluded: BATCH_E_NOT_INCLUDED,
+      }
     default:
       return {
         itinerary: BATCH_A_ITINERARY,
@@ -297,6 +317,15 @@ export type BatchItineraryPresentation = BatchTripDetails & {
 
 export function getBatchItineraryPresentation(batchSlug: MatchableBatchSlug): BatchItineraryPresentation {
   const details = getBatchTripDetails(batchSlug)
+  if (batchSlug === 'batch-e') {
+    return {
+      ...details,
+      itineraryTitle: 'Same route. Slower pace. Udaipur → Kumbhalgarh.',
+      includesLabel: 'Premium inclusions',
+      includesTitle: 'Everything included. Nothing left to chance.',
+      roseAccent: true,
+    }
+  }
   if (batchSlug === 'batch-b') {
     return {
       ...details,
@@ -304,6 +333,15 @@ export function getBatchItineraryPresentation(batchSlug: MatchableBatchSlug): Ba
       includesLabel: 'Premium inclusions',
       includesTitle: 'Everything included. Nothing left to chance.',
       roseAccent: true,
+    }
+  }
+  if (batchSlug === 'batch-d') {
+    return {
+      ...details,
+      itineraryTitle: '2 nights · 3 days — Udaipur & Kumbhalgarh.',
+      includesLabel: 'In the box',
+      includesTitle: 'Everything that makes it work.',
+      roseAccent: false,
     }
   }
   return {

@@ -3,6 +3,7 @@ import AccountItineraryPage from '@/components/account/AccountItineraryPage'
 import { getMemberContext } from '@/lib/auth/member'
 import { ROUTES } from '@/constants/routes'
 import { buildMetadata } from '@/lib/metadata'
+import { isBookableBatchSlug } from '@/constants/destinations'
 import type { MatchableBatchSlug } from '@/types/match'
 
 export const metadata = buildMetadata(
@@ -11,7 +12,8 @@ export const metadata = buildMetadata(
 )
 
 function resolveBatchSlug(raw: string | null | undefined): MatchableBatchSlug {
-  return raw === 'batch-b' ? 'batch-b' : 'batch-a'
+  if (isBookableBatchSlug(raw ?? '')) return raw as MatchableBatchSlug
+  return 'batch-a'
 }
 
 export default async function AccountItineraryRoute() {

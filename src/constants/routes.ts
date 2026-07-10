@@ -3,10 +3,30 @@ export const ROUTES = {
   howItWorks: '/how-it-works',
   match: '/match',
   /** Route batch interest through Our AI quiz for lead capture. */
-  matchForBatch: (slug?: string) =>
-    slug === 'batch-a' || slug === 'batch-b' ? `/match?batch=${slug}` : '/match',
+  matchForBatch: (slug?: string) => {
+    if (slug === 'batch-a' || slug === 'batch-b') {
+      return `/match?destination=himalayan&batch=${slug}`
+    }
+    if (slug === 'batch-d' || slug === 'batch-e') {
+      return `/match?destination=udaipur&batch=${slug}`
+    }
+    return '/match'
+  },
+  matchForDestination: (destination: 'himalayan' | 'udaipur', batchSlug?: string) => {
+    const params = new URLSearchParams({ destination })
+    if (
+      batchSlug === 'batch-a' ||
+      batchSlug === 'batch-b' ||
+      batchSlug === 'batch-d' ||
+      batchSlug === 'batch-e'
+    ) {
+      params.set('batch', batchSlug)
+    }
+    return `/match?${params.toString()}`
+  },
   batches: '/batches',
   batchDetail: (slug: string) => `/batches/${slug}`,
+  destinationDetail: (destination: 'himalayan' | 'udaipur') => `/batches/${destination}`,
   apply: (slug: string) => `/apply/${slug}`,
   confirmation: '/confirmation',
   waitlist: '/waitlist',

@@ -1,14 +1,21 @@
 import Reveal from '@/components/ui/Reveal'
 import QuizWidget from '@/components/quiz/QuizWidget'
+import type { DestinationSlug } from '@/constants/destinations'
 import type { QuizAnswers } from '@/types/quiz'
 
 type Props = {
   onComplete?: (answers: QuizAnswers) => void
   delegateResults?: boolean
   quizKey?: number
+  destination?: DestinationSlug
 }
 
-export default function QuizSection({ onComplete, delegateResults, quizKey }: Props) {
+export default function QuizSection({
+  onComplete,
+  delegateResults,
+  quizKey,
+  destination,
+}: Props) {
   return (
     <Reveal>
       <section className="quiz-sec" id="quiz">
@@ -26,6 +33,7 @@ export default function QuizSection({ onComplete, delegateResults, quizKey }: Pr
             key={quizKey}
             onComplete={onComplete}
             delegateResults={delegateResults}
+            destination={destination}
           />
         </div>
       </section>

@@ -126,10 +126,10 @@ export default function BlogArticle({ post, pricing, pricingAsOf }: Props) {
         <p className="blog-related-label">Continue exploring</p>
         <ul>
           <li>
-            <Link href={ROUTES.match}>Take the compatibility quiz →</Link>
+            <Link href={ROUTES.batches}>Choose your destination →</Link>
           </li>
           <li>
-            <Link href={ROUTES.batches}>View live batches →</Link>
+            <Link href={ROUTES.match}>Take the compatibility quiz →</Link>
           </li>
           <li>
             <Link href={`${ROUTES.home}#faq`}>Homepage FAQ →</Link>

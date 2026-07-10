@@ -1,5 +1,10 @@
 import { BATCH_META } from '@/constants/batches'
 import {
+  getDestinationForBatch,
+  getEditionSlugsForDestination,
+  type DestinationSlug,
+} from '@/constants/destinations'
+import {
   ageNoteForBatch,
   isAgeEligibleForBatch,
   parseQuizAge,
@@ -163,6 +168,56 @@ const BATCH_PROFILES: Record<
     },
   },
   'batch-b': {
+    minEmotionalAvailability: 0.58,
+    idealVector: {
+      socialEnergy: 0.55,
+      directness: 0.62,
+      depth: 0.88,
+      spontaneity: 0.48,
+      emotionalAvailability: 0.82,
+      warmth: 0.85,
+      humor: 0.58,
+      adventure: 0.52,
+      introspection: 0.82,
+      loyalty: 0.88,
+      curiosity: 0.72,
+      authenticity: 0.9,
+    },
+    baselinePeerMix: {
+      bonfire_romantic: 26,
+      thoughtful_planner: 22,
+      quiet_intensity: 18,
+      golden_warmth: 16,
+      free_spirit: 10,
+      chaos_catalyst: 8,
+    },
+  },
+  'batch-d': {
+    minEmotionalAvailability: 0.5,
+    idealVector: {
+      socialEnergy: 0.82,
+      directness: 0.78,
+      depth: 0.58,
+      spontaneity: 0.88,
+      emotionalAvailability: 0.68,
+      warmth: 0.72,
+      humor: 0.9,
+      adventure: 0.85,
+      introspection: 0.45,
+      loyalty: 0.6,
+      curiosity: 0.8,
+      authenticity: 0.78,
+    },
+    baselinePeerMix: {
+      chaos_catalyst: 28,
+      bonfire_romantic: 22,
+      free_spirit: 20,
+      golden_warmth: 14,
+      thoughtful_planner: 8,
+      quiet_intensity: 8,
+    },
+  },
+  'batch-e': {
     minEmotionalAvailability: 0.58,
     idealVector: {
       socialEnergy: 0.55,
@@ -379,22 +434,26 @@ export function analyzeBatchMatch(
   }
 }
 
-export function analyzeMatchProfile(answers: QuizAnswers): MatchAnalysis {
+export function analyzeMatchProfile(
+  answers: QuizAnswers,
+  destination: DestinationSlug = 'himalayan'
+): MatchAnalysis {
   const userAge = parseQuizAge(answers)
-  const batches = (['batch-a', 'batch-b'] as const).map((slug) => analyzeBatchMatch(answers, slug))
+  const editionSlugs = getEditionSlugsForDestination(destination)
+  const batches = editionSlugs.map((slug) => analyzeBatchMatch(answers, slug))
 
-  let primaryBatch: MatchableBatchSlug = 'batch-a'
+  let primaryBatch: MatchableBatchSlug = editionSlugs[0]
   if (userAge !== null) {
-    const agePrimary = primaryBatchForAge(userAge)
+    const agePrimary = primaryBatchForAge(userAge, destination)
     if (agePrimary) {
       primaryBatch = agePrimary
     } else {
       const sorted = [...batches].sort((a, b) => b.matchScore - a.matchScore)
-      primaryBatch = sorted[0]?.batchSlug ?? 'batch-a'
+      primaryBatch = sorted[0]?.batchSlug ?? editionSlugs[0]
     }
   } else {
     const sorted = [...batches].sort((a, b) => b.matchScore - a.matchScore)
-    primaryBatch = sorted[0]?.batchSlug ?? 'batch-a'
+    primaryBatch = sorted[0]?.batchSlug ?? editionSlugs[0]
   }
 
   const primaryScore =
@@ -415,7 +474,8 @@ export function getBatchMatch(
   answers: QuizAnswers,
   batchSlug: MatchableBatchSlug
 ): BatchMatchResult {
-  const analysis = analyzeMatchProfile(answers)
+  const destination = getDestinationForBatch(batchSlug) ?? 'himalayan'
+  const analysis = analyzeMatchProfile(answers, destination)
   return (
     analysis.batches.find((batch) => batch.batchSlug === batchSlug) ??
     analyzeBatchMatch(answers, batchSlug)

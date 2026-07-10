@@ -54,6 +54,52 @@ export const BATCH_VIDEO_TESTIMONIALS: Record<string, BatchVideoTestimonial[]> =
       poster: '/videos/batch-b/03-poster.jpg',
     },
   ],
+  'batch-d': [
+    {
+      id: 'd-1',
+      title: 'Ananya',
+      subtitle: 'Content creator · Kolkata',
+      src: '/videos/batch-a/01.mp4',
+      poster: '/videos/batch-a/01-poster.jpg',
+    },
+    {
+      id: 'd-2',
+      title: 'Shrutika',
+      subtitle: 'Digital Marketer · Delhi',
+      src: '/videos/batch-a/02.mp4',
+      poster: '/videos/batch-a/02-poster.jpg',
+    },
+    {
+      id: 'd-3',
+      title: 'Bhumi',
+      subtitle: 'Software Engineer · Bangalore',
+      src: '/videos/batch-a/03.mp4',
+      poster: '/videos/batch-a/03-poster.jpg',
+    },
+  ],
+  'batch-e': [
+    {
+      id: 'e-1',
+      title: 'Priya R.',
+      subtitle: 'Udaipur Edition · Pune',
+      src: '/videos/batch-b/01.mp4',
+      poster: '/videos/batch-b/01-poster.jpg',
+    },
+    {
+      id: 'e-2',
+      title: 'Abhishek M.',
+      subtitle: 'Udaipur Edition · Delhi',
+      src: '/videos/batch-b/02.mp4',
+      poster: '/videos/batch-b/02-poster.jpg',
+    },
+    {
+      id: 'e-3',
+      title: 'Neha K.',
+      subtitle: 'Udaipur Edition · Mumbai',
+      src: '/videos/batch-b/03.mp4',
+      poster: '/videos/batch-b/03-poster.jpg',
+    },
+  ],
   'batch-c': [
     {
       id: 'c-1',

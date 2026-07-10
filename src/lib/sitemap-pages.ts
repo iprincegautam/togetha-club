@@ -22,7 +22,7 @@ export type PublicSitemapEntry = {
   featured?: boolean
 }
 
-const BATCH_SLUGS = ['batch-a', 'batch-b', 'batch-c'] as const
+const BATCH_SLUGS = ['batch-a', 'batch-b', 'batch-d', 'batch-e', 'himalayan', 'udaipur'] as const
 
 const CORE_PAGES: PublicSitemapEntry[] = [
   {
@@ -144,17 +144,44 @@ const LEGAL_PAGES: PublicSitemapEntry[] = [
   },
 ]
 
+function batchTitle(slug: (typeof BATCH_SLUGS)[number]): string {
+  switch (slug) {
+    case 'batch-a':
+      return 'Himalayan Love Trail — GenZ Edition'
+    case 'batch-b':
+      return 'Himalayan Love Trail — Millennial Edition'
+    case 'batch-d':
+      return 'Udaipur Love Trail — GenZ Edition'
+    case 'batch-e':
+      return 'Udaipur Love Trail — Millennial Edition'
+    case 'himalayan':
+      return 'Himalayan Love Trail'
+    case 'udaipur':
+      return 'Udaipur Love Trail'
+    default:
+      return 'Togetha Love Trail'
+  }
+}
+
+function batchDescription(slug: (typeof BATCH_SLUGS)[number]): string {
+  switch (slug) {
+    case 'batch-d':
+    case 'batch-e':
+    case 'udaipur':
+      return '2N/3D matchmaking travel — Udaipur & Kumbhalgarh, Delhi NCR round trip.'
+    default:
+      return '5N/6D matchmaking travel in Manali, Kasol, and Sissu for screened singles.'
+  }
+}
+
 function batchPages(): PublicSitemapEntry[] {
   return BATCH_SLUGS.map((slug) => ({
     path: ROUTES.batchDetail(slug),
-    title: slug === 'batch-a' ? 'Himalayan Love Trail — Batch A' : slug === 'batch-b' ? 'Himalayan Love Trail — Batch B' : 'Himalayan Love Trail — Batch C',
-    description:
-      slug === 'batch-c'
-        ? 'Coming soon — the next exclusive matchmaking travel edition from Togetha.Club.'
-        : '6-day matchmaking travel experience in Manali, Kasol, and Sissu for screened singles.',
+    title: batchTitle(slug),
+    description: batchDescription(slug),
     priority: 0.85,
     changeFrequency: 'weekly' as const,
-    featured: slug !== 'batch-c',
+    featured: true,
   }))
 }
 

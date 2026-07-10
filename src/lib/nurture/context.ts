@@ -18,6 +18,8 @@ import type { NurtureEmailContext } from '@/lib/nurture/types'
 import { QUIZ_DEPARTURE_QUESTION_ID } from '@/lib/batch-age'
 import { normalizeQuizAnswers } from '@/lib/quiz-normalize'
 import { ROUTES } from '@/constants/routes'
+import { isBookableBatchSlug, getDestinationForBatch } from '@/constants/destinations'
+import { batchPriceFallbackRupees } from '@/lib/batch-price-fallbacks'
 import type { MatchableBatchSlug } from '@/types/match'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -49,7 +51,7 @@ function firstName(name: string | null): string {
 }
 
 function isMatchableBatch(slug: string | null): slug is MatchableBatchSlug {
-  return slug === 'batch-a' || slug === 'batch-b'
+  return isBookableBatchSlug(slug ?? '')
 }
 
 export function buildUnsubscribeUrl(email: string): string {
@@ -73,7 +75,7 @@ async function fetchBatchMeta(
     .maybeSingle()
 
   return {
-    priceRupees: data?.price ?? (batchSlug === 'batch-b' ? 22999 : 18999),
+    priceRupees: data?.price ?? batchPriceFallbackRupees(batchSlug),
     spotsTakenM: data?.spots_taken_m ?? 0,
     spotsTakenF: data?.spots_taken_f ?? 0,
   }
@@ -89,7 +91,8 @@ export async function buildNurtureContext(
     : 'batch-a'
 
   const answers = normalizeQuizAnswers(applicant.quiz_answers)
-  const analysis = analyzeMatchProfile(answers)
+  const destination = getDestinationForBatch(batchSlug) ?? 'himalayan'
+  const analysis = analyzeMatchProfile(answers, destination)
   const primary =
     analysis.batches.find((b) => b.batchSlug === batchSlug) ?? analysis.batches[0]
   const peer = primary?.peerMix[0]

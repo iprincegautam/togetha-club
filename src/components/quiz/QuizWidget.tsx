@@ -8,6 +8,7 @@ import {
   primaryBatchForAge,
   QUIZ_DEPARTURE_QUESTION_ID,
 } from '@/lib/batch-age'
+import { getDefaultBatchForDestination, type DestinationSlug } from '@/constants/destinations'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
 import { trackQuizStarted } from '@/lib/meta-pixel'
 import { loadQuizAnswers } from '@/lib/quiz-storage'
@@ -22,9 +23,14 @@ type Props = {
   onComplete?: (answers: QuizAnswers) => void
   /** When true, hand off to parent after scoring — do not render inline QuizResult. */
   delegateResults?: boolean
+  destination?: DestinationSlug
 }
 
-export default function QuizWidget({ onComplete, delegateResults = false }: Props) {
+export default function QuizWidget({
+  onComplete,
+  delegateResults = false,
+  destination = 'himalayan',
+}: Props) {
   const {
     cur,
     ans,
@@ -37,7 +43,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
     setAge,
     goNext,
     goBack,
-  } = useQuiz()
+  } = useQuiz(destination)
 
   const [fadeIn, setFadeIn] = useState(true)
   const [quizError, setQuizError] = useState('')
@@ -68,9 +74,8 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
     if (phase !== 'quiz' || question?.type !== 'departure') return
 
     const batchSlug: MatchableBatchSlug =
-      ageForDepartures !== null && primaryBatchForAge(ageForDepartures)
-        ? primaryBatchForAge(ageForDepartures)!
-        : 'batch-a'
+      (ageForDepartures !== null && primaryBatchForAge(ageForDepartures, destination)) ||
+      getDefaultBatchForDestination(destination)
 
     let cancelled = false
     setDepartureLoading(true)
@@ -91,7 +96,7 @@ export default function QuizWidget({ onComplete, delegateResults = false }: Prop
     return () => {
       cancelled = true
     }
-  }, [phase, question?.type, ageForDepartures, cur])
+  }, [phase, question?.type, ageForDepartures, cur, destination])
 
   useEffect(() => {
     if (phase !== 'result' || !result || completionNotifiedRef.current) return

@@ -33,4 +33,18 @@ export const BATCH_GALLERY: Record<string, BatchGallerySlide[]> = {
     { id: 'fireside', caption: 'Fireside circles — depth over small talk', Visual: BatchBSlideFireside },
     { id: 'summit', caption: 'Summit mornings — clarity at 3,000 metres', Visual: BatchBSlideSummit },
   ],
+  'batch-d': [
+    { id: 'overview', caption: 'Udaipur · Kumbhalgarh — 2N/3D', Visual: BatchAFullVisual },
+    { id: 'party', caption: 'Night 1 — hosted Bollywood house party', Visual: BatchASlideBonfire },
+    { id: 'fatehsagar', caption: 'Fatehsagar Lake sunset & street-food market', Visual: BatchASlideManali },
+    { id: 'palace', caption: 'City Palace, ghats & lake-view cafés', Visual: BatchASlideKasol },
+    { id: 'kumbhalgarh', caption: 'Kumbhalgarh Fort — 38 km of UNESCO walls', Visual: BatchASlideSissu },
+  ],
+  'batch-e': [
+    { id: 'overview', caption: 'Udaipur · Kumbhalgarh — 2N/3D', Visual: BatchBFullVisual },
+    { id: 'party', caption: 'Night 1 — hosted Bollywood house party', Visual: BatchBSlideFireside },
+    { id: 'lake', caption: 'Fatehsagar Lake and Gangaur Ghat', Visual: BatchBSlideValley },
+    { id: 'palace', caption: 'City Palace, temples & old-city cafés', Visual: BatchBSlideRetreat },
+    { id: 'kumbhalgarh', caption: 'Kumbhalgarh Fort — views that change you', Visual: BatchBSlideSummit },
+  ],
 }

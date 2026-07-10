@@ -1,9 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
-import { withPromoQuery } from '@/lib/promo'
+import { buildApplyUrl } from '@/lib/apply-url'
 import { slotBookingInstallmentLabel } from '@/lib/payment-plan'
 import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
@@ -33,6 +34,7 @@ const BATCH_CONFIG: Record<
     roseAccent: boolean
     infoClass?: string
     priceSectionClass?: string
+    priceNote?: string
     installmentColor?: string
     trustCheckColor?: string
     bookClass?: string
@@ -70,6 +72,39 @@ const BATCH_CONFIG: Record<
       '12M · 12F guaranteed',
     ],
   },
+  'batch-d': {
+    genBadge: 'GenZ · Ages 20–27',
+    tagline: '"Three days in the City of Lakes with 23 verified singles. No swiping — just showing up."',
+    ratingText: "India's first matchmaking travel experience",
+    includes: 'Return travel from Gurugram, 2 nights, 4 meals, hosted Bollywood house party & sightseeing',
+    priceNote: 'GST included',
+    roseAccent: false,
+    trustItems: [
+      'Verified profiles only',
+      'Secure Razorpay payment',
+      'Book online · instant confirmation',
+      '12 boys · 12 girls balance guaranteed',
+    ],
+  },
+  'batch-e': {
+    genBadge: 'Millennial · Ages 28–38',
+    tagline: '"Three days in the City of Lakes with 23 verified singles. No swiping — just showing up."',
+    ratingText: "India's most intentional travel experience",
+    includes: 'Return travel from Gurugram, 2 nights, 4 meals, hosted Bollywood house party & sightseeing',
+    priceNote: 'GST included',
+    roseAccent: true,
+    infoClass: 'rose-bg',
+    priceSectionClass: 'rose-bg',
+    installmentColor: 'var(--rose)',
+    trustCheckColor: 'var(--rose)',
+    bookClass: 'rose',
+    trustItems: [
+      'Premium accommodation',
+      'Private transport',
+      'Book online · instant confirmation',
+      '12M · 12F guaranteed',
+    ],
+  },
 }
 
 function ProductTitle({ slug }: { slug: string }) {
@@ -88,6 +123,24 @@ function ProductTitle({ slug }: { slug: string }) {
         The Himalayan
         <br />
         Love Trail — B
+      </>
+    )
+  }
+  if (slug === 'batch-d') {
+    return (
+      <>
+        The Udaipur
+        <br />
+        Love Trail — D
+      </>
+    )
+  }
+  if (slug === 'batch-e') {
+    return (
+      <>
+        The Udaipur
+        <br />
+        Love Trail — E
       </>
     )
   }
@@ -165,6 +218,7 @@ export default function BatchCard({
               <div className="price-installment" style={config.installmentColor ? { color: config.installmentColor } : undefined}>
                 {slotBookingInstallmentLabel(price)}
               </div>
+              {config.priceNote && <div className="price-includes">{config.priceNote}</div>}
               <div className="price-includes">{config.includes}</div>
             </div>
           )}
@@ -180,13 +234,20 @@ export default function BatchCard({
             <button
               type="button"
               className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
-              onClick={() => router.push(withPromoQuery(ROUTES.apply(slug), promoCode))}
+              onClick={() =>
+                router.push(
+                  buildApplyUrl(slug, {
+                    dateIndex: selectedDate,
+                    promo: promoCode,
+                  })
+                )
+              }
             >
               ✦ Apply & Reserve My Spot →
             </button>
-            <a href={ROUTES.batchDetail('batch-c')} className="btn-waitlist">
-              ♡ Join the Waitlist Instead
-            </a>
+            <Link href={ROUTES.batches} className="btn-waitlist">
+              ♡ Browse all destinations
+            </Link>
           </div>
 
           <div className="trust-row">

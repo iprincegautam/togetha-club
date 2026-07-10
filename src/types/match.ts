@@ -1,6 +1,6 @@
 import type { QuizAnswers } from '@/types/quiz'
 
-export type MatchableBatchSlug = 'batch-a' | 'batch-b'
+export type MatchableBatchSlug = 'batch-a' | 'batch-b' | 'batch-d' | 'batch-e'
 
 export type ArchetypeId =
   | 'bonfire_romantic'

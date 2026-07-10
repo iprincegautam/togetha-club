@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import type { DestinationSlug } from '@/constants/destinations'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import type { QuizAnswers, QuizResult } from '@/types/quiz'
 
@@ -45,8 +46,11 @@ export async function copyTextToClipboard(text: string): Promise<void> {
   if (!ok) throw new Error('Copy failed')
 }
 
-export function calculateQuizResult(answers: QuizAnswers): QuizResult {
-  const analysis = analyzeMatchProfile(answers)
+export function calculateQuizResult(
+  answers: QuizAnswers,
+  destination: DestinationSlug = 'himalayan'
+): QuizResult {
+  const analysis = analyzeMatchProfile(answers, destination)
   const primary = analysis.batches.find((batch) => batch.batchSlug === analysis.primaryBatch)
 
   return {

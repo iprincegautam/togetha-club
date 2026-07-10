@@ -1,17 +1,17 @@
 import { notFound, redirect } from 'next/navigation'
-import ApplyForm from '@/components/apply/ApplyForm'
+import ApplyFormLoader from '@/components/apply/ApplyFormLoader'
 import StampCircle from '@/components/ui/StampCircle'
 import { BATCH_META } from '@/constants/batches'
+import { isBookableBatchSlug, isMillennialEdition } from '@/constants/destinations'
 import { fetchBatchDepartures } from '@/lib/batches'
 import { ROUTES } from '@/constants/routes'
 import { formatPrice } from '@/lib/utils'
+import { BATCH_PRICE_FALLBACK_RUPEES } from '@/lib/batch-price-fallbacks'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
 import type { BatchStatus } from '@/types/batch'
+import type { MatchableBatchSlug } from '@/types/match'
 import '@/components/apply/apply.css'
-
-const VALID_SLUGS = ['batch-a', 'batch-b'] as const
-type BatchSlug = (typeof VALID_SLUGS)[number]
 
 export async function generateMetadata({
   params,
@@ -26,12 +26,14 @@ export async function generateMetadata({
   )
 }
 
-const FALLBACK: Record<BatchSlug, { name: string; price: number; status: BatchStatus }> = {
-  'batch-a': { name: 'The Himalayan Love Trail — A', price: 18999, status: 'open' },
-  'batch-b': { name: 'The Himalayan Love Trail — B', price: 22999, status: 'open' },
+const FALLBACK: Record<MatchableBatchSlug, { name: string; price: number; status: BatchStatus }> = {
+  'batch-a': { name: 'The Himalayan Love Trail — A', price: BATCH_PRICE_FALLBACK_RUPEES['batch-a'], status: 'open' },
+  'batch-b': { name: 'The Himalayan Love Trail — B', price: BATCH_PRICE_FALLBACK_RUPEES['batch-b'], status: 'open' },
+  'batch-d': { name: 'The Udaipur Love Trail — D', price: BATCH_PRICE_FALLBACK_RUPEES['batch-d'], status: 'open' },
+  'batch-e': { name: 'The Udaipur Love Trail — E', price: BATCH_PRICE_FALLBACK_RUPEES['batch-e'], status: 'open' },
 }
 
-async function fetchBatch(slug: BatchSlug) {
+async function fetchBatch(slug: MatchableBatchSlug) {
   const supabase = tryCreateServerSupabaseClient()
   if (!supabase) return FALLBACK[slug]
 
@@ -55,16 +57,23 @@ export default async function ApplyPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ name?: string; email?: string; applicantId?: string; promo?: string; step?: string }>
+  searchParams: Promise<{
+    name?: string
+    email?: string
+    applicantId?: string
+    promo?: string
+    step?: string
+    date?: string
+  }>
 }) {
   const { slug } = await params
   const query = await searchParams
 
-  if (!VALID_SLUGS.includes(slug as BatchSlug)) {
+  if (!isBookableBatchSlug(slug)) {
     notFound()
   }
 
-  const batchSlug = slug as BatchSlug
+  const batchSlug = slug
   const batch = await fetchBatch(batchSlug)
 
   if (!batch || batch.status === 'waitlist' || batch.status === 'coming_soon') {
@@ -81,6 +90,10 @@ export default async function ApplyPage({
   const previewStep =
     process.env.NODE_ENV === 'development' && (query.step === '2' || query.step === '3')
       ? (Number(query.step) as 2 | 3)
+      : undefined
+  const initialDateIndex =
+    query.date != null && query.date !== '' && !Number.isNaN(Number(query.date))
+      ? Number(query.date)
       : undefined
 
   return (
@@ -106,21 +119,24 @@ export default async function ApplyPage({
         <p className="apply-eyebrow">✦ {meta.label} ✦</p>
         <h1 className="apply-title">{batch.name}</h1>
         <p className="apply-sub">
-          {formatPrice(batch.price)} per person · 3 steps to reserve your spot
+          {formatPrice(batch.price)} per person
+          {batchSlug === 'batch-d' || batchSlug === 'batch-e' ? ' · GST included' : ''}
+          {' · 3 steps to reserve your spot'}
         </p>
 
-        <ApplyForm
+        <ApplyFormLoader
           batchSlug={batchSlug}
           batchName={batch.name}
           batchPrice={batch.price}
           dateOptions={dateOptions}
           accentColor={meta.accentColor}
-          roseAccent={batchSlug === 'batch-b'}
+          roseAccent={isMillennialEdition(batchSlug)}
           initialName={query.name}
           initialEmail={query.email}
           applicantId={query.applicantId}
           initialPromoCode={query.promo}
           previewStep={previewStep}
+          initialDateIndex={initialDateIndex}
         />
       </div>
     </div>

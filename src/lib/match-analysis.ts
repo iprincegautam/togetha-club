@@ -7,6 +7,8 @@ import {
 } from '@/lib/match-engine'
 import { fetchCohortInsight } from '@/lib/match-cohort'
 import { buildFallbackNarrative, generateAiNarrative } from '@/lib/match-narrative'
+import type { DestinationSlug } from '@/constants/destinations'
+import { isBookableBatchSlug } from '@/constants/destinations'
 import type { BatchMatchResult, CohortInsight, MatchAnalysis, MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
 
@@ -80,9 +82,9 @@ export async function enrichBatchMatch(
 export async function buildEnrichedMatchAnalysis(
   service: SupabaseClient | null,
   answers: QuizAnswers,
-  options: EnrichOptions = {}
+  options: EnrichOptions & { destination?: DestinationSlug } = {}
 ): Promise<MatchAnalysis> {
-  const base = analyzeMatchProfile(answers)
+  const base = analyzeMatchProfile(answers, options.destination ?? 'himalayan')
   const batches = await Promise.all(
     base.batches.map((batch) => enrichBatchMatch(service, answers, batch.batchSlug, options))
   )
@@ -104,7 +106,7 @@ export async function buildApplicantMatchInsight(
   answers: QuizAnswers | null,
   batchSlug: string | null
 ): Promise<{ match: BatchMatchResult | null; vector: ReturnType<typeof answersToCompatibilityVector> | null }> {
-  if (!answers || !batchSlug || (batchSlug !== 'batch-a' && batchSlug !== 'batch-b')) {
+  if (!answers || !batchSlug || !isBookableBatchSlug(batchSlug)) {
     return { match: null, vector: null }
   }
 

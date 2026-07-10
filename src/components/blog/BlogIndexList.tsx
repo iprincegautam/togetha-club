@@ -47,9 +47,9 @@ export default function BlogIndexList({ posts }: Props) {
       </div>
 
       <div className="blog-index-cta">
-        <p>Ready to see your fit?</p>
-        <Link href={ROUTES.match} className="btn-p">
-          Take the compatibility quiz →
+        <p>Ready to pick a trail?</p>
+        <Link href={ROUTES.batches} className="btn-p">
+          Choose your destination →
         </Link>
       </div>
     </div>

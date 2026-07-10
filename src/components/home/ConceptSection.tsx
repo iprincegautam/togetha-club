@@ -13,7 +13,7 @@ const STATS = [
       <>
         <strong>Verified singles per batch</strong>
         <br />
-        12 boys · 12 girls · always balanced.
+        12 women · 12 men · always balanced.
       </>
     ),
   },
@@ -45,9 +45,9 @@ const STATS = [
     suffix: <span className="sc-num-pct">%</span>,
     label: (
       <>
-        <strong>Chance your relationship status changes</strong>
+        <strong>Report something meaningful changed</strong>
         <br />
-        AI matching + verified data from pilot batches.
+        Romance, deep friendships, or just clarity. All real.
       </>
     ),
   },
@@ -75,8 +75,8 @@ export default function ConceptSection() {
               for the same reason. If there&apos;s a spark, you&apos;ll know it — and
               it&apos;ll be real.
             </p>
-            <Link href={ROUTES.match} className="btn-p">
-              ✦ Start the Quiz →
+            <Link href={ROUTES.batches} className="btn-p">
+              ✦ Choose your destination →
             </Link>
           </div>
           <div className="stat-cards">

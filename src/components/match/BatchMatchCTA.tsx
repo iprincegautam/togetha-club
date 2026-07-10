@@ -2,13 +2,19 @@
 
 import Link from 'next/link'
 import { ROUTES } from '@/constants/routes'
+import type { DestinationSlug } from '@/constants/destinations'
 import type { MatchableBatchSlug } from '@/types/match'
 
 type Props = {
   batchSlug: MatchableBatchSlug
+  destination?: DestinationSlug
 }
 
-export default function BatchMatchCTA({ batchSlug }: Props) {
+export default function BatchMatchCTA({ batchSlug, destination }: Props) {
+  const matchHref = destination
+    ? ROUTES.matchForDestination(destination, batchSlug)
+    : ROUTES.matchForBatch(batchSlug)
+
   return (
     <div className="match-batch-cta">
       <div>
@@ -19,7 +25,7 @@ export default function BatchMatchCTA({ batchSlug }: Props) {
           people you&apos;re most likely to connect with on this trip.
         </p>
       </div>
-      <Link href={`${ROUTES.match}?batch=${batchSlug}`} className="apply-submit">
+      <Link href={matchHref} className="apply-submit">
         Check my match chances →
       </Link>
     </div>

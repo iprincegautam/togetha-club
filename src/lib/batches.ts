@@ -94,7 +94,7 @@ export async function fetchBatchDepartures(
 export async function fetchAllBatchDepartures(
   supabase: SupabaseClient | null
 ): Promise<Record<string, DateOption[]>> {
-  const slugs = ['batch-a', 'batch-b']
+  const slugs = ['batch-a', 'batch-b', 'batch-d', 'batch-e']
   const entries = await Promise.all(
     slugs.map(async (slug) => [slug, await fetchBatchDepartures(supabase, slug)] as const)
   )
@@ -111,7 +111,7 @@ export async function fetchBatchDepartureShortLists(
   supabase: SupabaseClient | null
 ): Promise<Record<string, string>> {
   const departureMap = await fetchAllBatchDepartures(supabase)
-  const slugs = ['batch-a', 'batch-b'] as const
+  const slugs = ['batch-a', 'batch-b', 'batch-d', 'batch-e'] as const
   return Object.fromEntries(
     slugs.map((slug) => [slug, shortListFromDateOptions(departureMap[slug] ?? [], slug)])
   )

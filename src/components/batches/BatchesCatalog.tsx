@@ -1,90 +1,73 @@
 import Link from 'next/link'
-import { BATCH_META } from '@/constants/batches'
+import { DESTINATIONS } from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import { withPromoQuery } from '@/lib/promo'
 import { formatPrice } from '@/lib/utils'
-import type { BatchCatalogRow } from '@/lib/batch-catalog'
+import type { DestinationCatalogRow } from '@/lib/destination-catalog'
 import Reveal from '@/components/ui/Reveal'
 
 type BatchesCatalogProps = {
-  batches: BatchCatalogRow[]
+  destinations: DestinationCatalogRow[]
   promoCode?: string
 }
 
-function catalogCta(batch: BatchCatalogRow, promoCode?: string): { href: string; label: string } {
-  const matchUrl = withPromoQuery(ROUTES.matchForBatch(batch.slug), promoCode)
-  if (batch.slug === 'batch-c' || batch.status === 'coming_soon') {
-    return {
-      href: matchUrl,
-      label: 'Book your slot →',
-    }
-  }
-  return {
-    href: matchUrl,
-    label: 'Book your slot →',
-  }
-}
-
-export default function BatchesCatalog({ batches, promoCode }: BatchesCatalogProps) {
+export default function BatchesCatalog({ destinations, promoCode }: BatchesCatalogProps) {
   return (
     <section className="batches-catalog">
       <div className="batches-catalog-track">
-        {batches.map((batch) => {
-          const meta = BATCH_META[batch.slug as keyof typeof BATCH_META]
-          const cta = catalogCta(batch, promoCode)
+        {destinations.map((destination) => {
+          const meta = DESTINATIONS[destination.slug]
+          const matchUrl = withPromoQuery(ROUTES.matchForDestination(destination.slug), promoCode)
           const pillClass =
-            batch.slug === 'batch-b'
-              ? 'rose-pill'
-              : batch.slug === 'batch-c'
-                ? 'lavender-pill'
-                : ''
+            destination.slug === 'udaipur' ? 'gold-pill' : destination.slug === 'himalayan' ? '' : ''
 
           return (
-            <Reveal key={batch.slug} className="batches-catalog-item">
+            <Reveal key={destination.slug} className="batches-catalog-item">
               <article
-                className={`batches-catalog-card batches-catalog-card--${batch.slug.replace('batch-', '')}`}
-                style={{ '--batch-accent': meta?.color } as React.CSSProperties}
+                className={`batches-catalog-card batches-catalog-card--${destination.catalogCardClass}`}
+                style={{ '--batch-accent': destination.accentColor } as React.CSSProperties}
               >
                 <div className={`batch-label-pill${pillClass ? ` ${pillClass}` : ''}`}>
-                  ✦ {meta?.label ?? batch.slug} ✦
+                  ✦ {destination.stops} ✦
                 </div>
                 <h2 className="batches-catalog-card-title">
-                  {batch.slug === 'batch-a' && (
+                  {destination.slug === 'himalayan' && (
                     <>
                       For the <em>unfiltered</em> ones.
                     </>
                   )}
-                  {batch.slug === 'batch-b' && (
+                  {destination.slug === 'udaipur' && (
                     <>
-                      For the <em>intentional</em> ones.
-                    </>
-                  )}
-                  {batch.slug === 'batch-c' && (
-                    <>
-                      A <em>third</em> destination.
+                      For the <em>romantic</em> ones.
                     </>
                   )}
                 </h2>
-                <p className="batches-catalog-tagline">{meta?.tagline}</p>
-                <p className="batches-catalog-ages">Ages {meta?.ageRange}</p>
+                <p className="batches-catalog-tagline">{destination.tagline}</p>
+                <p className="batches-catalog-ages">{destination.ageSummary}</p>
                 <p className="batches-catalog-price">
-                  {batch.price != null ? (
+                  {destination.startingPrice != null ? (
                     <>
-                      From <strong>{formatPrice(batch.price)}</strong>
+                      From <strong>{formatPrice(destination.startingPrice)}</strong>
                       <span className="batches-catalog-per"> / person</span>
                     </>
                   ) : (
-                    <strong>Price revealed Aug 1</strong>
+                    <strong>Price coming soon</strong>
                   )}
                 </p>
                 <p className="batches-catalog-status">
-                  {batch.status === 'open' && '12 boys · 12 girls · Spots open'}
-                  {batch.status === 'coming_soon' && 'Waitlist open · Aug 2026'}
-                  {batch.status === 'sold_out' && 'Sold out — join waitlist'}
-                  {batch.status === 'waitlist' && 'Waitlist only'}
+                  {destination.status === 'open' && '12 boys · 12 girls · Spots open'}
+                  {destination.status === 'coming_soon' && 'Coming soon'}
+                  {destination.status === 'sold_out' && 'Sold out — join waitlist'}
+                  {destination.status === 'waitlist' && 'Waitlist only'}
                 </p>
-                <Link href={cta.href} className="batches-catalog-cta">
-                  {cta.label}
+                <Link href={matchUrl} className="batches-catalog-cta">
+                  Find your compatibility →
+                </Link>
+                <Link
+                  href={withPromoQuery(ROUTES.destinationDetail(destination.slug), promoCode)}
+                  className="batches-catalog-secondary"
+                >
+                  View {meta.shortTitle} editions →
                 </Link>
               </article>
             </Reveal>

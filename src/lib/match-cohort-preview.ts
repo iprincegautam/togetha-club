@@ -107,12 +107,17 @@ function buildOrgLine(
   preferCollege: boolean
 ): { role: string; orgLine: string } {
   const useCollege =
-    preferCollege || (batchSlug === 'batch-a' && rng() < 0.55) || (batchSlug === 'batch-b' && rng() < 0.25)
+    preferCollege ||
+    ((batchSlug === 'batch-a' || batchSlug === 'batch-d') && rng() < 0.55) ||
+    ((batchSlug === 'batch-b' || batchSlug === 'batch-e') && rng() < 0.25)
 
   if (useCollege) {
     const profile = pick(rng, COLLEGE_PROFILES)
     const college = pick(rng, profile.colleges)
-    const year = batchSlug === 'batch-a' ? pick(rng, ['2nd year', '3rd year', 'Final year']) : 'Graduate track'
+    const year =
+      batchSlug === 'batch-a' || batchSlug === 'batch-d'
+        ? pick(rng, ['2nd year', '3rd year', 'Final year'])
+        : 'Graduate track'
     return {
       role: `${profile.role} · ${profile.program}`,
       orgLine: `${college} · ${year}`,
@@ -136,7 +141,8 @@ function likeYouCountForMatch(match: BatchMatchResult, rng: () => number): numbe
 }
 
 function spotsUrgency(batchSlug: MatchableBatchSlug, rng: () => number) {
-  const totalLeft = batchSlug === 'batch-a' ? 3 + Math.floor(rng() * 5) : 2 + Math.floor(rng() * 4)
+  const isGenz = batchSlug === 'batch-a' || batchSlug === 'batch-d'
+  const totalLeft = isGenz ? 3 + Math.floor(rng() * 5) : 2 + Math.floor(rng() * 4)
   const spotsRemainingM = Math.max(1, Math.floor(totalLeft / 2 + rng() * 2))
   const spotsRemainingF = Math.max(1, totalLeft - spotsRemainingM + Math.floor(rng() * 2))
   const spotsRemaining = Math.min(8, spotsRemainingM + spotsRemainingF)
@@ -168,7 +174,11 @@ export function buildBatchCohortTeaser(
     const first = pick(rng, female ? FIRST_NAMES_F : FIRST_NAMES_M)
     const lastInitial = pick(rng, LAST_INITIALS)
     const topArchetype = match.peerMix[i % match.peerMix.length]?.id ?? match.peerMix[0]?.id ?? 'golden_warmth'
-    const { role, orgLine } = buildOrgLine(rng, match.batchSlug, match.batchSlug === 'batch-a' && rng() < 0.45)
+    const { role, orgLine } = buildOrgLine(
+      rng,
+      match.batchSlug,
+      (match.batchSlug === 'batch-a' || match.batchSlug === 'batch-d') && rng() < 0.45
+    )
 
     people.push({
       id: `${match.batchSlug}-${i}-${first}`,
