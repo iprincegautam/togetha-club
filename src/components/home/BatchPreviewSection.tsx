@@ -1,6 +1,8 @@
+import Image from 'next/image'
 import Reveal from '@/components/ui/Reveal'
 import Link from 'next/link'
 import SectionLabel from '@/components/ui/SectionLabel'
+import { destinationCoverImage } from '@/constants/batch-gallery'
 import { DESTINATIONS, type DestinationSlug } from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import { buildDestinationTripMetaLine } from '@/constants/destinations'
@@ -31,37 +33,6 @@ const DESTINATION_DISPLAY: Record<
     priceClass: 'tpc-price-rose',
     ctaClass: 'tpc-cta-rose',
   },
-}
-
-function HimalayanVisual() {
-  return (
-    <svg viewBox="0 0 480 190" xmlns="http://www.w3.org/2000/svg">
-      <rect width="480" height="190" fill="#D4E9F7" />
-      <circle cx="400" cy="48" r="30" fill="#F9D54A" opacity="0.9" />
-      <circle cx="400" cy="48" r="22" fill="#FCEA7E" />
-      <polygon points="0,144 68,76 128,108 186,80 244,124 302,86 360,114 420,80 480,100 480,190 0,190" fill="#4A8B5C" opacity="0.9" />
-      <rect x="0" y="162" width="480" height="28" fill="#3D7A49" />
-      <text x="14" y="183" fontFamily="Georgia" fontStyle="italic" fontSize="8.5" fill="rgba(44,24,16,0.38)">Manali · Kasol · Sissu</text>
-    </svg>
-  )
-}
-
-function UdaipurVisual() {
-  return (
-    <svg viewBox="0 0 480 190" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="udaipur-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FCE4B8" />
-          <stop offset="100%" stopColor="#D4516A" />
-        </linearGradient>
-      </defs>
-      <rect width="480" height="190" fill="url(#udaipur-sky)" />
-      <ellipse cx="240" cy="150" rx="220" ry="24" fill="#6B8CAE" opacity="0.85" />
-      <polygon points="180,150 220,90 260,150" fill="#F5E6C8" />
-      <polygon points="250,150 300,70 350,150" fill="#E8DFC8" />
-      <text x="14" y="183" fontFamily="Georgia" fontStyle="italic" fontSize="8.5" fill="rgba(44,24,16,0.45)">Udaipur · Kumbhalgarh</text>
-    </svg>
-  )
 }
 
 function statusLabel(status: BatchStatus): string {
@@ -97,10 +68,11 @@ export default function BatchPreviewSection({
           <div className="trips-grid">
             {destinations.map((destination) => {
               const display = DESTINATION_DISPLAY[destination.slug]
-              const Visual = destination.slug === 'udaipur' ? UdaipurVisual : HimalayanVisual
+              const cover = destinationCoverImage(destination.slug)
               const defaultSlug = DESTINATIONS[destination.slug].genzSlug
               const shortDates = departureShortLists[defaultSlug] ?? ''
               const meta = buildDestinationTripMetaLine(destination.slug, shortDates)
+              const stops = DESTINATIONS[destination.slug].stops
 
               return (
                 <Link
@@ -109,7 +81,19 @@ export default function BatchPreviewSection({
                   className="tpc"
                 >
                   <div className="tpc-vis">
-                    <Visual />
+                    {cover?.src ? (
+                      <>
+                        <Image
+                          src={cover.src}
+                          alt={cover.caption}
+                          fill
+                          sizes="(max-width: 700px) 100vw, 480px"
+                          className="tpc-vis-image"
+                          priority={destination.slug === 'himalayan'}
+                        />
+                        <span className="tpc-vis-label">{stops}</span>
+                      </>
+                    ) : null}
                   </div>
                   <div className="tpc-body">
                     <div className="tpc-badges">

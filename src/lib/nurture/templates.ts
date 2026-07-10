@@ -365,7 +365,7 @@ Reserve your slot with ${ctx.depositLabel} now. Balance due before departure. EM
 
 What's included:
 • Delhi to Delhi transport
-• 3 nights — 2 in Manali (3-star), 1 riverside camp in Kasol
+• 5 nights — Manali, Sissu & Kasol (Delhi overnight out and back)
 • All meals, ice breakers, bonfire night
 • Trip lead, verification, private group access
 
@@ -381,7 +381,7 @@ Unsubscribe: ${ctx.unsubscribeUrl}`
     ${urgencyBanner(ctx)}
     <p style="font-size:15px;line-height:1.65;">You don't have to pay the full amount today.</p>
     <p style="font-size:15px;line-height:1.65;">Reserve with <strong>${ctx.depositLabel}</strong> now. Balance due before departure. EMI available at checkout.</p>
-    <p style="font-size:14px;line-height:1.65;color:#6b5344;">Delhi-Delhi transport · 3 nights · all meals · bonfire · verified batch · trip lead</p>
+    <p style="font-size:14px;line-height:1.65;color:#6b5344;">Delhi-Delhi transport · 5 nights · all meals · bonfire · verified batch · trip lead</p>
     ${fomoBlock(ctx)}
     <p style="font-size:14px;color:#6b5344;">${dateBit}${ctx.vacantTotal} spots still open.</p>
     ${ctaButton(ctx, `Pay ${ctx.depositLabel} deposit & unlock →`)}`,

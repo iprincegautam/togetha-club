@@ -11,7 +11,7 @@ export default function HowItWorksHero() {
         </h1>
         <p className="hiw-hero-sub">
           Take the quiz, pick your Friday, pay on the website — then show up with 12 women and 12
-          men for 3 nights across Manali, Sissu, and Kasol.
+          men for 5 nights across Manali, Sissu, and Kasol.
         </p>
         <div className="hiw-hero-btns">
           <Link href={ROUTES.batches} className="btn-p">

@@ -2,8 +2,8 @@ import type { MatchableBatchSlug } from '@/types/match'
 
 /** Offline defaults when Supabase is unavailable — keep in sync with migrations. */
 export const BATCH_PRICE_FALLBACK_RUPEES: Record<MatchableBatchSlug, number> = {
-  'batch-a': 18999,
-  'batch-b': 22999,
+  'batch-a': 9999,
+  'batch-b': 9999,
   'batch-d': 13999,
   'batch-e': 13999,
 }

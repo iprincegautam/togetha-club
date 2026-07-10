@@ -30,8 +30,8 @@ export default function AboutPage() {
           <h2>What we do</h2>
           <p>
             Every month we run curated batches — GenZ (18–25) and Millennial (26–36) editions — with
-            balanced cohorts, AI compatibility matching, and 3 nights across Manali, Sissu, and
-            Sissu. Take the quiz, book your slot, pay online, and show up.
+            balanced cohorts, AI compatibility matching, and 5 nights across Manali, Sissu, and
+            Kasol. Take the quiz, book your slot, pay online, and show up.
           </p>
         </section>
 

@@ -1,14 +1,12 @@
 -- Public batch names: GenZ / Millennial editions only (no A/B/D/E letter codes).
--- Also restore Himalayan list prices if they drifted.
+-- Himalayan list prices are finalized in 046_himalayan_price_9999.sql.
 
 UPDATE batches
-SET name = 'Himalayan Love Trail — GenZ Edition',
-    price = 18999
+SET name = 'Himalayan Love Trail — GenZ Edition'
 WHERE slug = 'batch-a';
 
 UPDATE batches
-SET name = 'Himalayan Love Trail — Millennial Edition',
-    price = 22999
+SET name = 'Himalayan Love Trail — Millennial Edition'
 WHERE slug = 'batch-b';
 
 UPDATE batches

@@ -73,7 +73,7 @@ export function renderTripDetailsHtml(batchSlug: MatchableBatchSlug, _batchUrl: 
     : ''
 
   return `<div style="margin:24px 0 0;padding:18px 16px;background:#f5edd8;border:1px solid #e8dcc8;border-radius:4px;">
-    <p style="margin:0 0 6px;font-size:12px;font-family:system-ui,sans-serif;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#1a6b5a;">Your itinerary · 3 nights / 4 days</p>
+    <p style="margin:0 0 6px;font-size:12px;font-family:system-ui,sans-serif;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#1a6b5a;">Your itinerary · 5 nights / 6 days</p>
     <p style="margin:0 0 16px;font-size:13px;line-height:1.55;color:#6b5344;">Delhi → Manali → Sissu → Kasol → Delhi. Day-by-day plan and inclusions below.</p>
     ${dayBlocks}
     <p style="margin:8px 0 10px;font-size:12px;font-family:system-ui,sans-serif;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#1a6b5a;">What's included</p>

@@ -32,7 +32,7 @@ const STEPS = [
     num: '04',
     icon: HOW_IT_WORKS_GLYPH.connection,
     title: 'Go to the mountains',
-    desc: 'Manali → Sissu → Kasol. 3 nights, 4 days. Ice breakers, bonfires, real conversations. What happens next is entirely yours.',
+    desc: 'Manali → Sissu → Kasol. 5 nights, 6 days. Ice breakers, bonfires, real conversations. What happens next is entirely yours.',
     action: null,
   },
 ] as const

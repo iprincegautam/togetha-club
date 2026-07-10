@@ -8,7 +8,7 @@ import { buildMetadata } from '@/lib/metadata'
 export function generateMetadata() {
   return buildMetadata(
     'How It Works — Togetha.Club',
-    'From compatibility quiz to booking your slot: pay online, AI batch matching, 3 nights across Manali, Sissu, and Kasol.'
+    'From compatibility quiz to booking your slot: pay online, AI batch matching, 5 nights across Manali, Sissu, and Kasol.'
   )
 }
 

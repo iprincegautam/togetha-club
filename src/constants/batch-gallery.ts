@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import type { DestinationSlug } from '@/constants/destinations'
 
 export type BatchGallerySlide = {
   id: string
@@ -11,19 +12,9 @@ export type BatchGallerySlide = {
 
 const HIMALAYAN_GALLERY: BatchGallerySlide[] = [
   {
-    id: 'safety',
-    caption: 'Your safety is the product — verified by a real person',
-    src: '/batches/himalayan/safety-verified.jpg',
-  },
-  {
     id: 'dating-fatigue',
     caption: 'Done with dating apps — ready for the mountains',
     src: '/batches/himalayan/dating-apps-fatigue.jpg',
-  },
-  {
-    id: 'funnel',
-    caption: 'Quiz → match → pick your Friday → human review',
-    src: '/batches/himalayan/how-it-works-funnel.jpg',
   },
   {
     id: 'matchmaking',
@@ -35,23 +26,28 @@ const HIMALAYAN_GALLERY: BatchGallerySlide[] = [
     caption: 'Manali · Kasol · Sissu — real friendships around the fire',
     src: '/batches/himalayan/campfire-friendships.jpg',
   },
+  {
+    id: 'funnel',
+    caption: 'Quiz → match → pick your Friday → human review',
+    src: '/batches/himalayan/how-it-works-funnel.jpg',
+  },
+  {
+    id: 'safety',
+    caption: 'Your safety is the product — verified by a real person',
+    src: '/batches/himalayan/safety-verified.jpg',
+  },
 ]
 
 const UDAIPUR_GALLERY: BatchGallerySlide[] = [
   {
-    id: 'anonymous-profiles',
-    caption: 'Who are these strangers — is it safe?',
-    src: '/batches/udaipur/anonymous-profiles.jpg',
-  },
-  {
-    id: 'safety',
-    caption: 'Your safety is the product — verified by a real human',
-    src: '/batches/udaipur/safety-verified.jpg',
-  },
-  {
     id: 'dating-fatigue',
     caption: 'Done with dating apps — ready for the lakes',
     src: '/batches/udaipur/dating-apps-fatigue.jpg',
+  },
+  {
+    id: 'anonymous-profiles',
+    caption: 'Who are these strangers — is it safe?',
+    src: '/batches/udaipur/anonymous-profiles.jpg',
   },
   {
     id: 'bollywood-party',
@@ -68,6 +64,11 @@ const UDAIPUR_GALLERY: BatchGallerySlide[] = [
     caption: 'Quiz → match → pick your weekend → human review',
     src: '/batches/udaipur/how-it-works-funnel.jpg',
   },
+  {
+    id: 'safety',
+    caption: 'Your safety is the product — verified by a real human',
+    src: '/batches/udaipur/safety-verified.jpg',
+  },
 ]
 
 export const BATCH_GALLERY: Record<string, BatchGallerySlide[]> = {
@@ -75,4 +76,14 @@ export const BATCH_GALLERY: Record<string, BatchGallerySlide[]> = {
   'batch-b': HIMALAYAN_GALLERY,
   'batch-d': UDAIPUR_GALLERY,
   'batch-e': UDAIPUR_GALLERY,
+}
+
+/** Same galleries as the PDP, keyed by destination for catalog / home cards. */
+export const DESTINATION_GALLERY: Record<DestinationSlug, BatchGallerySlide[]> = {
+  himalayan: HIMALAYAN_GALLERY,
+  udaipur: UDAIPUR_GALLERY,
+}
+
+export function destinationCoverImage(slug: DestinationSlug): BatchGallerySlide | undefined {
+  return DESTINATION_GALLERY[slug]?.find((slide) => Boolean(slide.src))
 }

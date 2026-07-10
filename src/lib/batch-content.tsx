@@ -77,7 +77,7 @@ const BATCH_A_FAQ = [
   {
     question: "What happens if I don't click with anyone romantically?",
     answer:
-      "You still get 3 nights in the Himalayas with 23 interesting, vetted, single people who chose to do something different with their time. The worst outcome is: incredible trip, 23 new friends, and a story you'll tell for years. That's a pretty good worst case.",
+      "You still get 5 nights in the Himalayas with 23 interesting, vetted, single people who chose to do something different with their time. The worst outcome is: incredible trip, 23 new friends, and a story you'll tell for years. That's a pretty good worst case.",
   },
   {
     question: 'How do I book my spot?',
@@ -160,9 +160,9 @@ const BATCH_B_FAQ = [
       "No. The screened intent is \"open to something real\" — which could mean a relationship, a meaningful friendship, or just an experience that reminds you that interesting people exist. We don't ask you to be \"looking for marriage.\" We ask you to be genuine and open.",
   },
   {
-    question: "I'm 38. Is that too old?",
+    question: "I'm 36. Is that too old?",
     answer:
-      "No. The Millennial batch is 28–38. We've found this age range has remarkable chemistry because everyone's past the phase of figuring themselves out. You know what you want. So does everyone else. That's powerful.",
+      "No. The Millennial batch is 26–36. We've found this age range has remarkable chemistry because everyone's past the phase of figuring themselves out. You know what you want. So does everyone else. That's powerful.",
   },
   {
     question: 'What is the letter exchange?',
@@ -270,7 +270,7 @@ function buildBatchATabs() {
       label: 'Day-by-Day',
       content: (
         <ItineraryTab
-          title="3 nights · 4 days — Manali, Sissu & Kasol."
+          title="5 nights · 6 days — Manali, Sissu & Kasol."
           days={BATCH_A_ITINERARY}
         />
       ),
@@ -352,7 +352,7 @@ function buildBatchBTabs() {
         <VibeTab
           label="Who this is for"
           title="The Millennial Edition — a different pace."
-          intro={`You're 28–38. You have your life together — career, apartment, maybe even a car. The thing you don't have figured out is this. Dating in your 30s in India is strange. The apps feel beneath you. The arranged marriage pressure is exhausting. The people who "get it" seem impossible to find in normal life.\n\nThis trip is for you.`}
+          intro={`You're 26–36. You have your life together — career, apartment, maybe even a car. The thing you don't have figured out is this. Dating in your 30s in India is strange. The apps feel beneath you. The arranged marriage pressure is exhausting. The people who "get it" seem impossible to find in normal life.\n\nThis trip is for you.`}
           cards={BATCH_B_VIBE_CARDS}
         />
       ),

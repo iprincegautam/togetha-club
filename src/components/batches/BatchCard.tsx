@@ -42,7 +42,7 @@ const BATCH_CONFIG: Record<
   }
 > = {
   'batch-a': {
-    genBadge: 'GenZ · Ages 20–27',
+    genBadge: 'GenZ · Ages 18–25',
     tagline: '"Manali. Kasol. Sissu. Five nights of chaos, connection, and maybe something more."',
     ratingText: "India's first matchmaking travel experience",
     includes: 'Includes accommodation, all meals, transport Delhi↔Manali, activities & experiences',
@@ -55,7 +55,7 @@ const BATCH_CONFIG: Record<
     ],
   },
   'batch-b': {
-    genBadge: 'Millennial · Ages 28–38',
+    genBadge: 'Millennial · Ages 26–36',
     tagline: '"For the ones who\'ve done the apps and know what they actually want. No games. Just mountains and real people."',
     ratingText: "India's most intentional travel experience",
     includes: 'Premium accommodation, all meals, private transport, guided activities, curated experiences',
@@ -73,7 +73,7 @@ const BATCH_CONFIG: Record<
     ],
   },
   'batch-d': {
-    genBadge: 'GenZ · Ages 20–27',
+    genBadge: 'GenZ · Ages 18–25',
     tagline: '"Three days in the City of Lakes with 23 verified singles. No swiping — just showing up."',
     ratingText: "India's first matchmaking travel experience",
     includes: 'Return travel from Gurugram, 2 nights, 4 meals, hosted Bollywood house party & sightseeing',
@@ -87,7 +87,7 @@ const BATCH_CONFIG: Record<
     ],
   },
   'batch-e': {
-    genBadge: 'Millennial · Ages 28–38',
+    genBadge: 'Millennial · Ages 26–36',
     tagline: '"Three days in the City of Lakes with 23 verified singles. No swiping — just showing up."',
     ratingText: "India's most intentional travel experience",
     includes: 'Return travel from Gurugram, 2 nights, 4 meals, hosted Bollywood house party & sightseeing',

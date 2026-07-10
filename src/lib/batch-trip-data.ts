@@ -346,7 +346,7 @@ export function getBatchItineraryPresentation(batchSlug: MatchableBatchSlug): Ba
   }
   return {
     ...details,
-    itineraryTitle: '3 nights · 4 days — Manali, Sissu & Kasol.',
+    itineraryTitle: '5 nights · 6 days — Manali, Sissu & Kasol.',
     includesLabel: 'In the box',
     includesTitle: 'Everything that makes it work.',
     roseAccent: false,

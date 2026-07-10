@@ -507,6 +507,25 @@
   height: 190px;
   position: relative;
   overflow: hidden;
+  background: var(--warm);
+}
+
+.tpc-vis-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.tpc-vis-label {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
 }
 
 .tpc-vis svg {
