@@ -54,7 +54,7 @@ export default function ContactPage() {
             <h2>What to include in your message</h2>
             <ul>
               <li>Full name and email used at checkout</li>
-              <li>Batch name (e.g. Himalayan Love Trail — A)</li>
+              <li>Batch name (e.g. Himalayan Love Trail — GenZ Edition)</li>
               <li>Razorpay payment ID or order ID, if applicable</li>
               <li>Short description of your request (refund, transfer, technical issue)</li>
             </ul>

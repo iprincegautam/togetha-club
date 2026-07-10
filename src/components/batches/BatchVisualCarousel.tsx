@@ -1,11 +1,34 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useState } from 'react'
 import type { BatchGallerySlide } from '@/constants/batch-gallery'
 
 interface BatchVisualCarouselProps {
   slides: BatchGallerySlide[]
   accentColor?: string
+}
+
+function SlideMedia({ slide }: { slide: BatchGallerySlide }) {
+  if (slide.src) {
+    return (
+      <Image
+        src={slide.src}
+        alt={slide.caption}
+        fill
+        sizes="(max-width: 900px) 100vw, 900px"
+        className="batch-carousel-image"
+        priority={false}
+      />
+    )
+  }
+
+  if (slide.Visual) {
+    const Visual = slide.Visual
+    return <Visual />
+  }
+
+  return null
 }
 
 export default function BatchVisualCarousel({ slides, accentColor = 'var(--teal)' }: BatchVisualCarouselProps) {
@@ -32,8 +55,6 @@ export default function BatchVisualCarousel({ slides, accentColor = 'var(--teal)
 
   if (count === 0) return null
 
-  const slide = slides[index]
-
   return (
     <div
       className="batch-carousel"
@@ -46,10 +67,10 @@ export default function BatchVisualCarousel({ slides, accentColor = 'var(--teal)
           className="batch-carousel-track"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {slides.map(({ id, caption, Visual }) => (
-            <div className="batch-carousel-slide" key={id} aria-hidden={slides[index]?.id !== id}>
-              <Visual />
-              <p className="batch-carousel-caption">{caption}</p>
+          {slides.map((slide) => (
+            <div className="batch-carousel-slide" key={slide.id} aria-hidden={slides[index]?.id !== slide.id}>
+              <SlideMedia slide={slide} />
+              <p className="batch-carousel-caption">{slide.caption}</p>
             </div>
           ))}
         </div>

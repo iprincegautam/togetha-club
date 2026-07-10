@@ -108,39 +108,21 @@ const BATCH_CONFIG: Record<
 }
 
 function ProductTitle({ slug }: { slug: string }) {
-  if (slug === 'batch-a') {
+  if (slug === 'batch-a' || slug === 'batch-b') {
     return (
       <>
         The Himalayan
         <br />
-        Love Trail — A
+        Love Trail
       </>
     )
   }
-  if (slug === 'batch-b') {
-    return (
-      <>
-        The Himalayan
-        <br />
-        Love Trail — B
-      </>
-    )
-  }
-  if (slug === 'batch-d') {
+  if (slug === 'batch-d' || slug === 'batch-e') {
     return (
       <>
         The Udaipur
         <br />
-        Love Trail — D
-      </>
-    )
-  }
-  if (slug === 'batch-e') {
-    return (
-      <>
-        The Udaipur
-        <br />
-        Love Trail — E
+        Love Trail
       </>
     )
   }

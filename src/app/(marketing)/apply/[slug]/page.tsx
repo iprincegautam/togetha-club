@@ -7,6 +7,7 @@ import { fetchBatchDepartures } from '@/lib/batches'
 import { ROUTES } from '@/constants/routes'
 import { formatPrice } from '@/lib/utils'
 import { BATCH_PRICE_FALLBACK_RUPEES } from '@/lib/batch-price-fallbacks'
+import { batchPublicName } from '@/lib/batch-display'
 import { tryCreateServerSupabaseClient } from '@/lib/supabase/server'
 import { buildMetadata } from '@/lib/metadata'
 import type { BatchStatus } from '@/types/batch'
@@ -27,10 +28,10 @@ export async function generateMetadata({
 }
 
 const FALLBACK: Record<MatchableBatchSlug, { name: string; price: number; status: BatchStatus }> = {
-  'batch-a': { name: 'The Himalayan Love Trail — A', price: BATCH_PRICE_FALLBACK_RUPEES['batch-a'], status: 'open' },
-  'batch-b': { name: 'The Himalayan Love Trail — B', price: BATCH_PRICE_FALLBACK_RUPEES['batch-b'], status: 'open' },
-  'batch-d': { name: 'The Udaipur Love Trail — D', price: BATCH_PRICE_FALLBACK_RUPEES['batch-d'], status: 'open' },
-  'batch-e': { name: 'The Udaipur Love Trail — E', price: BATCH_PRICE_FALLBACK_RUPEES['batch-e'], status: 'open' },
+  'batch-a': { name: batchPublicName('batch-a'), price: BATCH_PRICE_FALLBACK_RUPEES['batch-a'], status: 'open' },
+  'batch-b': { name: batchPublicName('batch-b'), price: BATCH_PRICE_FALLBACK_RUPEES['batch-b'], status: 'open' },
+  'batch-d': { name: batchPublicName('batch-d'), price: BATCH_PRICE_FALLBACK_RUPEES['batch-d'], status: 'open' },
+  'batch-e': { name: batchPublicName('batch-e'), price: BATCH_PRICE_FALLBACK_RUPEES['batch-e'], status: 'open' },
 }
 
 async function fetchBatch(slug: MatchableBatchSlug) {

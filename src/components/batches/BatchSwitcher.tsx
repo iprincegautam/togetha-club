@@ -7,7 +7,6 @@ import {
   DESTINATIONS,
   getDestinationForBatch,
   getEditionSlugsForDestination,
-  type DestinationSlug,
 } from '@/constants/destinations'
 import { ROUTES } from '@/constants/routes'
 import { withPromoQuery } from '@/lib/promo'
@@ -33,13 +32,6 @@ function statusLabel(status: BatchCatalogRow['status']): string {
     default:
       return status
   }
-}
-
-function editionLabel(slug: string, destination: DestinationSlug): string {
-  if (slug === getEditionSlugsForDestination(destination)[0]) {
-    return `${DESTINATIONS[destination].shortTitle} — GenZ`
-  }
-  return `${DESTINATIONS[destination].shortTitle} — Millennial`
 }
 
 export default function BatchSwitcher({ batches, currentSlug, promoCode }: BatchSwitcherProps) {
@@ -79,7 +71,7 @@ export default function BatchSwitcher({ batches, currentSlug, promoCode }: Batch
               aria-current={active ? 'page' : undefined}
             >
               <span className="batch-switcher-edition">{meta?.label ?? batch.slug}</span>
-              <span className="batch-switcher-name">{editionLabel(batch.slug, destination)}</span>
+              <span className="batch-switcher-name">{DESTINATIONS[destination].shortTitle}</span>
               <span className="batch-switcher-meta">
                 {batch.price != null ? formatPrice(batch.price) : 'TBA'} · {statusLabel(batch.status)}
               </span>
