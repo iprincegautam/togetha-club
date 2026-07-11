@@ -63,7 +63,7 @@ export default function SafetySection() {
       {/* Hero */}
       <section className="sfty-hero">
         <div className="sfty-hero-inner">
-          <span className="sfty-stamp">Verified humans only</span>
+          <p className="sfty-hero-eyebrow">✦ Verified Humans Only ✦</p>
           <h1 className="sfty-hero-title">
             Not everyone gets in. <span className="t">That&apos;s the point.</span>
           </h1>
@@ -142,7 +142,7 @@ export default function SafetySection() {
       </section>
 
       {/* 3 · On the ground */}
-      <section ref={ground} className="sec sfty-sec reveal">
+      <section ref={ground} className="sec sfty-sec sfty-sec--paper reveal">
         <div className="sec-inner">
           <SectionLabel>On the ground</SectionLabel>
           <h2 className="sec-title">
@@ -186,7 +186,7 @@ export default function SafetySection() {
       </section>
 
       {/* 5 · Structure is safety */}
-      <section ref={structure} className="sec sfty-sec reveal">
+      <section ref={structure} className="sec sfty-sec sfty-sec--paper reveal">
         <div className="sec-inner">
           <SectionLabel>Structure is safety</SectionLabel>
           <h2 className="sec-title">
@@ -217,7 +217,7 @@ export default function SafetySection() {
       </section>
 
       {/* 7 · The women who'll be there */}
-      <section ref={leads} className="sec sfty-sec reveal">
+      <section ref={leads} className="sec sfty-sec sfty-sec--paper reveal">
         <div className="sec-inner">
           <SectionLabel>Who&apos;s with you</SectionLabel>
           <h2 className="sec-title">
@@ -308,7 +308,7 @@ export default function SafetySection() {
       </section>
 
       {/* 9 · The gate is real */}
-      <section ref={declined} className="sec sfty-sec reveal">
+      <section ref={declined} className="sec sfty-sec sfty-sec--paper reveal">
         <div className="sec-inner">
           <div className="sfty-declined">
             <span className="sfty-stamp is-red">Declined</span>

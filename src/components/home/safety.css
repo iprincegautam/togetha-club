@@ -2,57 +2,71 @@
    Cream + passport-stamp world. Calmer register than the carousels.
    Reuses generic .sec / .sec-inner / .sec-title / .sec-sub / .sec-label. */
 
-/* Hero */
+/* Hero — matches the homepage / how-it-works hero system */
 .sfty-hero {
-  padding: 120px 24px 64px;
+  padding: 108px 24px 56px;
   text-align: center;
-  background:
-    radial-gradient(120% 80% at 50% -10%, var(--warm-white) 0%, var(--cream) 60%);
+  background: var(--cream);
+  border-bottom: 1px dashed rgba(44, 24, 16, 0.12);
 }
 .sfty-hero-inner {
-  max-width: 760px;
+  max-width: 640px;
   margin: 0 auto;
+}
+.sfty-hero-eyebrow {
+  font-family: var(--font-family-caveat);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--teal-stamp);
+  margin-bottom: 12px;
 }
 .sfty-hero-title {
   font-family: var(--font-playfair);
   font-weight: 900;
-  font-size: clamp(2.1rem, 6vw, 3.6rem);
+  font-size: clamp(2rem, 5vw, 3.2rem);
   line-height: 1.05;
   color: var(--ink);
-  margin: 20px 0 18px;
+  margin: 0 0 14px;
 }
 .sfty-hero-title .t {
   color: var(--rose);
+  font-style: italic;
 }
 .sfty-hero-sub {
   font-family: var(--font-baskerville);
-  font-size: clamp(1rem, 2.4vw, 1.15rem);
-  line-height: 1.6;
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.65;
   color: var(--ink-mid);
-  max-width: 620px;
-  margin: 0 auto 28px;
+  max-width: 34rem;
+  margin: 0 auto 24px;
 }
 .sfty-hero-btns {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
 
-/* Postmark / stamp pill */
+/* Alternating section rhythm, like the homepage */
+.sfty-sec--paper {
+  background: var(--paper);
+}
+
+/* Rubber-stamp accent (postmark language, not a UI chip) */
 .sfty-stamp {
   display: inline-block;
-  font-family: var(--font-dm);
+  font-family: var(--font-family-caveat);
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.95rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding: 7px 14px;
-  border: 2px solid var(--teal-stamp);
+  padding: 5px 16px;
+  border: 2px double var(--teal-stamp);
   color: var(--teal-stamp);
-  border-radius: 4px;
+  border-radius: 6px;
   transform: rotate(-2deg);
-  opacity: 0.9;
+  opacity: 0.85;
 }
 .sfty-stamp.is-red {
   border-color: var(--red-stamp);
