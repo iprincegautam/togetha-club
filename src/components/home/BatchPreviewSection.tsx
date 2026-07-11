@@ -77,7 +77,7 @@ export default function BatchPreviewSection({
               return (
                 <Link
                   key={destination.slug}
-                  href={ROUTES.destinationDetail(destination.slug)}
+                  href={ROUTES.matchForDestination(destination.slug)}
                   className="tpc"
                 >
                   <div className="tpc-vis">
@@ -111,7 +111,7 @@ export default function BatchPreviewSection({
                       </div>
                     )}
                     <div className={`tpc-cta ${display.ctaClass}`}>
-                      See the trip →
+                      Check my fit in Our AI →
                     </div>
                   </div>
                 </Link>
