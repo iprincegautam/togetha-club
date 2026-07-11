@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: ROUTES.safety, label: 'Safety' },
   { href: ROUTES.match, label: 'Our AI' },
   { href: ROUTES.batches, label: 'Our Batches' },
+  { href: ROUTES.itineraries, label: 'Itineraries' },
   { href: ROUTES.blog, label: 'Journal' },
   { href: ROUTES.careers, label: 'Careers' },
 ] as const

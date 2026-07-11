@@ -4,6 +4,7 @@ import {
   PolicyTab,
   ReviewsTab,
   VibeTab,
+  type ItineraryDay,
   type PolicyData,
   type ReviewData,
   type VibeCardData,
@@ -469,6 +470,31 @@ function buildBatchETabs() {
       ),
     },
   ]
+}
+
+export function getBatchItinerary(
+  slug: string
+): { title: string; days: ItineraryDay[]; roseAccent?: boolean } | null {
+  switch (slug) {
+    case 'batch-a':
+      return { title: '5 nights · 6 days — Manali, Sissu & Kasol.', days: BATCH_A_ITINERARY }
+    case 'batch-b':
+      return {
+        title: 'Same route. Slower pace. Manali → Sissu → Kasol.',
+        days: BATCH_B_ITINERARY,
+        roseAccent: true,
+      }
+    case 'batch-d':
+      return { title: '3 days — Gurugram · Udaipur · Kumbhalgarh.', days: BATCH_D_ITINERARY }
+    case 'batch-e':
+      return {
+        title: '3 days — Gurugram · Udaipur · Kumbhalgarh.',
+        days: BATCH_E_ITINERARY,
+        roseAccent: true,
+      }
+    default:
+      return null
+  }
 }
 
 export function buildBatchTabs(slug: string) {

@@ -19,6 +19,9 @@ export default function Footer() {
           <Link href={ROUTES.batches}>Upcoming Batches</Link>
         </li>
         <li>
+          <Link href={ROUTES.itineraries}>Itineraries</Link>
+        </li>
+        <li>
           <Link href={ROUTES.match}>Our AI Match Quiz</Link>
         </li>
         <li>

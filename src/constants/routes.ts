@@ -26,6 +26,7 @@ export const ROUTES = {
   },
   batches: '/batches',
   safety: '/safety',
+  itineraries: '/itineraries',
   batchDetail: (slug: string) => `/batches/${slug}`,
   destinationDetail: (destination: 'himalayan' | 'udaipur') => `/batches/${destination}`,
   apply: (slug: string) => `/apply/${slug}`,
