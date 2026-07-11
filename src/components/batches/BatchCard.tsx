@@ -1,10 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/constants/routes'
 import { buildApplyUrl } from '@/lib/apply-url'
+import { hasQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
+import { hasCompletedQuizLead } from '@/lib/quiz-lead-storage'
 import { slotBookingInstallmentLabel } from '@/lib/payment-plan'
 import { formatPrice } from '@/lib/utils'
 import type { BatchStatus } from '@/types/batch'
@@ -163,6 +165,15 @@ export default function BatchCard({
   const [selectedDate, setSelectedDate] = useState<number | null>(0)
   const gallerySlides = BATCH_GALLERY[slug] ?? BATCH_GALLERY['batch-a']
 
+  // Default to the browse-first ("Start the Quiz") CTA. Only visitors who have
+  // already been through the quiz see the date-picker + direct reserve button,
+  // so cold traffic is always routed back into the funnel. Detected in an effect
+  // (localStorage/sessionStorage) to avoid a hydration mismatch.
+  const [quizDone, setQuizDone] = useState(false)
+  useEffect(() => {
+    setQuizDone(hasCompletedQuizLead() || hasQuizAnswers(loadQuizAnswers()))
+  }, [])
+
   return (
     <div className="product-card">
       <div className="product-hero">
@@ -205,32 +216,52 @@ export default function BatchCard({
             </div>
           )}
 
-          <DatePicker
-            options={dateOptions}
-            value={selectedDate}
-            onChange={setSelectedDate}
-            accentColor={accentColor}
-          />
+          {quizDone ? (
+            <>
+              <DatePicker
+                options={dateOptions}
+                value={selectedDate}
+                onChange={setSelectedDate}
+                accentColor={accentColor}
+              />
 
-          <div className="cta-stack">
-            <button
-              type="button"
-              className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
-              onClick={() =>
-                router.push(
-                  buildApplyUrl(slug, {
-                    dateIndex: selectedDate,
-                    promo: promoCode,
-                  })
-                )
-              }
-            >
-              ✦ Apply & Reserve My Spot →
-            </button>
-            <Link href={ROUTES.batches} className="btn-waitlist">
-              ♡ Browse all destinations
-            </Link>
-          </div>
+              <div className="cta-stack">
+                <button
+                  type="button"
+                  className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
+                  onClick={() =>
+                    router.push(
+                      buildApplyUrl(slug, {
+                        dateIndex: selectedDate,
+                        promo: promoCode,
+                      })
+                    )
+                  }
+                >
+                  ✦ Apply & Reserve My Spot →
+                </button>
+                <Link href={ROUTES.batches} className="btn-waitlist">
+                  ♡ Browse all destinations
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="cta-stack">
+              <button
+                type="button"
+                className={`btn-book${config.bookClass ? ` ${config.bookClass}` : ''}`}
+                onClick={() => router.push(ROUTES.matchForBatch(slug))}
+              >
+                ✦ Start the Quiz →
+              </button>
+              <Link href={ROUTES.batches} className="btn-waitlist">
+                ♡ Browse all destinations
+              </Link>
+              <p className="cta-quiz-note">
+                Take the 2-minute compatibility quiz — then pick your date &amp; reserve your spot.
+              </p>
+            </div>
+          )}
 
           <div className="trust-row">
             {config.trustItems.map((item) => (

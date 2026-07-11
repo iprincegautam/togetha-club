@@ -489,6 +489,15 @@
   margin-bottom: 18px;
 }
 
+.cta-quiz-note {
+  font-family: var(--font-dm);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-mid);
+  text-align: center;
+  margin: 2px 0 0;
+}
+
 .product-body {
   border-top: 2px dashed rgba(44, 24, 16, 0.15);
 }

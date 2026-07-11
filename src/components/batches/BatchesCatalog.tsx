@@ -60,14 +60,14 @@ export default function BatchesCatalog({ destinations, promoCode }: BatchesCatal
                   {destination.status === 'sold_out' && 'Sold out — join waitlist'}
                   {destination.status === 'waitlist' && 'Waitlist only'}
                 </p>
-                <Link href={matchUrl} className="batches-catalog-cta">
-                  Find your compatibility →
-                </Link>
                 <Link
                   href={withPromoQuery(ROUTES.destinationDetail(destination.slug), promoCode)}
-                  className="batches-catalog-secondary"
+                  className="batches-catalog-cta"
                 >
-                  View {meta.shortTitle} editions →
+                  See the trip &amp; itinerary →
+                </Link>
+                <Link href={matchUrl} className="batches-catalog-secondary">
+                  Or check your compatibility →
                 </Link>
               </article>
             </Reveal>
