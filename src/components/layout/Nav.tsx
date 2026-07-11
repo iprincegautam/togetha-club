@@ -10,6 +10,7 @@ import { GLYPH } from '@/constants/brand-glyphs'
 
 const NAV_ITEMS = [
   { href: ROUTES.howItWorks, label: 'How It Works' },
+  { href: ROUTES.safety, label: 'Safety' },
   { href: ROUTES.match, label: 'Our AI' },
   { href: ROUTES.batches, label: 'Our Batches' },
   { href: ROUTES.blog, label: 'Journal' },

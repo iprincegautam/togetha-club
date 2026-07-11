@@ -649,6 +649,17 @@ export default function ApplyForm({
             onError={(msg) => setError(msg)}
           />
 
+          <p className="trust-microline trust-microline--box">
+            <span className="tm-mark" aria-hidden>
+              ✦
+            </span>
+            Everyone in your batch is hand-verified.{' '}
+            <strong>Can&apos;t verify you? Full refund.</strong>{' '}
+            <a href={ROUTES.safety} target="_blank" rel="noopener noreferrer">
+              How we vet →
+            </a>
+          </p>
+
           <button
             type="button"
             className="apply-back apply-back-full"

@@ -37,6 +37,9 @@ export default function Footer() {
           <Link href={ROUTES.howItWorks}>How It Works</Link>
         </li>
         <li>
+          <Link href={ROUTES.safety}>Safety · Who Gets In</Link>
+        </li>
+        <li>
           <a href="https://instagram.com/togetha.club" target="_blank" rel="noopener noreferrer">
             Instagram
           </a>

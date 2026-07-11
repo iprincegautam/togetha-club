@@ -118,6 +118,14 @@ export default function BatchPreviewSection({
               )
             })}
           </div>
+          <p className="trust-microline">
+            <span className="tm-mark" aria-hidden>
+              ✦
+            </span>
+            Every price includes hand-verification of all 24 travellers.{' '}
+            <strong>Can&apos;t verify you? Full refund.</strong>{' '}
+            <Link href={ROUTES.safety}>See who gets in →</Link>
+          </p>
           <div className="batch-waitlist-wrap">
             <Link href={ROUTES.batches} className="batch-waitlist-link">
               ✦ View all destinations & editions →

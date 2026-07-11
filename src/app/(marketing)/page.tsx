@@ -1,4 +1,5 @@
 import HeroSection from '@/components/home/HeroSection'
+import SafetyStrip from '@/components/home/SafetyStrip'
 import BatchPreviewSection from '@/components/home/BatchPreviewSection'
 import HomeVideoTestimonialsSection from '@/components/home/HomeVideoTestimonialsSection'
 import HomeClosingCta from '@/components/home/HomeClosingCta'
@@ -24,6 +25,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
+      <SafetyStrip />
       <BatchPreviewSection destinations={destinations} departureShortLists={departureShortLists} />
       <HomeVideoTestimonialsSection />
       <HomeClosingCta />

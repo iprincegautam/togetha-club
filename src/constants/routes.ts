@@ -25,6 +25,7 @@ export const ROUTES = {
     return `/match?${params.toString()}`
   },
   batches: '/batches',
+  safety: '/safety',
   batchDetail: (slug: string) => `/batches/${slug}`,
   destinationDetail: (destination: 'himalayan' | 'udaipur') => `/batches/${destination}`,
   apply: (slug: string) => `/apply/${slug}`,

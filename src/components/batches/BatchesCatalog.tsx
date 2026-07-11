@@ -77,6 +77,14 @@ export default function BatchesCatalog({ destinations, promoCode }: BatchesCatal
       <p className="batches-catalog-foot">
         Every batch starts with the quiz — then pick your Friday and pay on togetha.club to confirm.
       </p>
+      <p className="trust-microline">
+        <span className="tm-mark" aria-hidden>
+          ✦
+        </span>
+        Every traveller is hand-verified before they&apos;re confirmed.{' '}
+        <strong>Can&apos;t verify you? Full refund.</strong>{' '}
+        <Link href={ROUTES.safety}>See who gets in →</Link>
+      </p>
     </section>
   )
 }
