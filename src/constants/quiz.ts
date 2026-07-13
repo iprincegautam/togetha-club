@@ -12,6 +12,12 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     max: '99',
   },
   {
+    id: 12,
+    type: 'destination',
+    q: 'Which trail are you dreaming about?',
+    sub: "Pick your trip. We'll show you its dates and read your fit for that batch.",
+  },
+  {
     id: 1,
     type: 'opts',
     q: "It's Friday night. Your ideal version of this evening is...",

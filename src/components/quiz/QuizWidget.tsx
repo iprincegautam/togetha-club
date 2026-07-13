@@ -6,9 +6,16 @@ import {
   isValidQuizAge,
   parseQuizAge,
   primaryBatchForAge,
+  QUIZ_BATCH_QUESTION_ID,
   QUIZ_DEPARTURE_QUESTION_ID,
+  readQuizDestination,
 } from '@/lib/batch-age'
-import { getDefaultBatchForDestination, type DestinationSlug } from '@/constants/destinations'
+import {
+  DESTINATIONS,
+  DESTINATION_SLUGS,
+  getDefaultBatchForDestination,
+  type DestinationSlug,
+} from '@/constants/destinations'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
 import { trackQuizStarted } from '@/lib/meta-pixel'
 import { loadQuizAnswers } from '@/lib/quiz-storage'
@@ -24,12 +31,15 @@ type Props = {
   /** When true, hand off to parent after scoring — do not render inline QuizResult. */
   delegateResults?: boolean
   destination?: DestinationSlug
+  /** Pre-select this trail on the trail-picker question (e.g. when arriving from a destination link). */
+  preselectDestination?: DestinationSlug
 }
 
 export default function QuizWidget({
   onComplete,
   delegateResults = false,
   destination = 'himalayan',
+  preselectDestination,
 }: Props) {
   const {
     cur,
@@ -63,6 +73,18 @@ export default function QuizWidget({
   const pct = Math.round(((cur + 1) / totalQuestions) * 100)
   const isLast = cur === totalQuestions - 1
   const ageForDepartures = parseQuizAge(ans)
+  const chosenDestination = readQuizDestination(ans)
+  const departureDestination: DestinationSlug = chosenDestination ?? destination
+
+  const preselectAppliedRef = useRef(false)
+  useEffect(() => {
+    if (preselectAppliedRef.current || !preselectDestination) return
+    preselectAppliedRef.current = true
+    if (readQuizDestination(ans) === null) {
+      setText(QUIZ_BATCH_QUESTION_ID, preselectDestination)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectDestination])
 
   useEffect(() => {
     setFadeIn(false)
@@ -74,8 +96,8 @@ export default function QuizWidget({
     if (phase !== 'quiz' || question?.type !== 'departure') return
 
     const batchSlug: MatchableBatchSlug =
-      (ageForDepartures !== null && primaryBatchForAge(ageForDepartures, destination)) ||
-      getDefaultBatchForDestination(destination)
+      (ageForDepartures !== null && primaryBatchForAge(ageForDepartures, departureDestination)) ||
+      getDefaultBatchForDestination(departureDestination)
 
     let cancelled = false
     setDepartureLoading(true)
@@ -96,7 +118,7 @@ export default function QuizWidget({
     return () => {
       cancelled = true
     }
-  }, [phase, question?.type, ageForDepartures, cur, destination])
+  }, [phase, question?.type, ageForDepartures, cur, departureDestination])
 
   useEffect(() => {
     if (phase !== 'result' || !result || completionNotifiedRef.current) return
@@ -121,6 +143,12 @@ export default function QuizWidget({
         return
       }
     }
+    if (question.type === 'destination') {
+      if (readQuizDestination(ans) === null) {
+        setQuizError('Pick the trail you want to explore to continue.')
+        return
+      }
+    }
     if (question.type === 'departure') {
       const choice = ans[QUIZ_DEPARTURE_QUESTION_ID]
       if (choice === undefined || choice === '') {
@@ -134,6 +162,12 @@ export default function QuizWidget({
   const pickDeparture = (label: string) => {
     trackQuizStartedOnce()
     setText(QUIZ_DEPARTURE_QUESTION_ID, label)
+  }
+
+  const pickDestination = (slug: DestinationSlug) => {
+    trackQuizStartedOnce()
+    setText(QUIZ_BATCH_QUESTION_ID, slug)
+    setQuizError('')
   }
 
   const handlePick = (questionId: number, optionIndex: number) => {
@@ -183,7 +217,46 @@ export default function QuizWidget({
               Question {cur + 1} of {totalQuestions}
             </div>
             <div className="qtext">{question.q}</div>
-            {question.sub && <div className="qsub">{question.sub}</div>}
+            {(() => {
+              const sub =
+                question.type === 'departure'
+                  ? `Pick your ${DESTINATIONS[departureDestination].shortTitle} departure · ${DESTINATIONS[departureDestination].duration}. ${
+                      departureDestination === 'himalayan'
+                        ? 'A new Friday batch every week.'
+                        : 'Weekend trips to the City of Lakes.'
+                    }`
+                  : question.sub
+              return sub ? <div className="qsub">{sub}</div> : null
+            })()}
+
+            {question.type === 'destination' && (
+              <div className="qdest-grid">
+                {DESTINATION_SLUGS.map((slug) => {
+                  const meta = DESTINATIONS[slug]
+                  const selected = chosenDestination === slug
+                  const dimmed = chosenDestination !== null && !selected
+                  return (
+                    <button
+                      key={slug}
+                      type="button"
+                      className={`qdest-card${selected ? ' selected' : ''}${dimmed ? ' dimmed' : ''}`}
+                      style={{ '--dest-accent': meta.accentColor } as React.CSSProperties}
+                      onClick={() => pickDestination(slug)}
+                      aria-pressed={selected}
+                    >
+                      <span className="qdest-title">
+                        {selected && <span className="qopt-star">✦ </span>}
+                        {meta.title}
+                      </span>
+                      <span className="qdest-stops">{meta.stops}</span>
+                      <span className="qdest-meta">
+                        {meta.duration} · {meta.tagline}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             {question.type === 'opts' && question.opts && (
               <div className="qopts">

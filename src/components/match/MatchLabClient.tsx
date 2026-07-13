@@ -8,6 +8,7 @@ import CohortTeaserPanel from '@/components/match/CohortTeaserPanel'
 import MatchPreviewPanel from '@/components/match/MatchPreviewPanel'
 import { BATCH_META } from '@/constants/batches'
 import { DESTINATIONS, getDestinationForBatch, isDestinationSlug, type DestinationSlug } from '@/constants/destinations'
+import { readQuizDestination } from '@/lib/batch-age'
 import { analyzeMatchProfile } from '@/lib/match-engine'
 import { clearQuizAnswers, loadQuizAnswers } from '@/lib/quiz-storage'
 import { clearQuizLead, hasCompletedQuizLead, loadQuizLead } from '@/lib/quiz-lead-storage'
@@ -26,17 +27,29 @@ type MatchLabMode = 'quiz' | 'lead' | 'results'
 
 export default function MatchLabClient({ initialBatch, initialDestination }: Props) {
   const searchParams = useSearchParams()
-  const destination: DestinationSlug =
-    initialDestination ??
-    (isDestinationSlug(searchParams.get('destination') ?? '')
-      ? (searchParams.get('destination') as DestinationSlug)
-      : getDestinationForBatch(initialBatch ?? '') ?? 'himalayan')
   const [booted, setBooted] = useState(false)
   const [mode, setMode] = useState<MatchLabMode>('quiz')
   const [quizKey, setQuizKey] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers | null>(null)
   const [analysis, setAnalysis] = useState<MatchAnalysis | null>(null)
   const matchResultTrackedRef = useRef(false)
+
+  // The trail we can pre-select on the quiz when the visitor arrives from a
+  // destination/batch link. Undefined means "let them choose".
+  const preselectDestination: DestinationSlug | undefined =
+    initialDestination ??
+    (isDestinationSlug(searchParams.get('destination') ?? '')
+      ? (searchParams.get('destination') as DestinationSlug)
+      : getDestinationForBatch(initialBatch ?? '') ?? undefined)
+
+  // The trail the visitor actually picked in the quiz wins; otherwise fall back
+  // to the link they came from, then to Himalayan.
+  const destination: DestinationSlug =
+    (answers ? readQuizDestination(answers) : null) ?? preselectDestination ?? 'himalayan'
+
+  // Only honour an incoming ?batch= pre-selection when it matches the chosen trail.
+  const effectiveInitialBatch =
+    initialBatch && getDestinationForBatch(initialBatch) === destination ? initialBatch : undefined
 
   const quizResult = useMemo(
     () => (answers ? calculateQuizResult(answers, destination) : null),
@@ -157,6 +170,7 @@ export default function MatchLabClient({ initialBatch, initialDestination }: Pro
           key={quizKey}
           delegateResults
           destination={destination}
+          preselectDestination={preselectDestination}
           onComplete={handleQuizComplete}
         />
       </div>
@@ -202,13 +216,13 @@ export default function MatchLabClient({ initialBatch, initialDestination }: Pro
       <CohortTeaserPanel
         answers={answers}
         batchMatches={analysis.batches}
-        initialBatch={initialBatch}
+        initialBatch={effectiveInitialBatch}
         destination={destination}
       />
       <MatchPreviewPanel
         answers={answers}
         batchMatches={analysis.batches}
-        initialBatch={initialBatch}
+        initialBatch={effectiveInitialBatch}
         showApplyLink
         fetchLive={false}
       />

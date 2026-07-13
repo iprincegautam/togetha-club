@@ -1057,6 +1057,76 @@ footer {
   color: var(--rose);
 }
 
+/* Trail / destination picker */
+.qdest-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.qdest-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 16px 16px 18px;
+  border: 1.5px solid rgba(44, 24, 16, 0.18);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qdest-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--dest-accent, var(--teal));
+}
+
+.qdest-card.selected {
+  border-width: 2px;
+  border-color: var(--dest-accent, var(--teal));
+  box-shadow: 3px 3px 0 rgba(44, 24, 16, 0.1);
+}
+
+.qdest-card.dimmed {
+  opacity: 0.4;
+  filter: grayscale(0.55);
+}
+
+.qdest-card.dimmed:hover {
+  opacity: 0.75;
+  filter: grayscale(0);
+}
+
+.qdest-title {
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.qdest-stops {
+  font-family: var(--font-family-caveat);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  color: var(--dest-accent, var(--teal));
+}
+
+.qdest-meta {
+  font-family: var(--font-baskerville);
+  font-size: 0.78rem;
+  color: var(--ink-mid);
+}
+
+@media (max-width: 520px) {
+  .qdest-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .qinput {
   width: 100%;
   border: 1.5px solid rgba(44, 24, 16, 0.18);

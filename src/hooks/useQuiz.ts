@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { QUIZ_QUESTIONS } from '@/constants/quiz'
 import type { DestinationSlug } from '@/constants/destinations'
+import { readQuizDestination } from '@/lib/batch-age'
 import { saveQuizAnswers } from '@/lib/quiz-storage'
 import { calculateQuizResult } from '@/lib/utils'
 import type { QuizAnswers, QuizResult } from '@/types/quiz'
@@ -51,7 +52,8 @@ export function useQuiz(destination: DestinationSlug = 'himalayan') {
       setAns(updatedAns)
     }
 
-    const computed = calculateQuizResult(updatedAns, destination)
+    const effectiveDestination = readQuizDestination(updatedAns) ?? destination
+    const computed = calculateQuizResult(updatedAns, effectiveDestination)
     saveQuizAnswers(updatedAns)
     setResult(computed)
     setPhase('result')

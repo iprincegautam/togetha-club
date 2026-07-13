@@ -1,11 +1,24 @@
 import type { DestinationSlug } from '@/constants/destinations'
-import { getEditionSlugsForDestination } from '@/constants/destinations'
+import { getEditionSlugsForDestination, isDestinationSlug } from '@/constants/destinations'
 import type { MatchableBatchSlug } from '@/types/match'
 import type { QuizAnswers } from '@/types/quiz'
 
 export const QUIZ_AGE_QUESTION_ID = 0
 
 export const QUIZ_DEPARTURE_QUESTION_ID = 11
+
+/**
+ * Trail/destination selector question. Uses a fresh id (12) so the existing
+ * scoring questions (ids 1–10) and the departure question (id 11) keep their
+ * ids; the question is simply positioned second in the quiz array.
+ */
+export const QUIZ_BATCH_QUESTION_ID = 12
+
+/** Read the trail the user picked in the quiz, if any. */
+export function readQuizDestination(answers: QuizAnswers): DestinationSlug | null {
+  const raw = answers[QUIZ_BATCH_QUESTION_ID]
+  return typeof raw === 'string' && isDestinationSlug(raw) ? raw : null
+}
 
 export const BATCH_AGE_LIMITS: Record<
   MatchableBatchSlug,

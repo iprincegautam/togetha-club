@@ -8,6 +8,7 @@ type Props = {
   delegateResults?: boolean
   quizKey?: number
   destination?: DestinationSlug
+  preselectDestination?: DestinationSlug
 }
 
 export default function QuizSection({
@@ -15,6 +16,7 @@ export default function QuizSection({
   delegateResults,
   quizKey,
   destination,
+  preselectDestination,
 }: Props) {
   return (
     <Reveal>
@@ -26,7 +28,8 @@ export default function QuizSection({
               Find your <span className="t">perfect batch.</span>
             </h2>
             <p className="quiz-header-sub">
-              12 questions. 4 minutes. Age first, then our AI reads the real you between the lines.
+              13 questions. 4 minutes. Age and trail first, then our AI reads the real you between the
+              lines.
             </p>
           </div>
           <QuizWidget
@@ -34,6 +37,7 @@ export default function QuizSection({
             onComplete={onComplete}
             delegateResults={delegateResults}
             destination={destination}
+            preselectDestination={preselectDestination}
           />
         </div>
       </section>
