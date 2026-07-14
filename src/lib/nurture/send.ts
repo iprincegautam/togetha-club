@@ -38,6 +38,15 @@ export type NurtureEnrollResult = {
   resendId?: string
 }
 
+// Keep each cron invocation safely under Vercel Hobby's serverless function
+// ceiling (60s). We stop processing at the budget and let the next run pick up
+// the rest, so the endpoint always returns 200 instead of being killed
+// mid-request. Bump this (and route maxDuration) if you move to Vercel Pro.
+const CRON_TIME_BUDGET_MS = 50_000
+// Hard cap on rows pulled per run so a large backlog can't build one giant loop.
+const CRON_MAX_SEQUENCES_PER_KEY = 60
+const CRON_MAX_PULL_FORWARD = 60
+
 function isMissingNurtureTable(error: { message?: string } | null): boolean {
   const msg = error?.message ?? ''
   return msg.includes('email_sequences') || msg.includes('email_sends') || msg.includes('does not exist')
@@ -320,7 +329,10 @@ export async function enrollQuizNurture(
   }
 }
 
-async function pullForwardUrgentSequences(supabase: SupabaseClient): Promise<number> {
+async function pullForwardUrgentSequences(
+  supabase: SupabaseClient,
+  deadline: number
+): Promise<number> {
   const now = new Date()
   const { data: active } = await supabase
     .from('email_sequences')
@@ -329,10 +341,13 @@ async function pullForwardUrgentSequences(supabase: SupabaseClient): Promise<num
     .eq('sequence_key', NURTURE_SEQUENCE_KEY_V2)
     .not('next_send_at', 'is', null)
     .gt('next_send_at', now.toISOString())
+    .order('next_send_at', { ascending: true })
+    .limit(CRON_MAX_PULL_FORWARD)
 
   let updated = 0
 
   for (const row of active ?? []) {
+    if (Date.now() >= deadline) break
     const { data: applicant } = await supabase
       .from('applicants')
       .select('id, email, name, batch_slug, quiz_answers, quiz_score, date_choice, razorpay_payment_id, status')
@@ -367,8 +382,9 @@ async function pullForwardUrgentSequences(supabase: SupabaseClient): Promise<num
 
 async function processSequenceBatch(
   supabase: SupabaseClient,
-  sequenceKey: string
-): Promise<{ processed: number; sent: number; errors: number }> {
+  sequenceKey: string,
+  deadline: number
+): Promise<{ processed: number; sent: number; errors: number; remaining: number }> {
   const now = new Date().toISOString()
   const maxStep = maxStepForSequenceKey(sequenceKey)
 
@@ -379,20 +395,29 @@ async function processSequenceBatch(
     .eq('sequence_key', sequenceKey)
     .lte('next_send_at', now)
     .lt('current_step', maxStep)
+    .order('next_send_at', { ascending: true })
+    .limit(CRON_MAX_SEQUENCES_PER_KEY)
 
   if (error) {
     if (isMissingNurtureTable(error)) {
       console.warn('[nurture cron] tables missing')
-      return { processed: 0, sent: 0, errors: 0 }
+      return { processed: 0, sent: 0, errors: 0, remaining: 0 }
     }
     throw error
   }
 
+  const rows = due ?? []
   let processed = 0
   let sent = 0
   let errors = 0
+  let remaining = 0
 
-  for (const row of due ?? []) {
+  for (let index = 0; index < rows.length; index += 1) {
+    if (Date.now() >= deadline) {
+      remaining = rows.length - index
+      break
+    }
+    const row = rows[index]
     let currentStep = row.current_step
     const enrolledAt = new Date(row.enrolled_at)
 
@@ -484,24 +509,34 @@ async function processSequenceBatch(
     }
   }
 
-  return { processed, sent, errors }
+  return { processed, sent, errors, remaining }
 }
 
 export async function processDueNurtureEmails(
   supabase: SupabaseClient
-): Promise<{ processed: number; sent: number; errors: number; pulledForward: number }> {
-  const pulledForward = await pullForwardUrgentSequences(supabase)
+): Promise<{
+  processed: number
+  sent: number
+  errors: number
+  pulledForward: number
+  remaining: number
+}> {
+  const deadline = Date.now() + CRON_TIME_BUDGET_MS
+  const pulledForward = await pullForwardUrgentSequences(supabase, deadline)
 
   let processed = 0
   let sent = 0
   let errors = 0
+  let remaining = 0
 
   for (const key of NURTURE_SEQUENCE_KEYS) {
-    const batch = await processSequenceBatch(supabase, key)
+    if (Date.now() >= deadline) break
+    const batch = await processSequenceBatch(supabase, key, deadline)
     processed += batch.processed
     sent += batch.sent
     errors += batch.errors
+    remaining += batch.remaining
   }
 
-  return { processed, sent, errors, pulledForward }
+  return { processed, sent, errors, pulledForward, remaining }
 }

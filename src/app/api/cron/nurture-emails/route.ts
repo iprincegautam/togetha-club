@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { processDueNurtureEmails } from '@/lib/nurture/send'
 import { tryCreateServiceRoleClient } from '@/lib/supabase/server'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+// Vercel Hobby caps serverless functions at 60s; the processor self-limits
+// (CRON_TIME_BUDGET_MS) well under this so it always returns 200.
+export const maxDuration = 60
+
 function authorizeCron(req: NextRequest): boolean {
   const secret = process.env.CRON_SECRET
   if (!secret) return process.env.NODE_ENV === 'development'

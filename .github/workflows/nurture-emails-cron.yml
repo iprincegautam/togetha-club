@@ -19,5 +19,8 @@ jobs:
             echo "CRON_SECRET is not set in GitHub repository secrets."
             exit 1
           fi
-          curl -fsS -H "Authorization: Bearer ${CRON_SECRET}" \
+          curl -fsS --show-error \
+            --max-time 75 --connect-timeout 15 \
+            --retry 2 --retry-delay 15 --retry-all-errors \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
             "${SITE_URL}/api/cron/nurture-emails"
