@@ -170,7 +170,7 @@ export function buildUrgencyCopy(opts: {
     case 'urgent':
       return {
         urgencyPrefix: `⏱ ${daysLabel(opts.daysUntil ?? 0)} until departure`,
-        fomoLine: `Your date — ${opts.pickedLabel ?? effective} — is ${opts.daysUntil} days away. ${scarcity}. Balance is due 14 days before departure if you book with a deposit.`,
+        fomoLine: `Your date — ${opts.pickedLabel ?? effective} — is ${opts.daysUntil} days away. ${scarcity}. Reserve with a deposit now and pay the rest once you're approved.`,
         ctaDateLine: shortEffective ? `Confirm ${shortEffective} before spots fill` : 'Confirm your date before spots fill',
         tone: 'firm',
       }

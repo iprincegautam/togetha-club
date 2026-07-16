@@ -121,7 +121,7 @@ export default function AccountDashboard() {
                 Your slot is confirmed for this departure. We&apos;ll email you pre-trip details
                 before you leave.
                 {canPayBalance
-                  ? ' You can pay the remaining balance anytime before departure (optional until then).'
+                  ? " You're approved — pay your remaining balance within 48 hours to confirm your spot."
                   : null}
               </p>
             )}
@@ -194,8 +194,8 @@ export default function AccountDashboard() {
         <div className="account-panel" id="pay-balance">
           <h2 className="account-panel-title">Pay remaining balance</h2>
           <p className="account-sub">
-            You&apos;re approved for this trip. Pay the remaining balance anytime before departure
-            — optional until then.
+            You&apos;re approved for this trip. Pay your remaining balance within 48 hours to lock
+            your spot — after that, your slot may be released to someone on the waitlist.
           </p>
           {payMsg && <p className="account-msg">{payMsg}</p>}
           <BalancePayButton

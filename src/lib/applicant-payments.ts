@@ -18,7 +18,7 @@ export interface ApplicantPaymentRow {
 const PAYMENT_KIND_LABELS: Record<ApplicantPaymentKind, string> = {
   deposit: 'Slot booking (deposit)',
   full: 'Paid in full',
-  balance: 'Balance before departure',
+  balance: 'Balance payment',
   claim: 'Payment linked',
 }
 

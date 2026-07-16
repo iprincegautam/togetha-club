@@ -16,6 +16,12 @@ export const BUSINESS = {
   refundProcessingDays: '5–7 business days',
   cancellationProcessingFeeInr: 999,
   slotBookingPercent: 30,
+  /** Time to verify an applicant's profile after a slot booking */
+  verificationWindow: '24–36 hours',
+  /** Hours an approved applicant has to pay the remaining balance before the slot is released */
+  balancePaymentWindowHours: 48,
+  /** Percent of the booking amount retained if an approved applicant misses the balance window */
+  lateForfeitPercent: 50,
   governingLaw: 'laws of India',
   governingCourts: 'courts at New Delhi',
   agentName: 'Sophie',

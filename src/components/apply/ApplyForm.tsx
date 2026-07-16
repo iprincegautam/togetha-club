@@ -595,7 +595,7 @@ export default function ApplyForm({
                   </span>
                   <span className="apply-plan-amount">{formatPaise(depositDue)}</span>
                   <span className="apply-plan-note">
-                    Pay {formatPaise(totalDue - depositDue)} later before departure
+                    Pay {formatPaise(totalDue - depositDue)} after your profile is approved
                   </span>
                 </span>
               </label>
@@ -623,7 +623,8 @@ export default function ApplyForm({
             </div>
             {paymentPlan === 'deposit' && balanceDue > 0 && (
               <p className="apply-plan-balance-note">
-                Balance of {formatPaise(balanceDue)} due before your trip.
+                We verify your profile within 24–36 hours. Once you&apos;re approved, you&apos;ll pay
+                the {formatPaise(balanceDue)} balance to lock your spot.
               </p>
             )}
           </div>
@@ -653,7 +654,7 @@ export default function ApplyForm({
             <span className="tm-mark" aria-hidden>
               ✦
             </span>
-            Everyone in your batch is hand-verified.{' '}
+            Everyone is hand-verified within 24–36 hours.{' '}
             <strong>Can&apos;t verify you? Full refund.</strong>{' '}
             <a href={ROUTES.safety} target="_blank" rel="noopener noreferrer">
               How we vet →

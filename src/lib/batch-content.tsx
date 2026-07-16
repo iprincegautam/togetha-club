@@ -1,6 +1,5 @@
 import {
   IncludesTab,
-  ItineraryTab,
   PolicyTab,
   ReviewsTab,
   VibeTab,
@@ -9,6 +8,7 @@ import {
   type ReviewData,
   type VibeCardData,
 } from '@/components/batches/BatchTabPanels'
+import ItineraryAccordion from '@/components/batches/ItineraryAccordion'
 import {
   BATCH_A_INCLUDES,
   BATCH_A_ITINERARY,
@@ -83,7 +83,7 @@ const BATCH_A_FAQ = [
   {
     question: 'How do I book my spot?',
     answer:
-      "Take the quiz, pick your Friday departure on togetha.club, and pay to lock your slot. Once payment goes through you're in — 12 boys and 12 girls on the same trip. Our AI uses your quiz to place you in the best-fit cohort. You meet everyone on Day 1.",
+      "Take the quiz, pick your Friday departure on togetha.club, and reserve your slot with the booking amount. We verify your profile within 24–36 hours, and once you're approved you pay the balance to confirm — 12 boys and 12 girls on the same trip. Our AI uses your quiz to place you in the best-fit cohort. You meet everyone on Day 1.",
   },
   {
     question: 'Is there a gender balance guarantee?',
@@ -232,7 +232,7 @@ const UDAIPUR_POLICIES: PolicyData[] = [
   },
   {
     title: '— Cancellation & refunds',
-    text: 'Your booking amount reserves the seat; the balance is due at least 7 days before departure. Read the cancellation and refund policy before paying.',
+    text: 'Your booking amount reserves the seat; once your profile is approved, you pay the balance to confirm. Read the cancellation and refund policy before paying.',
   },
 ]
 
@@ -260,7 +260,7 @@ const UDAIPUR_FAQ = [
   {
     question: 'How do I book, and what about refunds?',
     answer:
-      'Take the quiz, pick your weekend, and reserve your seat with the booking amount. The balance is due at least 7 days before departure. Read the full cancellation and refund terms before you pay.',
+      'Take the quiz, pick your weekend, and reserve your seat with the booking amount. We verify your profile within 24–36 hours, and once you\'re approved you pay the balance to confirm your seat. Read the full cancellation and refund terms before you pay.',
   },
 ]
 
@@ -270,7 +270,7 @@ function buildBatchATabs() {
       id: 'itinerary',
       label: 'Day-by-Day',
       content: (
-        <ItineraryTab
+        <ItineraryAccordion
           title="5 nights · 6 days — Manali, Sissu & Kasol."
           days={BATCH_A_ITINERARY}
         />
@@ -327,7 +327,7 @@ function buildBatchBTabs() {
       id: 'itinerary',
       label: 'Day-by-Day',
       content: (
-        <ItineraryTab
+        <ItineraryAccordion
           title="Same route. Slower pace. Manali → Sissu → Kasol."
           days={BATCH_B_ITINERARY}
           roseAccent
@@ -385,7 +385,7 @@ function buildBatchDTabs() {
       id: 'itinerary',
       label: 'Day-by-Day',
       content: (
-        <ItineraryTab
+        <ItineraryAccordion
           title="3 days — Gurugram · Udaipur · Kumbhalgarh."
           days={BATCH_D_ITINERARY}
         />
@@ -431,7 +431,7 @@ function buildBatchETabs() {
       id: 'itinerary',
       label: 'Day-by-Day',
       content: (
-        <ItineraryTab
+        <ItineraryAccordion
           title="3 days — Gurugram · Udaipur · Kumbhalgarh."
           days={BATCH_E_ITINERARY}
           roseAccent

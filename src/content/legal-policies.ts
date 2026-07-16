@@ -22,7 +22,7 @@ export const termsSections: LegalSection[] = [
   {
     title: '3. Bookings and payments',
     paragraphs: [
-      `Trip prices are shown in Indian Rupees (INR) on the website. You may pay in full or reserve a slot with a ${B.slotBookingPercent}% booking amount; the remaining balance is due before departure as communicated by email.`,
+      `Trip prices are shown in Indian Rupees (INR) on the website. You may pay in full, or reserve a slot with a ${B.slotBookingPercent}% booking amount. After a slot booking we verify your profile within ${B.verificationWindow}. If approved, the remaining balance is due within ${B.balancePaymentWindowHours} hours of approval to confirm your spot. If the balance is not paid within this window, your slot is released and ${B.lateForfeitPercent}% of the booking amount is retained (${100 - B.lateForfeitPercent}% refunded).`,
       'Payments are processed securely via Razorpay. By paying, you authorise us to charge the selected amount and agree to Razorpay’s terms where applicable.',
       'A booking is confirmed only after successful payment and written confirmation from Togetha (email or on-site confirmation page).',
     ],
@@ -144,7 +144,8 @@ export const cancellationSections: LegalSection[] = [
   {
     title: '3. Slot booking (partial payment)',
     paragraphs: [
-      `If you paid only the ${B.slotBookingPercent}% slot booking amount, the same windows above apply to that payment. The remaining balance, if not yet paid, is simply not charged if you cancel within the applicable window.`,
+      `If you paid only the ${B.slotBookingPercent}% slot booking amount and later cancel, the same windows above apply to that payment. The remaining balance, if not yet paid, is simply not charged if you cancel within the applicable window.`,
+      `If your profile is approved but you do not pay the remaining balance within ${B.balancePaymentWindowHours} hours of approval, your slot is released and ${B.lateForfeitPercent}% of the booking amount is retained; the remaining ${100 - B.lateForfeitPercent}% is refunded within ${B.refundProcessingDays}.`,
     ],
   },
   {

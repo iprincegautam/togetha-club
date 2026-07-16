@@ -130,7 +130,7 @@ export const BLOG_POST_3: BlogPost = {
     },
     {
       type: 'p',
-      text: 'We don\'t believe in bait-and-switch marketing prices. The table below is rendered from the same Supabase batch records that power our booking pages. Deposit percentage and balance due dates follow our published payment terms.',
+      text: 'We don\'t believe in bait-and-switch marketing prices. The table below is rendered from the same Supabase batch records that power our booking pages. Deposit percentage and balance timing follow our published payment terms.',
     },
     {
       type: 'live_pricing',

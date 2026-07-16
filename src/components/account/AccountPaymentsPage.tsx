@@ -92,8 +92,8 @@ export default function AccountPaymentsPage() {
         <div className="account-panel" id="pay-balance">
           <h2 className="account-panel-title">Pay remaining balance</h2>
           <p className="account-sub" style={{ marginBottom: 12 }}>
-            Balance due: <strong>{formatPaise(balance)}</strong> — optional until departure, but
-            required to confirm your spot in full.
+            Balance due: <strong>{formatPaise(balance)}</strong> — due within 48 hours of approval to
+            lock your spot.
           </p>
           {msg && <p className="account-msg">{msg}</p>}
           <BalancePayButton
@@ -115,7 +115,7 @@ export default function AccountPaymentsPage() {
           <h2 className="account-panel-title">Balance payment locked</h2>
           <p className="account-muted">
             Your profile is under review. Balance payment opens after our team approves your
-            application — usually within 1–2 days.
+            application — usually within 24–36 hours.
           </p>
           <p className="account-muted" style={{ marginTop: 8 }}>
             Balance due: {formatPaise(balance)}

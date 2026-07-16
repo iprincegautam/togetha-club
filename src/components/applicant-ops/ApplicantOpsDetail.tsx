@@ -155,7 +155,7 @@ export default function ApplicantOpsDetail({
     if (profileApproved) return
     if (
       !confirm(
-        `Approve profile for ${applicant.name || applicant.email}?\n\nThis unlocks optional balance payment in the member portal.`
+        `Approve profile for ${applicant.name || applicant.email}?\n\nThis unlocks balance payment in the member portal — the applicant then has 48 hours to pay the balance before the slot is released.`
       )
     ) {
       return
@@ -171,7 +171,7 @@ export default function ApplicantOpsDetail({
       setProfileMessage(json.error ?? 'Could not approve profile')
     } else {
       setKycStatus(json.applicant?.kyc_status ?? 'approved')
-      setProfileMessage('Profile approved — member can pay balance anytime before departure.')
+      setProfileMessage('Profile approved — member has 48 hours to pay the balance before the slot is released.')
       router.refresh()
     }
     setApprovingProfile(false)
@@ -238,8 +238,9 @@ export default function ApplicantOpsDetail({
             <>
               <p className="admin-msg">Profile approved — balance payment is open in the member portal.</p>
               <p className="admin-muted" style={{ fontSize: 13 }}>
-                They can pay the remaining balance anytime before departure. Use the payments panel
-                above to copy the link or email a reminder.
+                They have 48 hours from approval to pay the remaining balance before the slot is
+                released (50% of the deposit refunded). Use the payments panel above to copy the link
+                or email a reminder.
               </p>
             </>
           ) : (

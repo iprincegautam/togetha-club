@@ -29,7 +29,7 @@ export async function generateMetadata({
   return buildMetadata(
     "You're In — Togetha.Club",
     meta
-      ? `Your spot for ${meta.label} is confirmed. We'll be in touch within 48 hours.`
+      ? `Your spot for ${meta.label} is confirmed. We'll verify your profile and be in touch shortly.`
       : 'Your spot is confirmed. Welcome to Togetha.Club.'
   )
 }
@@ -77,8 +77,8 @@ export default async function ConfirmationPage({
           <p className="apply-sub confirm-message">
             {isDeposit
               ? batchName
-                ? `We've received your booking deposit for ${batchName}. Your spot is held — we'll email you payment details for the remaining balance before departure.`
-                : "We've received your booking deposit. Your spot is held — we'll email you payment details for the remaining balance before departure."
+                ? `We've received your booking deposit for ${batchName}. Your slot is on hold while we verify your profile — usually within 24–36 hours. Once you're approved, we'll email you to pay the remaining balance and lock your spot.`
+                : "We've received your booking deposit. Your slot is on hold while we verify your profile — usually within 24–36 hours. Once you're approved, we'll email you to pay the remaining balance and lock your spot."
               : batchName
                 ? `Your spot for ${batchName} is confirmed. We'll email you within 48 hours with your pre-trip pack — what to pack, who you'll meet, and everything else.`
                 : "Your spot is confirmed. We'll email you within 48 hours with your pre-trip pack and everything you need."}

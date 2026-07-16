@@ -221,7 +221,7 @@ ${ctx.vacantBoys} boys · ${ctx.vacantGirls} girls still open on your edition.
 
 → ${ctx.departure.ctaDateLine}: ${ctx.unlockUrl}
 
-Reserve with ${ctx.depositLabel} deposit · balance due before departure.
+Reserve with ${ctx.depositLabel} deposit · pay the rest once you're approved.
 
 — Togetha.Club
 Unsubscribe: ${ctx.unsubscribeUrl}`
@@ -361,7 +361,7 @@ function email5(ctx: NurtureEmailContext): NurtureEmailContent {
 
 You don't have to pay the full amount today.
 
-Reserve your slot with ${ctx.depositLabel} now. Balance due before departure. EMI available on checkout.
+Reserve your slot with ${ctx.depositLabel} now. Pay the rest once you're approved. EMI available on checkout.
 
 What's included:
 • Delhi to Delhi transport
@@ -380,7 +380,7 @@ Unsubscribe: ${ctx.unsubscribeUrl}`
     `<p style="font-size:16px;line-height:1.6;">Hi ${ctx.firstName},</p>
     ${urgencyBanner(ctx)}
     <p style="font-size:15px;line-height:1.65;">You don't have to pay the full amount today.</p>
-    <p style="font-size:15px;line-height:1.65;">Reserve with <strong>${ctx.depositLabel}</strong> now. Balance due before departure. EMI available at checkout.</p>
+    <p style="font-size:15px;line-height:1.65;">Reserve with <strong>${ctx.depositLabel}</strong> now. Pay the rest once you're approved. EMI available at checkout.</p>
     <p style="font-size:14px;line-height:1.65;color:#6b5344;">Delhi-Delhi transport · 5 nights · all meals · bonfire · verified batch · trip lead</p>
     ${fomoBlock(ctx)}
     <p style="font-size:14px;color:#6b5344;">${dateBit}${ctx.vacantTotal} spots still open.</p>

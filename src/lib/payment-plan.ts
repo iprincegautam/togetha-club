@@ -32,7 +32,7 @@ export function slotBookingInstallmentLabel(totalRupees: number): string {
   const depositPaise = depositAmountForTotal(totalRupees * 100)
   const depositRupees = Math.round(depositPaise / 100)
   const formatted = `₹${depositRupees.toLocaleString('en-IN')}`
-  return `✦ Pay ${formatted} now · rest 14 days before departure`
+  return `✦ Pay ${formatted} now · rest after you're approved`
 }
 
 export function statusForPaymentPlan(plan: PaymentPlan): 'paid' | 'deposit_paid' {

@@ -102,7 +102,8 @@ export function bookingPipelineState(
     }
 
     if (balance > 0) {
-      // Approved for trip — balance is optional until departure (step 2 stays open, not checked).
+      // Approved for trip — balance due within 48h of approval (step 2 stays open until paid).
+      // NOTE: copy reflects the 48h deadline; enforcing auto-release is a separate logic change.
       return pipeline(['done', 'done', 'pending', 'done', 'current'], 4)
     }
 

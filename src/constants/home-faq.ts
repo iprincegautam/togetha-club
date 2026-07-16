@@ -17,7 +17,7 @@ export const HOME_FAQ_ITEMS = [
   {
     question: 'How do I book my spot?',
     answer:
-      'Take the 12-question quiz, pick your destination and edition, choose your Friday departure, then pay on togetha.club to lock your slot. Once payment goes through, you\'re in — 12 women and 12 men on the same trip, AI-matched from your quiz.',
+      'Take the 12-question quiz, pick your destination and edition, choose your Friday departure, then reserve your slot on togetha.club with the booking amount. We verify your profile within 24–36 hours, and once you\'re approved you pay the balance to confirm — 12 women and 12 men on the same trip, AI-matched from your quiz.',
   },
   {
     question: 'Is this safe? I\'m a woman thinking about coming solo.',

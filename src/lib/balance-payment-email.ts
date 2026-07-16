@@ -58,7 +58,7 @@ export function renderBalancePaymentReminderEmail(opts: {
       : null
   const departureLine = opts.departureLabel
     ? `Your departure: ${opts.departureLabel}.`
-    : 'Your Himalayan departure is coming up.'
+    : 'Your departure is coming up.'
 
   const totalLine = total
     ? listPrice && discount
@@ -66,13 +66,13 @@ export function renderBalancePaymentReminderEmail(opts: {
       : `Your trip total is ${total}`
     : null
 
-  const subject = `✦ Complete your trip payment — ${balance} due before departure`
+  const subject = `✦ You're approved — pay ${balance} within 48 hours to lock your spot`
 
   const text = `Hi ${firstName},
 
-Thank you for reserving your spot on ${opts.batchName}. ${departureLine}
+Great news — your profile is approved for ${opts.batchName}. ${departureLine}
 ${totalLine ? `${totalLine}.\n` : ''}
-You've paid ${paidSoFar} so far${total ? ` toward ${total}` : ''}. The remaining balance is ${balance}, due before your trip.
+You've paid ${paidSoFar} so far${total ? ` toward ${total}` : ''}. The remaining balance is ${balance}. Please pay it within 48 hours to confirm your spot. If we don't receive it in time, your slot is released to someone on the waitlist and 50% of your booking amount is refunded.
 
 Pay securely on your member portal (same email you booked with):
 ${opts.payUrl}
@@ -81,7 +81,7 @@ After you log in, scroll to "Pay remaining balance" — Razorpay checkout takes 
 
 If you've already paid, ignore this — we'll reconcile within 24 hours.
 
-See you in the mountains,
+See you soon,
 Togetha.Club
 hello@togetha.club`
 
@@ -91,15 +91,15 @@ hello@togetha.club`
       : ''
 
   const html = emailShell(`
-    <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#1a6b5a;">✦ Balance due ✦</p>
-    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;line-height:1.3;">Hi ${firstName}, complete your trip payment</h1>
-    <p style="margin:0 0 16px;line-height:1.6;">Thank you for reserving your spot on <strong>${opts.batchName}</strong>. ${departureLine}</p>
+    <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#1a6b5a;">✦ You're approved ✦</p>
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;line-height:1.3;">Hi ${firstName}, pay within 48 hours to lock your spot</h1>
+    <p style="margin:0 0 16px;line-height:1.6;">Great news — your profile is approved for <strong>${opts.batchName}</strong>. ${departureLine}</p>
     <div style="margin:20px 0;padding:16px 18px;background:#f5edd8;border:1px dashed #2c1810;border-radius:4px;font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;">
       ${pricingBlock}
       <p style="margin:0 0 6px;"><strong>Paid so far:</strong> ${paidSoFar}${total ? ` of ${total}` : ''}</p>
       <p style="margin:0;font-size:16px;"><strong>Balance due now:</strong> ${balance}</p>
     </div>
-    <p style="margin:0;line-height:1.6;">Log in with your booking email, then use <strong>Pay remaining balance</strong> on your dashboard. Same secure Razorpay checkout as when you booked your slot.</p>
+    <p style="margin:0;line-height:1.6;">Please pay within <strong>48 hours</strong> to confirm your spot. If we don't receive it in time, your slot is released and 50% of your booking amount is refunded. Log in with your booking email, then use <strong>Pay remaining balance</strong> on your dashboard — same secure Razorpay checkout as when you booked your slot.</p>
     ${ctaButton(opts.payUrl, `Pay ${balance} →`)}
     <p style="margin:20px 0 0;font-size:13px;color:#6b5344;line-height:1.5;">Already paid? Ignore this — we'll update your booking within 24 hours.</p>
   `)
