@@ -26,6 +26,18 @@ export default function BookingPipeline({
     )
   }
 
+  if (status === 'expired') {
+    return (
+      <div className="booking-pipeline booking-pipeline-rejected">
+        <p className="booking-pipeline-msg">
+          Your slot was released because the balance wasn&apos;t paid within 48 hours of approval.
+          Half of your booking amount is refunded to your original payment method within 5–7
+          business days. Email hello@togetha.club if you&apos;d like to re-book a future departure.
+        </p>
+      </div>
+    )
+  }
+
   const doneThrough = completedThrough ?? stageIndex
 
   return (

@@ -4,6 +4,7 @@ export type ApplicantStatus =
   | 'rejected'
   | 'paid'
   | 'deposit_paid'
+  | 'expired'
 
 export type PaymentPlan = 'deposit' | 'full'
 export type Gender = 'm' | 'f'

@@ -1,0 +1,27 @@
+name: Balance deadline cron
+
+on:
+  schedule:
+    # Hourly — Vercel Hobby only allows daily; the 48h window needs tighter
+    # granularity so reminders and slot releases fire close to the deadline.
+    - cron: '15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  balance-deadline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger balance deadline cron
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://togetha.club' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not set in GitHub repository secrets."
+            exit 1
+          fi
+          curl -fsS --show-error \
+            --max-time 75 --connect-timeout 15 \
+            --retry 2 --retry-delay 15 --retry-all-errors \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${SITE_URL}/api/cron/balance-deadline"

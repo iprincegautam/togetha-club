@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 import { renderMemberWelcomeEmail } from '@/lib/member-welcome-email'
-import { buildBalancePaymentReminder } from '@/lib/balance-payment-email'
+import { buildBalancePaymentReminder, renderSlotReleasedEmail } from '@/lib/balance-payment-email'
 
 export const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -94,6 +94,44 @@ export async function sendBalancePaymentReminderEmail(opts: {
   }
 
   return { ok: true as const, payUrl: `${siteUrl.replace(/\/$/, '')}/account/login?next=${encodeURIComponent('/account')}` }
+}
+
+export async function sendSlotReleasedEmail(opts: {
+  to: string
+  name: string
+  batchName: string
+  amountPaidPaise: number
+  refundPaise: number
+  retainedPaise: number
+  forfeitPercent: number
+}) {
+  if (!isResendConfigured() || !resend) {
+    return { ok: false as const, error: 'Email service is not configured.' }
+  }
+
+  const { subject, text, html } = renderSlotReleasedEmail({
+    name: opts.name,
+    batchName: opts.batchName,
+    amountPaidPaise: opts.amountPaidPaise,
+    refundPaise: opts.refundPaise,
+    retainedPaise: opts.retainedPaise,
+    forfeitPercent: opts.forfeitPercent,
+  })
+
+  const result = await resend.emails.send({
+    from: 'Togetha.Club <hello@togetha.club>',
+    to: opts.to,
+    subject,
+    text,
+    html,
+  })
+
+  if (result.error) {
+    console.error('[sendSlotReleasedEmail]', result.error)
+    return { ok: false as const, error: result.error.message }
+  }
+
+  return { ok: true as const }
 }
 
 export async function sendSupportWelcomeEmail(opts: {

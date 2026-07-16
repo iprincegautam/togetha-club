@@ -7,6 +7,7 @@ export type BookingStage =
   | 'under_review'
   | 'approved'
   | 'rejected'
+  | 'expired'
 
 export type BookingStepState = 'done' | 'current' | 'pending'
 
@@ -20,6 +21,8 @@ export function bookingStageFromStatus(status: string): BookingStage {
       return 'approved'
     case 'rejected':
       return 'rejected'
+    case 'expired':
+      return 'expired'
     case 'pending':
     default:
       return 'applied'
@@ -75,6 +78,11 @@ export function bookingPipelineState(
 
   if (status === 'rejected') {
     return pipeline(['done', 'done', 'done', 'done', 'current'], 4)
+  }
+
+  if (status === 'expired') {
+    // Slot released for a missed balance deadline — terminal state.
+    return pipeline(['done', 'done', 'pending', 'done', 'current'], 4)
   }
 
   if (isProfileKycRejected(kycStatus)) {

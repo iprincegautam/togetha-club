@@ -107,6 +107,45 @@ hello@togetha.club`
   return { subject, text, html }
 }
 
+export function renderSlotReleasedEmail(opts: {
+  name: string
+  batchName: string
+  amountPaidPaise: number
+  refundPaise: number
+  retainedPaise: number
+  forfeitPercent: number
+}): { subject: string; text: string; html: string } {
+  const firstName = opts.name.split(/\s+/)[0] || opts.name
+  const refund = formatPaise(opts.refundPaise)
+  const retained = formatPaise(opts.retainedPaise)
+
+  const subject = `Your ${opts.batchName} slot has been released`
+
+  const text = `Hi ${firstName},
+
+Your approved slot for ${opts.batchName} was held for 48 hours to complete payment, but we didn't receive the remaining balance in time — so the slot has now been released to the next person on the waitlist.
+
+As per our policy, ${opts.forfeitPercent}% of your booking amount (${retained}) is retained and the remaining ${refund} will be refunded to your original payment method within 5–7 business days.
+
+If you'd still like to join a future departure, reply to this email or reach us at hello@togetha.club and we'll help you re-book.
+
+— Togetha.Club
+hello@togetha.club`
+
+  const html = emailShell(`
+    <p style="margin:0 0 8px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#8a3324;">Slot released</p>
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;line-height:1.3;">Hi ${firstName}, your ${opts.batchName} slot was released</h1>
+    <p style="margin:0 0 16px;line-height:1.6;">Your approved slot was held for 48 hours to complete payment, but we didn't receive the remaining balance in time — so it has been released to the next person on the waitlist.</p>
+    <div style="margin:20px 0;padding:16px 18px;background:#f5edd8;border:1px dashed #2c1810;border-radius:4px;font-family:system-ui,sans-serif;font-size:14px;line-height:1.7;">
+      <p style="margin:0 0 6px;"><strong>Retained (${opts.forfeitPercent}%):</strong> ${retained}</p>
+      <p style="margin:0;font-size:16px;"><strong>Refund to you:</strong> ${refund}</p>
+    </div>
+    <p style="margin:0;line-height:1.6;">The refund goes to your original payment method within 5–7 business days. Want to join a future departure? Reply to this email and we'll help you re-book.</p>
+  `)
+
+  return { subject, text, html }
+}
+
 export function buildBalancePaymentReminder(opts: {
   name: string
   batchName: string

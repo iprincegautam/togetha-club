@@ -116,7 +116,8 @@ export default function AccountDashboard() {
               status={booking.status}
             />
             {booking.stageIndex >= 4 &&
-              booking.status !== 'rejected' && (
+              booking.status !== 'rejected' &&
+              booking.status !== 'expired' && (
               <p className="account-msg" style={{ marginTop: 12 }}>
                 Your slot is confirmed for this departure. We&apos;ll email you pre-trip details
                 before you leave.
