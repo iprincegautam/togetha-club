@@ -5,3 +5,6 @@ influencers video/
 .next/
 .vercel/output/
 .git/
+
+# Native mobile app lives here; not part of the Next.js website build
+mobile
