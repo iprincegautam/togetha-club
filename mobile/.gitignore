@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.DS_Store
+ios/Togetha.xcodeproj
+ios/build/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+node_modules/
+
+# Xcode
+xcuserdata/
+DerivedData/
+*.xcuserstate
