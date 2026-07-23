@@ -1,0 +1,56 @@
+name: Togetha
+options:
+  bundleIdPrefix: club.togetha
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+targets:
+  Togetha:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - Togetha
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: club.togetha.app
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        TARGETED_DEVICE_FAMILY: "1"
+        # Shared production Supabase (togetha.club). The anon key is a public
+        # client key — RLS protects data. Empty these out to force MockAPIClient.
+        # See Core/API/APIClient.swift.
+        TOGETHA_SUPABASE_URL: "https://bqroebrlhndftkutsqbu.supabase.co"
+        TOGETHA_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxcm9lYnJsaG5kZnRrdXRzcWJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNTY5NDQsImV4cCI6MjA5NTkzMjk0NH0.EBOlis17YB0dFskbxsT07IqwN8A48h1Giy9tvpaf6UY"
+        TOGETHA_FUNCTIONS_URL: "https://bqroebrlhndftkutsqbu.supabase.co/functions/v1"
+        # Real phone-OTP auth. OFF until Phone auth + an SMS provider are enabled
+        # in Supabase (currently disabled there). While NO, sign-in uses the mock
+        # OTP flow so the app stays demoable. Flip to YES once phone auth is live.
+        TOGETHA_PHONE_AUTH_ENABLED: "NO"
+    info:
+      path: Togetha/Info.plist
+      properties:
+        CFBundleDisplayName: Togetha
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
+        NSCameraUsageDescription: "Togetha uses the camera so you can capture trip photos to share with your batch."
+        NSPhotoLibraryUsageDescription: "Togetha needs photo access so you can upload trip memories and your verification document."
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        TOGETHA_SUPABASE_URL: "$(TOGETHA_SUPABASE_URL)"
+        TOGETHA_SUPABASE_ANON_KEY: "$(TOGETHA_SUPABASE_ANON_KEY)"
+        TOGETHA_FUNCTIONS_URL: "$(TOGETHA_FUNCTIONS_URL)"
+        TOGETHA_PHONE_AUTH_ENABLED: "$(TOGETHA_PHONE_AUTH_ENABLED)"
